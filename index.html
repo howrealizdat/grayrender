@@ -348,6 +348,19 @@
   .bm-add{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--border);
     margin-top:6px;padding:11px 10px 7px;font:inherit;font-size:13px;color:var(--accent);cursor:pointer}
   .bm-add:hover{text-decoration:underline}
+  .ob-wrap{max-width:660px}
+  .ob-steps{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  .ob-step{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+  .ob-step.on{color:var(--ink);font-weight:600}
+  .ob-num{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;
+    border-radius:50%;border:1px solid var(--border);font-size:11.5px;background:var(--surface)}
+  .ob-step.on .ob-num{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+  .ob-step.done .ob-num{border-color:var(--accent);color:var(--accent)}
+  .ob-line{flex:1;height:1px;background:var(--border);max-width:40px}
+  .ob-skip{margin-top:20px;font-size:13px;color:var(--ink-2)}
+  .ob-skip button{background:none;border:0;padding:0 0 0 3px;font:inherit;font-size:13px;
+    color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .ob-skip-why{display:block;margin-top:4px;font-size:12px;opacity:.8}
   .pick-up{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
   .pu-lbl{font-size:12.5px;color:var(--ink-2)}
   .pu-chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -916,7 +929,9 @@ function removeBrand(id){
     try{ BRAND?localStorage.setItem(ACTIVE_KEY,BRAND.id):localStorage.removeItem(ACTIVE_KEY); }catch(e){}
     REFINE=null; CAMPAIGN=null; hydrateWork();
   }
-  reflectBrand(); renderTool();
+  reflectBrand();
+  if(!BRANDS.length) return renderOnboard();   // back to the start rather than an empty product
+  renderTool();
 }
 function clearBrand(){
   BRAND=null; BRANDS=[];
@@ -1389,7 +1404,7 @@ async function tryUnlock(){
     setPasscode(v);
     const card=document.querySelector(".lock-card");
     if(card) card.classList.add("ok");
-    setTimeout(()=>{ hideLock(); reflectBrand(); renderTool(); },260);
+    setTimeout(()=>{ hideLock(); reflectBrand(); hydrateWork(); bootScreen(); },260);
     return;
   }
   if(d&&d.reason==="unset"){ setLockMsg("This deployment has no passcode configured yet. Contact Edmund."); return; }
@@ -1528,6 +1543,76 @@ function listOf(f){
    company is, and every tool in the suite is correct for their industry from then
    on. There is a manual path because a first-run experience that can dead-end on a
    network error is not a first-run experience. */
+/* ---------------- FIRST RUN --------------------------------------------------------------
+   Setup used to be something you FELL INTO: you clicked a tool, got intercepted, and had to
+   work out why. That is fine as a safety net and wrong as an introduction. A first visitor now
+   gets a deliberate three step start, numbered so they can see where they are and how much is
+   left, and they arrive in the product knowing exactly how they got there and what it now
+   knows about them. The audit needs no profile at all, so there is an honest way past it. */
+function onboardSteps(active){
+  const names=["Your website","Reading it","Confirm"];
+  return `<div class="ob-steps">${names.map((n,i)=>{
+    const k=i+1, cls=k===active?"on":(k<active?"done":"");
+    return `<div class="ob-step ${cls}"><span class="ob-num">${k<active?"&#10003;":k}</span><span>${esc(n)}</span></div>`;
+  }).join('<span class="ob-line"></span>')}</div>`;
+}
+/* Nobody has set anything up yet: start at the beginning rather than mid product. */
+function bootScreen(){ if(!BRANDS.length) return renderOnboard(); renderTool(); }
+function renderOnboard(msg){
+  try{window.scrollTo(0,0);}catch(e){}
+  main.innerHTML=`
+    <div class="ob-wrap">
+      ${onboardSteps(1)}
+      <div class="tool-head">
+        <h1>Let's set up your <span class="hl">first</span> business.</h1>
+        <p>Give me your website and I will read it the way a browser does, then set every tool in
+           the suite up for your industry: what you sell, who buys it, how you sound. It takes about
+           ten seconds and you only do it once per business.</p>
+      </div>
+      <div class="card">
+        <div class="field span2">
+          <label for="obUrl">Your website</label>
+          <input id="obUrl" type="text" placeholder="e.g. https://www.yourcompany.com" autocomplete="off"/>
+          <span class="bc-hint">A homepage is enough. Nothing is published and nothing is shared.</span>
+        </div>
+        ${msg?`<div class="bw-msg">${esc(msg)}</div>`:""}
+        <div class="gen-row">
+          <button class="btn-gen" id="obGo">Read my site${ARROW}</button>
+          <button class="btn-copy" id="obManual">Enter it by hand</button>
+        </div>
+      </div>
+      <p class="ob-skip">Only here to audit a website? <button type="button" id="obSkip">Skip setup and run an audit</button>
+        <span class="ob-skip-why">The audit reads somebody else's site, so it needs no profile.</span></p>
+    </div>`;
+  const go=()=>runOnboard();
+  document.getElementById("obGo").addEventListener("click",go);
+  const u=document.getElementById("obUrl");
+  u.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  u.focus();
+  document.getElementById("obManual").addEventListener("click",()=>renderBrandManual());
+  document.getElementById("obSkip").addEventListener("click",()=>{ current="audit"; renderTool(); });
+}
+async function runOnboard(){
+  const el=document.getElementById("obUrl"), url=(el&&el.value||"").trim();
+  if(!(url && url.indexOf(".")>0)){ renderOnboard("Enter a website address, for example yourcompany.com."); return; }
+  main.innerHTML=`
+    <div class="ob-wrap">
+      ${onboardSteps(2)}
+      <div class="tool-head"><h1>Reading <span class="hl">${esc(url)}</span></h1>
+        <p>Rendering the page, then working out what you sell, who buys it and how you sound.</p></div>
+      <div class="card"><div class="loading"><div class="dots"><span></span><span></span><span></span></div>
+        <div class="load-text">Opening the page in a real browser…</div></div></div>
+    </div>`;
+  let d={};
+  try{ d=await postAudit({mode:"brand",url:url,owner:isOwner()}); }catch(e){ d={error:"network"}; }
+  if(handleLocked(d)) return;
+  if(!d||!d.profile||(!d.profile.name&&!d.profile.profile)){
+    renderOnboard("I could not read that site from here. Try another address, or enter your details by hand.");
+    return;
+  }
+  renderBrandConfirm(d.profile,url,true);
+}
+
 function renderBrandSetup(msg){
   try{window.scrollTo(0,0);}catch(e){}
   /* Are we standing in front of a tool the user actually clicked? renderTool gates on a
@@ -1618,7 +1703,7 @@ async function runBrandSetup(){
   }
   renderBrandConfirm(d.profile,url);
 }
-function renderBrandConfirm(prof,url){
+function renderBrandConfirm(prof,url,firstRun){
   try{window.scrollTo(0,0);}catch(e){}
   /* SAVE THE MOMENT IT IS READ, not when Continue is pressed.
      The sidebar stays live on this screen, so anyone who reads their site and then clicks a
@@ -1636,6 +1721,7 @@ function renderBrandConfirm(prof,url){
               ["Proof found on your site",(prof.proof||[]).join(", ")||"Nothing verifiable found, so nothing will be claimed"]];
   const list=a=>(a||[]).filter(Boolean).join(", ");
   main.innerHTML=`
+    ${firstRun?onboardSteps(3):""}
     <div class="tool-head">
       <h1>I read your site. <span class="hl">Confirm</span> these.</h1>
       <p>From ${esc(url)}. These three answers become the choices in every tool, so correcting one here fixes it everywhere. It is saved already and you only do this once.</p>
@@ -1697,7 +1783,7 @@ function toggleBrandMenu(){
     <button class="bm-item${BRAND&&b.id===BRAND.id?" on":""}" data-switch="${esc(b.id)}">
       <span class="bm-name">${esc(b.name||"Untitled")}</span>
       <span class="bm-sub">${esc(b.industry||b.what||"")}</span>
-      ${BRANDS.length>1?`<span class="bm-x" data-del="${esc(b.id)}" title="Remove this profile">&times;</span>`:""}
+      <span class="bm-x" data-del="${esc(b.id)}" title="Delete ${esc(b.name||"this business")}">&times;</span>
     </button>`).join("");
   const el=document.createElement("div");
   el.className="brand-menu"; el.id="brandMenu";
@@ -1709,7 +1795,12 @@ function toggleBrandMenu(){
     el.remove(); switchBrand(btn.getAttribute("data-switch"));
   }));
   el.querySelectorAll("[data-del]").forEach(x=>x.addEventListener("click",ev=>{
-    ev.stopPropagation(); el.remove(); removeBrand(x.getAttribute("data-del"));
+    ev.stopPropagation();
+    const id=x.getAttribute("data-del"), b=BRANDS.find(y=>y.id===id);
+    // Deleting a business also deletes its saved work, so it is worth one question first.
+    const n=(b&&b.name)||"this business";
+    if(!window.confirm("Delete "+n+" and everything written for it?\n\nThis cannot be undone.")) return;
+    el.remove(); removeBrand(id);
   }));
   document.getElementById("bmAdd").addEventListener("click",()=>{ el.remove(); renderBrandSetup(); });
 }
@@ -3483,7 +3574,7 @@ document.getElementById("rfInput").addEventListener("keydown",e=>{
 
 reflectBrand();
 hydrateWork();          // yesterday's work is still here
-renderTool();
+bootScreen();
 if(!isUnlocked()) showLock();
 </script>
 </body>

@@ -86,6 +86,12 @@ const RESULTS = [{
   ] }
 }];
 
+/* A first visitor with no saved business now lands on the setup flow, so there is no tool
+   screen and no #outArea until one is opened. Open the audit first, exactly as a real user
+   does, before asserting on what the report renders into. */
+win.eval("saveBrand(DEFAULT_BRAND); current='audit';");
+win.renderTool();
+
 console.log('\nTHE RENDERED REPORT  (what a human actually ends up holding)');
 let err = '';
 try {
@@ -927,6 +933,53 @@ const bcId = win.eval("BRANDS.find(b=>b.name==='Basecamp').id");
 win.removeBrand(bcId);
 check('removing a business clears its stored work',
   win.eval("localStorage.getItem('gr_work_'+" + JSON.stringify(bcId) + ") === null"));
+
+/* ---------------------------------------------------------------------------
+   FIRST RUN, AND DELETING A BUSINESS.
+
+   Edmund: setup should be a deliberate startup process so people know how they
+   got there, and there was no way to delete a profile. There was one, but it
+   was hidden whenever you only had a single business, which is exactly when
+   you would want it.
+--------------------------------------------------------------------------- */
+console.log('\nFIRST RUN  (a start, not an interception)');
+win.eval("clearBrand();");
+win.bootScreen();
+check('a first visitor lands on setup, not mid product', !!win.document.getElementById('obUrl'));
+check('and can see how many steps there are', win.document.querySelectorAll('.ob-step').length === 3);
+check('with the first step marked as current',
+  win.document.querySelector('.ob-step.on') && /Your website/.test(win.document.querySelector('.ob-step.on').textContent));
+check('the audit is offered as an honest way past setup', !!win.document.getElementById('obSkip'));
+win.document.getElementById('obSkip').dispatchEvent(new win.Event('click'));
+check('and skipping goes straight to the audit, no profile needed',
+  /Run Full-Site Audit/i.test(win.document.body.textContent) && win.eval('BRANDS.length') === 0);
+
+/* Someone who already has a business must NOT be sent back to setup. */
+win.saveBrand({ name: 'Northwind', offerings: ['Install'], audiences: ['Facilities'], goals: ['Leads'] });
+win.eval("current='ads';");
+win.bootScreen();
+check('a returning visitor goes straight to the product', !win.document.getElementById('obUrl'));
+
+/* The confirm screen is step 3 of that flow when it is part of first run. */
+win.renderBrandConfirm({ name: 'N', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] }, 'https://n.example', true);
+check('the confirm screen shows it is the last step',
+  win.document.querySelectorAll('.ob-step').length === 3
+  && /Confirm/.test((win.document.querySelector('.ob-step.on') || {}).textContent || ''));
+win.renderBrandConfirm({ name: 'N', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] }, 'https://n.example');
+check('but not when you are just re-reading a site later', win.document.querySelectorAll('.ob-step').length === 0);
+
+console.log('\nDELETING A BUSINESS');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Only One', offerings: ['x'], audiences: ['y'], goals: ['z'] });
+win.eval("current='ads';"); win.renderTool();
+win.toggleBrandMenu();
+check('the delete control is offered even with a single business',
+  !!win.document.querySelector('[data-del]'), 'no delete control');
+const onlyId = win.eval("BRANDS[0].id");
+win.removeBrand(onlyId);
+check('deleting the last business empties the list', win.eval('BRANDS.length') === 0);
+check('and returns you to the start rather than an empty product',
+  !!win.document.getElementById('obUrl'), win.document.querySelector('h1') ? win.document.querySelector('h1').textContent : '');
 
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
