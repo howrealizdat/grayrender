@@ -81,7 +81,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
         'HEADINGS: ' + [].concat(sig.h1s || [], sig.h2s || []).slice(0, 14).join(' | ') + '\n' +
         'BUTTON LABELS: ' + (sig.buttons || []).slice(0, 12).join(' | ') + '\n' +
         'LINK LABELS: ' + ((sig.links || []).map(function (l) { return l.text || l; })).slice(0, 18).join(' | ') + '\n' +
-        'PAGE TEXT (excerpt): ' + String(sig.text || '').slice(0, 2600);
+        'PAGE TEXT (excerpt): ' + String((buildDigest(html, sig, 8000) || {}).text || '').slice(0, 2600);
 
       const bm = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
