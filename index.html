@@ -87,6 +87,12 @@
   .brand-chip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .bc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
   .bw-msg{margin-top:12px;font-size:13px;color:var(--amber);font-weight:500}
+  /* Says WHY this screen is standing in front of the tool you clicked. Without it the nav
+     highlights one thing while the pane shows another, which reads as a broken app. */
+  .bw-gate{display:flex;gap:10px;align-items:flex-start;margin:0 0 20px;padding:12px 14px;
+    border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:10px;
+    background:var(--surface-2);font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+  .bw-gate b{color:var(--ink);font-weight:600}
   .bc-list{margin-top:18px;border-top:1px solid var(--border)}
   .bc-row{display:flex;gap:16px;padding:11px 2px;border-bottom:1px solid var(--border);font-size:13.5px}
   .bc-row:last-child{border-bottom:none}
@@ -1022,6 +1028,7 @@ End with this exact line on a new line: ${WATERMARK}`,
 const LOAD_MSGS=["Analyzing target...","Drafting content...","Applying brand positioning...","Finalizing output..."];
 const AUDIT_LOAD=["Fetching the live page...","Reading the content and structure...","Checking messaging, SEO, and trust signals...","Scoring conversion and lead capture...","Writing the strategic audit..."];
 const ARROW='<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const ICON_INFO='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-top:1px;color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.6"/></svg>';
 let current="outreach";
 const main=document.getElementById("main");
 const MODKEY=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘":"Ctrl";
@@ -1220,12 +1227,19 @@ function optsOf(f){
    network error is not a first-run experience. */
 function renderBrandSetup(msg){
   try{window.scrollTo(0,0);}catch(e){}
+  /* Are we standing in front of a tool the user actually clicked? renderTool gates on a
+     missing brand, which leaves the nav highlighting (say) AI Marketing Audit while this
+     screen renders instead. Unexplained, that reads as a broken app, and it is also why
+     someone can paste a site here, get a brand profile, and wonder where their grades went. */
+  const gatedTool = !BRAND ? TOOLS[current] : null;
   main.innerHTML=`
     <div class="tool-head">
       <h1>Who are we <span class="hl">writing</span> for?</h1>
       <p>Give me your website. I will read it the way a browser does and learn your name, what you sell, who buys it and how you sound, so every tool here is already correct for your business.</p>
     </div>
     <div class="card">
+      ${gatedTool?`<div class="bw-gate"><span>${ICON_INFO}</span><span><b>One-time setup, then straight to your ${esc(gatedTool.title)}.</b>
+        This is your OWN website, so the suite knows who you are. It is not the site you want audited, and you only do this once.</span></div>`:""}
       <div class="field span2">
         <label>Your website</label>
         <input id="bwUrl" type="text" placeholder="e.g. https://www.yourcompany.com" autocomplete="off"/>
@@ -1274,7 +1288,7 @@ function renderBrandManual(prefill){
       name:name, what:what, industry:document.getElementById("mbInd").value.trim(),
       profile:what
     }));
-    reflectBrand(); current="outreach"; setActiveNav(); renderTool();
+    reflectBrand(); setActiveNav(); renderTool();   // same as the confirm path: keep the tool they asked for
   });
   document.getElementById("mbName").focus();
 }
@@ -1317,14 +1331,19 @@ function renderBrandConfirm(prof,url){
         <input id="bcName" type="text" value="${esc(prof.name||"")}" autocomplete="off"/></div>
       <div class="bc-list">${rows.map(r=>`<div class="bc-row"><span class="bc-k">${esc(r[0])}</span><span class="bc-v">${escMd(r[1]||"Not stated")}</span></div>`).join("")}</div>
       <div class="gen-row">
-        <button class="btn-gen" id="bcGo">Start using this${ARROW}</button>
+        <button class="btn-gen" id="bcGo">Continue to ${esc((TOOLS[current]||{}).title||"the suite")}${ARROW}</button>
         <button class="btn-copy" id="bcRedo">Read a different site</button>
       </div>
     </div>`;
   document.getElementById("bcRedo").addEventListener("click",()=>renderBrandSetup());
   document.getElementById("bcGo").addEventListener("click",()=>{
     prof.name=document.getElementById("bcName").value.trim()||prof.name;
-    saveBrand(prof); reflectBrand(); current="outreach"; setActiveNav(); renderTool();
+    // Go to the tool they were actually heading for. This used to hard-code the outreach
+    // generator, so clicking AI Marketing Audit with no brand yet sent you through setup and
+    // then dumped you on a completely different tool: you asked for an audit and got an
+    // email writer, with no grades and no explanation. `current` already holds the tool that
+    // was gated, so the correct destination is simply the one we never should have thrown away.
+    saveBrand(prof); reflectBrand(); setActiveNav(); renderTool();
   });
 }
 /* The header chip is the only permanent reminder of whose voice this is speaking in. */

@@ -396,6 +396,51 @@ check('a well-behaved half is left alone', A.keepSections(already, A.FIX_SECTION
 check('unrecognisable text is returned rather than blanked',
   A.keepSections('no headers here at all', A.MAIN_SECTIONS) === 'no headers here at all');
 
+/* ---------------------------------------------------------------------------
+   FIRST RUN MUST LAND YOU ON THE TOOL YOU CLICKED.
+
+   Edmund clicked AI Marketing Audit, had no brand yet, so renderTool gated him
+   into brand setup. He pasted his site, it read it correctly, and then the app
+   hard-coded current="outreach" and dropped him on the email writer. He asked
+   for an audit and got no grades, no report, and no explanation. The brand read
+   worked perfectly, which is exactly why it was so hard to see.
+
+   `current` and `TOOLS` are top-level let/const, so they live in the global
+   declarative scope and never appear on window: read them through win.eval.
+--------------------------------------------------------------------------- */
+console.log('\nFIRST RUN LANDS ON THE TOOL YOU CLICKED  (it used to dump you on the email writer)');
+
+win.eval("clearBrand(); current='audit';");
+win.renderBrandSetup();
+const gate = win.document.querySelector('.bw-gate');
+check('the setup screen explains why it is standing in the way', !!gate, 'no .bw-gate rendered');
+check('and it names the tool being gated', !!gate && /AI Marketing Audit/.test(gate.textContent), gate && gate.textContent);
+check('and it says this is your own site, not the one to audit',
+  !!gate && /not the site you want audited/i.test(gate.textContent));
+
+win.renderBrandConfirm({ name: 'Zhaion', what: 'AI-hybrid R&B artist', industry: 'Music',
+                         tone: 'Bold', audiences: [], offerings: [], proof: [] }, 'https://zhaion.com');
+const bcGo = win.document.getElementById('bcGo');
+check('the confirm button names where it is taking you', !!bcGo && /AI Marketing Audit/.test(bcGo.textContent), bcGo && bcGo.textContent);
+
+bcGo.dispatchEvent(new win.Event('click'));
+check('THE BUG: first run lands on the audit, not the outreach generator',
+  win.eval('current') === 'audit', 'landed on: ' + win.eval('current'));
+check('the audit tool actually rendered', /Run Full-Site Audit/i.test(win.document.body.textContent));
+check('the brand was still saved on the way through', win.eval('!!BRAND'));
+
+/* A user who clicked nothing still gets the sensible default rather than a blank. */
+win.eval("clearBrand(); current='outreach';");
+win.renderBrandConfirm({ name: 'Northwind', what: 'Staffing', industry: 'Staffing',
+                         tone: 'Professional', audiences: [], offerings: [], proof: [] }, 'https://northwind.example');
+win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
+check('the default first-run destination is unchanged', win.eval('current') === 'outreach');
+
+/* Re-running setup later, with a brand already saved, is not a gate and must not nag. */
+win.eval("current='audit';");
+win.renderBrandSetup();
+check('no gate notice once a brand exists', !win.document.querySelector('.bw-gate'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
