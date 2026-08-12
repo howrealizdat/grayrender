@@ -665,9 +665,9 @@ check('and the tool form still rendered', !!win.document.getElementById('genBtn'
 /* ---------------------------------------------------------------------------
    NO INDUSTRY DNA LEFT IN THE FIELDS.
 
-   Spotted on Edmund's own screen: Competitive Intelligence suggested Robert
-   Half, TEKsystems, Insight Global, Randstad and Toptal to every user, so an
-   R&B artist was offered five staffing firms as competitors. The dropdowns
+   Spotted on Edmund's own screen: Competitive Intelligence hard-coded five
+   staffing agencies as its suggested competitors for every user, so a
+   musician was offered recruiters to compete with. The dropdowns
    were made brand-aware long ago; the placeholders and datalists beside them
    were missed. Third time this repo has found leftover staffing DNA, after
    the scorePath keyword table and the near-duplicate service regex.
