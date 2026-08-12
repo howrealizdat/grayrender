@@ -215,26 +215,32 @@ win.eval("current='home';");
 win.renderTool();
 check('Today renders instead of a form', !!win.document.querySelector('.wk-tiles'));
 check('with no generate button, because it generates nothing', !win.document.getElementById('genBtn'));
-check('a business with no audit is told to run one',
-  /Run your first site audit/.test(win.document.querySelector('.wk-moves').textContent));
+check('the program names the first step and marks it as where you are',
+  /Audit the site/.test(win.document.querySelector('.pg-list').textContent)
+  && /You are here/.test(win.document.querySelector('.pg-now').textContent));
+check('and files it as a dated job rather than leaving it on a diagram',
+  win.openItems().some(x => x.source === 'program' && /Step 1 of 6/.test(x.title) && x.due),
+  JSON.stringify(win.openItems().map(x => x.source + ':' + x.title)));
 
 const it1 = win.addItem({ source: 'audit', title: 'Fix the title tag', priority: 'Critical', due: win.ymd(win.addDays(today, 1)) });
 win.renderHome();
 check('a due item shows on the screen', /Fix the title tag/.test(win.document.body.textContent));
-check('the tiles count it', win.document.querySelector('.wk-tile b').textContent === '1');
+check('the tiles count every open item, including the step the program filed',
+  win.document.querySelector('.wk-tile b').textContent === String(win.openItems().length),
+  win.document.querySelector('.wk-tile b').textContent + ' vs ' + win.openItems().length);
 const box = win.document.querySelector('.wi-check');
 box.dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
 check('ticking it off marks it done', win.findItem(it1.id).status === 'done');
 check('and it is written to the timeline',
   win.eval("PLAN.log[0].kind") === 'done', win.eval("JSON.stringify(PLAN.log[0]||{})"));
 win.renderHome();
-check('done work leaves the open list', win.openItems().length === 0);
+check('done work leaves the open list', !win.openItems().some(x => x.id === it1.id));
 check('and the timeline is on screen', !!win.document.querySelector('.wk-log'));
 
 console.log('\nIT SURVIVES A RELOAD, AND TRAVELS WITH THE PROFILE');
 win.eval("persistPlan();");
 const stored = JSON.parse(win.localStorage.getItem(win.eval('planKey()')));
-check('the plan is persisted for this profile', stored.items.length === 1);
+check('the plan is persisted for this profile', stored.items.length >= 1 && stored.items.some(x => x.id === it1.id));
 check('under a key scoped to the business', /^gr_plan_b/.test(win.eval('planKey()')));
 win.saveBrand({ name: 'Second Business', offerings: ['x'], audiences: ['y'], goals: ['z'] });
 win.eval("hydratePlan();");
@@ -358,6 +364,115 @@ check('an acronym is left exactly as written',
 check('a name with no description is just the name',
   win.brandBlurb({ name: 'Acme' }) === 'Acme');
 check('and nothing at all yields nothing', win.brandBlurb({}) === '');
+
+console.log('\nTHE PROGRAM IS AN ORDER, NOT A MENU');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', url: 'https://northwind.example',
+  offerings: ['Boiler install'], audiences: ['Homeowner'], goals: ['Leads'], proof: [] });
+win.eval("PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+
+check('every step maps to a tool that exists',
+  win.eval("JSON.stringify(PROGRAM.map(function(s){return !!TOOLS[s.tool]}))") === JSON.stringify([true,true,true,true,true,true]));
+check('and every tool is reachable from the sidebar, none lost in the reorder',
+  win.eval("JSON.stringify(Object.keys(TOOLS).filter(function(k){return !document.querySelector('.nav-item[data-tool=\"'+k+'\"]')}))") === '[]',
+  win.eval("JSON.stringify(Object.keys(TOOLS).filter(function(k){return !document.querySelector('.nav-item[data-tool=\"'+k+'\"]')}))"));
+
+let st = win.programState();
+check('with nothing done, step one is where you are', st[0].status === 'now' && st[0].tool === 'audit');
+check('and everything after it is later, not locked', st.slice(1).every(s => s.status === 'later'));
+
+console.log('\nAN AUDIT ALONE DOES NOT FINISH STEP ONE');
+const AUDIT_BODY = 'PRIORITIZED FIXES\n- [Critical] Home page (/), title tag: placeholder. Current: "Home Final". Use: "Boiler Install | Northwind". Effort: 10 min (SEO specialist).\n\nSTRATEGIC MOVES\n- later\n';
+win.rememberOutput('audit', { kind: 'audit', body: AUDIT_BODY, vals: { url: 'https://northwind.example', platform: { name: 'WordPress', kind: 'cms' } }, mark: 'B-', raw: AUDIT_BODY, pages: [] });
+st = win.programState();
+check('running the report leaves step one open while a critical fix is unshipped',
+  st[0].status === 'now', JSON.stringify(st.map(s => s.n + ':' + s.status)));
+check('and says so, rather than looking merely undone', st[0].started === true);
+const critical = win.openItems().filter(x => x.source === 'audit')[0];
+win.setItemStatus(critical.id, 'done');
+st = win.programState();
+check('shipping the fixes is what completes it', st[0].status === 'done', JSON.stringify(st.map(s => s.n + ':' + s.status)));
+check('and step two becomes where you are', st[1].status === 'now' && st[1].tool === 'brand');
+
+console.log('\nWORKING OUT OF ORDER IS ALLOWED');
+win.rememberOutput('report', { kind: 'gen', raw: 'HEADLINE\nnumbers', vals: {} });
+st = win.programState();
+check('a step done early is marked done where it is', st[5].status === 'done');
+check('and the sequence still points at the real next one', st[1].status === 'now');
+check('progress counts what is actually finished', win.programDone() === 2);
+
+console.log('\nTHE STEP YOU ARE ON IS REAL WORK');
+win.syncProgramItem();
+const pItem = win.PLAN ? null : null;
+const progItems = win.openItems().filter(x => x.source === 'program');
+check('exactly one program step is open at a time', progItems.length === 1, JSON.stringify(progItems.map(x => x.title)));
+check('it is the current step', /Step 2 of 6/.test(progItems[0].title), progItems[0].title);
+check('it carries a date, so it reaches the calendar export', !!progItems[0].due);
+const icsProg = win.buildIcs(win.openItems(), 'x');
+check('and it really does appear in the calendar file',
+  icsProg.ics.indexOf('Step 2 of 6') > -1);
+win.rememberOutput('brand', { kind: 'gen', raw: 'POSITIONING\nvoice', vals: {} });
+win.syncProgramItem();
+check('finishing that step closes its job automatically',
+  !win.openItems().some(x => x.key === 'program:brand'));
+check('and the next one opens', win.openItems().some(x => x.key === 'program:intel'));
+
+console.log('\nTHE SIDEBAR SHOWS THE CHECKLIST');
+win.eval("current='home';"); win.renderTool();
+const badges = [...win.document.querySelectorAll('.nav-item .np')].map(b => b.className.replace('np np-', '') + ':' + b.textContent);
+check('every program step carries a badge', badges.length === 6, badges.join(' | '));
+check('done steps show a tick, not a number', badges.filter(b => /✓/.test(b)).length === win.programDone(), badges.join(' | '));
+check('one and only one step is marked as where you are',
+  badges.filter(b => /^now/.test(b)).length === 1, badges.join(' | '));
+check('the anytime tools carry no step number',
+  !win.document.querySelector('.nav-item[data-tool="editor"] .np'));
+win.eval("clearBrand();"); win.eval("current='home';");
+win.paintProgram();
+check('and with no business at all the sidebar is a plain menu again',
+  win.document.querySelectorAll('.nav-item .np').length === 0);
+
+console.log('\nTHE STRATEGY DOCUMENT');
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', url: 'https://northwind.example', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] });
+win.eval("PLAN.strategyDoc={text:'WHERE YOU ARE\\nTwo steps are done.\\n\\nTHE STRATEGY\\n1. Fix the title tag first.\\n2. Then launch.\\n\\nTHE NEXT NINETY DAYS\\nDays 1 to 30\\nShip the fixes.\\n\\nWHAT WOULD MAKE THIS FAIL\\nNobody owns it.\\n\\nWHAT IS NOT KNOWN YET\\nNo conversion data.',at:Date.now(),done:2};");
+win.eval("current='home';"); win.renderHome();
+const strat = win.document.getElementById('stratOut');
+check('it renders as a document, not a wall of text',
+  strat.querySelectorAll('.st-sec').length === 5, String(strat.querySelectorAll('.st-sec').length));
+check('numbered moves are pulled out', strat.querySelectorAll('.st-move').length === 2);
+check('the ninety day phases are marked', strat.querySelectorAll('.st-phase').length === 1);
+check('it says how much of the program it was written from, not how much is done NOW',
+  /written from 2 of 6 steps done/.test(strat.textContent.replace(/\s+/g, ' ')),
+  strat.textContent.replace(/\s+/g, ' ').slice(0, 160));
+check('and admits when the work has moved on since it was written',
+  /finished \d+ more steps? since this was written/.test(strat.textContent),
+  strat.textContent.replace(/\s+/g, ' ').slice(0, 300));
+check('and it can be taken away', !!win.document.getElementById('stDl') && !!win.document.getElementById('stCopy'));
+check('a strategy written earlier is still there on the next visit',
+  (win.renderHome(), !!win.document.querySelector('.strategy')));
+check('the audit section reader finds a named section',
+  /placeholder/.test(win.auditSectionOf(AUDIT_BODY, 'PRIORITIZED FIXES')));
+check('and returns nothing for a section that is not there',
+  win.auditSectionOf(AUDIT_BODY, 'WHAT IS COSTING YOU LEADS') === '');
+
+console.log('\nTHE PROGRAM GETS OUT OF THE WAY ONCE YOU ARE MOVING');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Fresh Co', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [], url: 'https://fresh.example' });
+win.eval("PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.eval("current='home';"); win.renderHome();
+check('on day one all six steps are shown', win.document.querySelectorAll('.pg-s').length === 6);
+win.rememberOutput('brand', { kind: 'gen', raw: 'POSITIONING\nvoice', vals: {} });
+win.renderHome();
+check('once something is done it collapses to the step you are on',
+  win.document.querySelectorAll('.pg-s').length === 1, String(win.document.querySelectorAll('.pg-s').length));
+check('and that one row is the current step',
+  /Audit the site/.test(win.document.querySelector('.pg-s').textContent));
+check('the progress bar still reports the whole program',
+  /1<\/b> of 6 done/.test(win.document.querySelector('.pg-prog').innerHTML.replace(/\s+/g, ' ')),
+  win.document.querySelector('.pg-prog').textContent.replace(/\s+/g, ' '));
+win.document.getElementById('pgToggle').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+check('opening it shows everything again', win.document.querySelectorAll('.pg-s').length === 6);
+win.renderHome();
+check('and the choice survives a re-render', win.document.querySelectorAll('.pg-s').length === 6);
 
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');

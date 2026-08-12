@@ -852,7 +852,86 @@
   .wl-m{color:var(--ink-2);font-size:12px}
   .wl-a{margin-left:auto;color:var(--ink-2);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
 
+  /* ---- The program ------------------------------------------------------
+     A sidebar grouped by what tools ARE is a menu. Numbered, ticked, and with
+     one row marked "you are here", the same list becomes a plan. */
+  .nav-item{position:relative}
+  .np{margin-left:auto;flex-shrink:0;width:19px;height:19px;border-radius:6px;
+    font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border);color:var(--ink-2);background:var(--surface);
+    transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+  .np-done{background:var(--accent);border-color:var(--accent);color:#fff}
+  .np-now{background:var(--ink);border-color:var(--ink);color:#fff}
+  .np-part{box-shadow:0 0 0 2px rgba(138,109,59,.25)}
+
+  .pg-card .wk-head{align-items:center}
+  .pg-prog{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+  .pg-prog b{font-variant-numeric:tabular-nums;color:var(--ink);font-size:13px}
+  .pg-bar{display:block;width:88px;height:4px;border-radius:99px;background:var(--border);overflow:hidden}
+  .pg-bar i{display:block;height:100%;background:var(--accent);transition:width .5s var(--ease)}
+  .pg-list{list-style:none;margin:0;padding:4px 0;counter-reset:none}
+  .pg-s{display:flex;gap:14px;padding:15px 24px;border-bottom:1px solid var(--border);position:relative}
+  .pg-s:last-child{border-bottom:none}
+  /* the thread down the left, so it reads as a sequence rather than six unrelated rows */
+  .pg-s::before{content:"";position:absolute;left:37px;top:0;bottom:0;width:1px;background:var(--border)}
+  .pg-s:first-child::before{top:50%}
+  .pg-s:last-child::before{bottom:50%}
+  .pg-n{position:relative;z-index:1;flex-shrink:0;width:27px;height:27px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+    font-variant-numeric:tabular-nums;border:1px solid var(--border);background:var(--bg);color:var(--ink-2)}
+  .pg-done .pg-n{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pg-now .pg-n{background:var(--ink);border-color:var(--ink);color:#fff}
+  .pg-b{flex:1;min-width:0}
+  .pg-t{font-size:14.5px;font-weight:600;letter-spacing:-.1px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .pg-done .pg-t{color:var(--ink-2)}
+  .pg-here{font-size:9.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;
+    color:#fff;background:var(--ink);border-radius:5px;padding:2px 7px}
+  .pg-open{font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--accent);border:1px solid rgba(138,109,59,.35);border-radius:5px;padding:1px 6px}
+  .pg-w{font-size:12.8px;color:var(--ink-2);margin-top:4px;line-height:1.55;max-width:62ch}
+  .pg-go{margin-top:9px;display:inline-flex;align-items:center;gap:7px;min-height:44px;
+    background:none;border:none;color:var(--accent);font-family:inherit;font-size:12.5px;
+    font-weight:700;cursor:pointer;padding:0}
+  .pg-go svg{width:14px;height:14px}
+  .pg-go:hover{text-decoration:underline}
+  .pg-later .pg-go{color:var(--ink-2)}
+  .pg-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding:18px 24px;border-top:1px solid var(--border)}
+  .pg-toggle{order:-1;background:none;border:none;color:var(--accent);font-family:inherit;
+    font-size:12.5px;font-weight:700;cursor:pointer;padding:11px 0;min-height:44px;width:100%;text-align:left}
+  .pg-toggle:hover{text-decoration:underline}
+  .pg-foot-t{font-size:12.5px;color:var(--ink-2);line-height:1.55;flex:1;min-width:240px}
+
+  /* ---- The strategy document -------------------------------------------- */
+  .strategy{margin:0 24px 22px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--bg)}
+  .st-top{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .st-eyebrow{display:block;font-family:var(--display);font-size:20px;letter-spacing:-.2px}
+  .st-meta{display:block;margin-top:3px;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-2)}
+  .st-sec{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .st-sec:last-of-type{border-bottom:none}
+  .st-sec h3{margin:0 0 8px;font-size:10px;font-weight:700;letter-spacing:1.3px;
+    text-transform:uppercase;color:var(--ink-2)}
+  .st-b p{margin:0 0 9px;font-size:13.6px;line-height:1.68}
+  .st-b p:last-child{margin-bottom:0}
+  .st-move{display:flex;gap:11px;margin:0 0 11px;font-size:13.6px;line-height:1.62}
+  .st-move:last-child{margin-bottom:0}
+  .st-n{flex-shrink:0;width:21px;height:21px;border-radius:7px;background:var(--ink);color:#fff;
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    font-variant-numeric:tabular-nums;margin-top:1px}
+  .st-phase{margin:12px 0 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--accent)}
+  .st-phase:first-child{margin-top:0}
+  .st-stale{margin:0 20px 14px;padding:11px 13px;border:1px solid rgba(138,109,59,.35);
+    border-radius:9px;font-size:12.5px;color:var(--accent);line-height:1.5}
+  .st-row{display:flex;gap:8px;padding:0 20px 18px;flex-wrap:wrap}
+
   @media(max-width:900px){
+    .pg-s{padding:14px 18px}
+    .pg-s::before{left:31px}
+    .pg-foot{padding:16px 18px}
+    .strategy{margin-left:18px;margin-right:18px}
+    .np{margin-left:8px}
     .wk-tiles{grid-template-columns:1fr 1fr}
     .wk-head{padding:16px 18px}
     .wi{padding:14px 18px}
@@ -905,15 +984,39 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
       Today
     </div>
-    <div class="nav-label" style="margin-top:18px">Campaign</div>
+    <!-- THE PROGRAM. The tools used to be grouped by what they ARE. Grouped by WHEN YOU
+         DO THEM, the sidebar stops being a menu and starts being a plan: you cannot position
+         before you know what you sell, cannot write at scale before the voice is fixed, and
+         cannot report on a campaign you have not shipped. Numbers and ticks are painted on
+         by paintProgram from real state, never hardcoded. -->
+    <div class="nav-label" style="margin-top:18px">Marketing Program</div>
+    <div class="nav-item" data-tool="audit" id="navAudit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6M11 8v6" opacity=".55"/></svg>
+      AI Marketing Audit
+    </div>
+    <div class="nav-item" data-tool="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 4.5 8v8L12 20.5 19.5 16V8z"/><path d="M12 9.5 8.5 11.5v3L12 16.5l3.5-2v-3z"/></svg>
+      Brand Voice &amp; Messaging
+    </div>
+    <div class="nav-item" data-tool="intel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.7v5.1c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V5.7z"/></svg>
+      Competitive Intelligence
+    </div>
     <div class="nav-item" data-tool="campaign">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l16-6-4 15-4-6z"/><path d="M11 14l-4 5"/></svg>
       Campaign Builder
     </div>
+    <div class="nav-item" data-tool="calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Content Calendar Builder
+    </div>
+    <div class="nav-item" data-tool="report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6.5 20V13M11 20V7M15.5 20v-5M20 20V10"/></svg>
+      Social Performance
+    </div>
 
-    <div class="nav-label" style="margin-top:18px">Marketing Tools</div>
-
-    <div class="nav-item active" data-tool="outreach">
+    <div class="nav-label" style="margin-top:18px">Any Time</div>
+    <div class="nav-item" data-tool="outreach">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
       Client Outreach Generator
     </div>
@@ -925,16 +1028,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg>
       Campaign Ad Studio
     </div>
-    <div class="nav-item" data-tool="intel">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.7v5.1c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V5.7z"/></svg>
-      Competitive Intelligence
-    </div>
-
-    <div class="nav-label" style="margin-top:18px">Social &amp; Comms</div>
-    <div class="nav-item" data-tool="calendar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-      Content Calendar Builder
-    </div>
     <div class="nav-item" data-tool="social">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6.5" r="2.6"/><circle cx="17.5" cy="17.5" r="2.6"/><path d="m8.4 10.8 6.8-3.2M8.4 13.2l6.8 3.2"/></svg>
       Multi-Channel Studio
@@ -943,23 +1036,9 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11v12H4z"/><path d="M15 9h3.5L20 11v7h-5"/><path d="M7 9h5M7 12h5"/></svg>
       Comms &amp; PR Kit
     </div>
-    <div class="nav-item" data-tool="brand">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 4.5 8v8L12 20.5 19.5 16V8z"/><path d="M12 9.5 8.5 11.5v3L12 16.5l3.5-2v-3z"/></svg>
-      Brand Voice &amp; Messaging
-    </div>
-    <div class="nav-item" data-tool="report">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6.5 20V13M11 20V7M15.5 20v-5M20 20V10"/></svg>
-      Social Performance
-    </div>
     <div class="nav-item" data-tool="editor">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 20 4-1 10-10-3-3L5 16z"/><path d="m14.5 6.5 3 3"/></svg>
       Copy Editor
-    </div>
-
-    <div class="nav-label" style="margin-top:18px">Site Intelligence</div>
-    <div class="nav-item" data-tool="audit" id="navAudit">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6M11 8v6" opacity=".55"/></svg>
-      AI Marketing Audit
     </div>
 
     <div class="nav-foot">Rendered, measured,<br/>then graded.</div>
@@ -1453,8 +1532,24 @@ document.addEventListener("keydown",e=>{
   }
 });
 
+function paintProgram(){
+  if(!BRAND) { document.querySelectorAll(".nav-item .np").forEach(n=>n.remove()); return; }
+  const st=programState();
+  st.forEach(s=>{
+    const el=document.querySelector('.nav-item[data-tool="'+s.tool+'"]');
+    if(!el) return;
+    let b=el.querySelector(".np");
+    if(!b){ b=document.createElement("span"); b.className="np"; el.appendChild(b); }
+    const want=s.status==="done"?"\u2713":String(s.n);
+    if(b.textContent!==want) b.textContent=want;
+    const cls="np np-"+s.status+(s.started?" np-part":"");
+    if(b.className!==cls) b.className=cls;
+    b.title=s.status==="done"?"Done":s.status==="now"?"You are here":"Step "+s.n;
+  });
+}
 function setActiveNav(){
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.tool===current));
+  paintProgram();
 }
 /* One way in, used by the sidebar, the command palette and the setup flow. */
 function goTool(id){
@@ -2435,7 +2530,7 @@ function restoreOutput(){
    private mode degrades to this-session-only instead of breaking the product. */
 const PLAN_VER=1, LOG_CAP=120;
 function planKey(){ return "gr_plan_"+((BRAND&&BRAND.id)||"none"); }
-function blankPlan(){ return {v:PLAN_VER,items:[],log:[],strategy:null,lastSeen:0}; }
+function blankPlan(){ return {v:PLAN_VER,items:[],log:[],strategy:null,strategyDoc:null,lastSeen:0,progOpen:null}; }
 let PLAN=blankPlan();
 function loadPlan(){
   try{
@@ -2758,39 +2853,185 @@ You are given the business, the work completed recently, and the open work with 
 Write a plain email body: one line of context, a short "what we did" list, a short "what is next" list with the dates you were given, and one closing line naming anything you need a decision on. Between 120 and 220 words.
 HARD RULES: use only the facts given to you. Never invent a metric, a percentage, a result, a person's name, a company name or a date that was not supplied. Do not write a subject line, a greeting with an invented name, or a signature block. No markdown, no bullets with asterisks, use plain hyphens.`;
 
+/* ---------------- THE PROGRAM ----------------
+   Twelve tools in a sidebar is a menu, and a menu does not tell anybody where to start.
+   This is the order a marketing lead would actually work in, and the reasoning is not
+   decorative: you cannot fix what you have not measured, cannot position before you know
+   what you sell, cannot write at scale before the voice is fixed, cannot schedule a
+   campaign that does not exist, and cannot report on something you never shipped.
+
+   Completion is DERIVED from real state, never ticked by hand. Nothing is ever locked:
+   later steps stay clickable, and doing one out of order marks it done where it is. The
+   only opinion the product enforces is what comes NEXT when you have no opinion of your own.
+
+   Step one is deliberately not finished by running the audit. A report you have not acted
+   on has changed nothing, so it stays open until the Critical and High fixes are shipped,
+   which is also what keeps them on the daily list and in the calendar. */
+const PROGRAM=[
+  {n:1,tool:"audit",label:"Audit the site",
+   why:"Grade the site and file what it finds. Everything after this reads those findings, so it goes first.",
+   done:()=>!!LAST_OUT.audit && !openItems().some(x=>x.source==="audit"&&(x.priority==="Critical"||x.priority==="High")),
+   part:()=>!!LAST_OUT.audit},
+  {n:2,tool:"brand",label:"Lock the voice",
+   why:"Every other tool reads this. Fix how you sound once, before you write anything at scale.",
+   done:()=>!!LAST_OUT.brand},
+  {n:3,tool:"intel",label:"Know the competition",
+   why:"Position before you promote. A campaign written without this sounds like everybody else in the category.",
+   done:()=>!!LAST_OUT.intel},
+  {n:4,tool:"campaign",label:"Build the campaign",
+   why:"One brief, and the release, posts, ads and calendar all come back saying the same thing.",
+   done:()=>!!LAST_OUT.campaign},
+  {n:5,tool:"calendar",label:"Put it on dates",
+   why:"A campaign without dates does not ship. These become work in your calendar.",
+   done:()=>!!LAST_OUT.calendar},
+  {n:6,tool:"report",label:"Measure it",
+   why:"Paste the numbers and find out what actually moved, then the next audit starts the loop again.",
+   done:()=>!!LAST_OUT.report}
+];
+function programState(){
+  let first=true;
+  return PROGRAM.map(s=>{
+    let ok=false; try{ ok=!!s.done(); }catch(e){ ok=false; }
+    let status;
+    if(ok) status="done";
+    else if(first){ status="now"; first=false; }
+    else status="later";
+    let started=false; try{ started=!ok && !!(s.part?s.part():false); }catch(e){}
+    return {n:s.n,tool:s.tool,label:s.label,why:s.why,status:status,started:started,
+      title:(TOOLS[s.tool]||{}).title||s.tool,at:(LAST_OUT[s.tool]||{}).at||0};
+  });
+}
+function programDone(){ return programState().filter(s=>s.status==="done").length; }
+/* The step you are on becomes a dated job in the daily list, which is what puts the program
+   itself into the calendar export rather than leaving it as a diagram on a screen. */
+function syncProgramItem(){
+  const st=programState();
+  st.forEach(s=>{
+    const it=PLAN.items.find(x=>x.key==="program:"+s.tool);
+    if(it && s.status==="done" && it.status!=="done"){ it.status="done"; it.done_at=Date.now(); }
+  });
+  const now=st.find(s=>s.status==="now");
+  if(now){
+    addItem({key:"program:"+now.tool,source:"program",tool:now.tool,
+      title:"Step "+now.n+" of "+PROGRAM.length+": "+now.label,
+      detail:now.why,
+      due:ymd(addDays(new Date(),now.n===1?2:5))});
+  }
+  persistPlan();
+}
+
+/* The comprehensive strategy. Not another daily note: this reads the whole program, what
+   has actually been produced and what the audit found, and writes the plan a marketing lead
+   would put in front of a board. It is told EXPLICITLY which steps are done and which are
+   not, because the one thing that would discredit it instantly is claiming work that was
+   never done. */
+const STRATEGY_SYSTEM=`You are a marketing director writing the strategy for one business, for its owner. ${NODASH}
+You are given the business, which steps of its marketing program are done and which are not, what has already been produced, and what its website audit found.
+Write in exactly these sections, with these headings on their own lines:
+WHERE YOU ARE
+One short paragraph. Be straight about what has been done and what has not. Never describe unfinished work as finished.
+THE STRATEGY
+Three to five numbered moves. Each move: what to do, why it is the right move for THIS business given what the audit and the work already show, and what it depends on. Name the specific tool or asset in this suite that produces it.
+THE NEXT NINETY DAYS
+Three short phases, headed Days 1 to 30, Days 31 to 60, Days 61 to 90, each with two or three concrete actions in sequence.
+WHAT WOULD MAKE THIS FAIL
+Two or three honest risks specific to this business, not general marketing advice.
+WHAT IS NOT KNOWN YET
+Two or three things this plan is assuming because nobody has measured them yet, and how to find them out.
+HARD RULES: use only what you were given. Never invent a statistic, a percentage, a benchmark, a result, a budget figure, a customer name or a competitor you were not told about. Never claim a step is complete when the list says it is not. If something important is missing, say plainly that it is missing and put it in WHAT IS NOT KNOWN YET. No preamble, no sign off, no markdown formatting.`;
+async function buildStrategy(){
+  const btn=document.getElementById("wkStrat");
+  const out=document.getElementById("stratOut");
+  const st=programState();
+  if(btn){ btn.disabled=true; btn.textContent="Writing the strategy"; }
+  if(out) out.innerHTML=`<div class="wk-note wk-wait">Reading everything done for ${esc(brandName())}</div>`;
+  const a=LAST_OUT.audit;
+  const costing=a?String(auditSectionOf(a.body||"","WHAT IS COSTING YOU LEADS")||"").replace(/\s+/g," ").slice(0,900):"";
+  const msg=`BUSINESS: ${brandName()}\n${brandContext()}\n\nTODAY IS: ${new Date().toDateString()}\n\n`+
+    `THE PROGRAM, AND WHAT IS ACTUALLY DONE:\n`+
+    st.map(s=>`Step ${s.n} ${s.label} (${s.title}): ${s.status==="done"?"DONE":s.started?"STARTED BUT NOT FINISHED":"NOT DONE"}`).join("\n")+
+    (a?`\n\nSITE AUDIT: graded ${a.mark||"ungraded"}.${costing?" What it found costing leads: "+costing:""}`:`\n\nSITE AUDIT: never run.`)+
+    `\n\nOPEN WORK:\n${itemLines(openItems().slice(0,10))||"Nothing open."}`+
+    (workDigest("")||"")+
+    `\n\nWrite the strategy now.`;
+  let text=await askModel(STRATEGY_SYSTEM,msg,"workspace-strategy",1500);
+  if(btn){ btn.disabled=false; btn.textContent="Write the full strategy"; }
+  if(!text){ if(out) out.innerHTML=`<div class="wk-note">That did not come back. Try it again in a moment.</div>`; return; }
+  text=dropUnbackedFigures(text,msg);
+  PLAN.strategyDoc={text:text,at:Date.now(),done:st.filter(s=>s.status==="done").length}; persistPlan();
+  logEvent("strategy","Wrote the full marketing strategy",progDoneWords(st));
+  paintStrategy();
+}
+function progDoneWords(st){ return st.filter(s=>s.status==="done").length+" of "+st.length+" steps done"; }
+const STRAT_SECS=["WHERE YOU ARE","THE STRATEGY","THE NEXT NINETY DAYS","WHAT WOULD MAKE THIS FAIL","WHAT IS NOT KNOWN YET"];
+function paintStrategy(){
+  const out=document.getElementById("stratOut");
+  const d=PLAN.strategyDoc;
+  if(!out||!d||!d.text) return;
+  const lines=String(d.text).split("\n");
+  let html="", open=false;
+  lines.forEach(l=>{
+    const t=l.trim();
+    if(!t){ return; }
+    if(STRAT_SECS.some(h=>t.toUpperCase()===h)){
+      if(open) html+="</div></section>";
+      html+=`<section class="st-sec"><h3>${escMd(t)}</h3><div class="st-b">`; open=true; return;
+    }
+    if(/^days?\s+\d+\s+to\s+\d+/i.test(t)){ html+=`<div class="st-phase">${escMd(t)}</div>`; return; }
+    const num=t.match(/^(\d+)[.)]\s*(.+)$/);
+    if(num){ html+=`<div class="st-move"><span class="st-n">${esc(num[1])}</span><span>${escMd(num[2])}</span></div>`; return; }
+    html+=`<p>${escMd(t.replace(/^[-•*]\s*/,""))}</p>`;
+  });
+  if(open) html+="</div></section>";
+  out.innerHTML=`<div class="strategy">
+      <div class="st-top"><span class="st-eyebrow">Marketing strategy</span>
+        <span class="st-meta">${esc(brandName())} &nbsp;·&nbsp; written from ${esc(String(d.done!=null?d.done:programDone()))} of ${PROGRAM.length} steps done &nbsp;·&nbsp; ${esc(agoWords(d.at))}</span></div>
+      ${html}
+      ${(d.done!=null && programDone()>d.done)?`<div class="st-stale">You have finished ${programDone()-d.done} more step${programDone()-d.done===1?"":"s"} since this was written. Write it again to bring it up to date.</div>`:""}
+      <div class="st-row">
+        <button type="button" class="btn-mini" id="stCopy">Copy</button>
+        <button type="button" class="btn-mini" id="stDl">Download</button>
+      </div>
+    </div>`;
+  const txt=cleanCopy(d.text);
+  const c=document.getElementById("stCopy");
+  if(c) c.addEventListener("click",()=>{ navigator.clipboard.writeText(txt).catch(()=>{});
+    c.textContent="Copied"; setTimeout(()=>c.textContent="Copy",1400); });
+  const dl=document.getElementById("stDl");
+  if(dl) dl.addEventListener("click",()=>downloadText(slugify(brandName())+"-marketing-strategy.md",
+    brandName()+" marketing strategy\n\n"+txt));
+}
+
 /* ---------------- what to do next, decided in code ----------------
    Rules over stored state, so this is free, instant and identical every time. The model is
    for the writing, never for working out that an audit from six weeks ago is stale. */
 function daysSince(ts){ return Math.floor((Date.now()-(ts||0))/86400000); }
 function nextMoves(){
   const moves=[], has=k=>!!LAST_OUT[k], a=LAST_OUT.audit;
+  /* The program card above already names the next step, so the old "run your first audit"
+     and "lock your brand voice" prompts would say the same thing a second time. What is
+     left here is everything the program cannot know: what is late, what is stale, and what
+     is currently costing money. */
   const late=openItems().filter(x=>{ const d=daysUntil(x.due); return d!==null&&d<0; });
   const hot=openItems().filter(x=>x.priority==="Critical"||x.priority==="High");
   if(late.length) moves.push({t:late.length===1?"One item is past its date":late.length+" items are past their date",
     d:"Move the date or get them shipped, but do not leave them sitting.",go:""});
-  if(!a) moves.push({t:"Run your first site audit",
-    d:"It grades the site and files the fixes here, so the rest of the suite has something real to work from.",go:"audit"});
-  else if(daysSince(a.at)>=30) moves.push({t:"Re-run the audit",
+  if(a && daysSince(a.at)>=30) moves.push({t:"Re-run the audit",
     d:"The last one was "+daysSince(a.at)+" days ago. A fresh run shows what actually shipped and reopens anything that did not.",go:"audit"});
   if(hot.length) moves.push({t:hot.length===1?"Ship the highest priority fix":"Ship the "+hot.length+" highest priority fixes",
     d:hot.length===1?"This is the one costing you leads today.":"These are the ones costing you leads today.",go:""});
-  if(a&&!has("campaign")) moves.push({t:"Turn the findings into a campaign",
-    d:"One brief, and the press release, posts, ads and calendar all come back saying the same thing.",go:"campaign"});
-  if(has("campaign")&&!has("calendar")) moves.push({t:"Put the campaign on a calendar",
-    d:"Four weeks of posts, dated, and they land in your work here.",go:"calendar"});
   if(BRAND && !BRAND.url) moves.push({t:"Tell Grayrender your website",
     d:"This profile was set up before the address was kept, so the audit cannot fill it in for you yet. Read your site once and it will.",go:""});
-  if(!has("brand")) moves.push({t:"Lock your brand voice",
-    d:"Every other tool reads it, so the whole suite stops sounding like eleven different people.",go:"brand"});
-  if(has("calendar")&&!has("report")) moves.push({t:"Report on what went out",
-    d:"Paste the numbers and it will tell you what they say, and what it still cannot see.",go:"report"});
-  return moves.slice(0,4);
+  const stale=Object.keys(LAST_OUT).filter(k=>TOOLS[k]&&LAST_OUT[k]&&daysSince(LAST_OUT[k].at)>=21);
+  if(stale.length&&programDone()===PROGRAM.length) moves.push({t:"Everything is shipped, so start the loop again",
+    d:"The program is complete for this business. A fresh audit is how you find out whether any of it worked.",go:"audit"});
+  return moves.slice(0,3);
 }
 function greeting(){
   const h=new Date().getHours();
   return h<12?"Good morning":h<18?"Good afternoon":"Good evening";
 }
-function srcLabel(s){ return s==="audit"?"From the audit":s==="calendar"?"Scheduled post":"Added by you"; }
+function srcLabel(s){ return s==="audit"?"From the audit":s==="calendar"?"Scheduled post":s==="program"?"Your program":"Added by you"; }
 
 /* ---------------- Today ---------------- */
 function itemRow(it){
@@ -2816,7 +3057,15 @@ function renderHome(){
   try{window.scrollTo(0,0);}catch(e){}
   setActiveNav();
   if(!BRANDS.length) return renderOnboard();
+  syncProgramItem();                     // the step you are on is a dated job, not a diagram
   const open=openItems(), soon=dueWithin(7), moves=nextMoves();
+  const prog=programState(), progDone=prog.filter(s=>s.status==="done").length;
+  const nowStep=prog.find(s=>s.status==="now");
+  /* A six step card is the right thing to see on day one and the wrong thing to see every
+     morning after, pushing the work that is actually due below the fold. So it opens itself
+     while nothing is done, collapses to the step you are on once you are moving, and
+     remembers whichever you chose. */
+  const showAll = (PLAN.progOpen===undefined||PLAN.progOpen===null) ? (progDone===0||!nowStep) : !!PLAN.progOpen;
   const doneWeek=PLAN.items.filter(x=>x.status==="done"&&x.done_at&&daysSince(x.done_at)<7).length;
   const a=LAST_OUT.audit;
   const touched=Object.keys(LAST_OUT).filter(k=>TOOLS[k]&&LAST_OUT[k]).sort((x,y)=>(LAST_OUT[y].at||0)-(LAST_OUT[x].at||0));
@@ -2858,6 +3107,32 @@ function renderHome(){
     </div>
 
     <div class="wk-tiles">${tiles}</div>
+
+    <div class="card wk-card pg-card">
+      <div class="wk-head">
+        <h2>The program</h2>
+        <span class="pg-prog"><span class="pg-bar"><i style="width:${Math.round(progDone/prog.length*100)}%"></i></span>
+          <b>${progDone}</b> of ${prog.length} done</span>
+      </div>
+      <ol class="pg-list">${(showAll?prog:prog.filter(s=>s.status==="now")).map(s=>`
+        <li class="pg-s pg-${s.status}${s.started?" pg-part":""}">
+          <span class="pg-n">${s.status==="done"?"&#10003;":s.n}</span>
+          <div class="pg-b">
+            <div class="pg-t">${esc(s.label)}${s.status==="now"?`<span class="pg-here">You are here</span>`:""}${s.started?`<span class="pg-open">Report run, fixes still open</span>`:""}</div>
+            <div class="pg-w">${esc(s.why)}</div>
+            <button type="button" class="pg-go" data-go="${esc(s.tool)}">${
+              s.status==="done"?"Revisit":s.started?"Continue in":s.status==="now"?"Start":"Open"} ${esc(s.title)}${ARROW}</button>
+          </div>
+        </li>`).join("")}</ol>
+      <div class="pg-foot">
+        ${nowStep?`<button type="button" class="pg-toggle" id="pgToggle" aria-expanded="${showAll?"true":"false"}">${showAll?"Show less":"Show all "+prog.length+" steps"}</button>`:""}
+        <div class="pg-foot-t">${progDone===prog.length
+          ? "Every step is done for "+esc(brandName())+". Run the audit again and the loop starts over with evidence."
+          : "Do them in this order and you finish with a strategy you can defend. Nothing is locked, so work out of order whenever you want to."}</div>
+        <button type="button" class="btn-mini solid" id="wkStrat">Write the full strategy</button>
+      </div>
+      <div id="stratOut" aria-live="polite"></div>
+    </div>
 
     <div class="card wk-card">
       <div class="wk-head"><h2>Today</h2>
@@ -2920,6 +3195,10 @@ function wireHome(){
   const p=document.getElementById("wkPlan"); if(p) p.addEventListener("click",planMyDay);
   const m=document.getElementById("wkMail"); if(m) m.addEventListener("click",draftUpdate);
   const i=document.getElementById("wkIcs"); if(i) i.addEventListener("click",exportPlanIcs);
+  const st=document.getElementById("wkStrat"); if(st) st.addEventListener("click",buildStrategy);
+  const pt=document.getElementById("pgToggle");
+  if(pt) pt.addEventListener("click",()=>{ PLAN.progOpen=!(pt.getAttribute("aria-expanded")==="true"); persistPlan(); renderHome(); });
+  paintStrategy();   // a strategy written yesterday is still the strategy
 }
 function wkOut(html){ const el=document.getElementById("wkOut"); if(el) el.innerHTML=html; }
 function exportPlanIcs(){
@@ -3735,9 +4014,13 @@ const IMPACT_ELEMENTS=[["title","title tag"],["meta","meta description"],["h1","
   ["canonical"],["schema","structured data","json-ld"],["link label","anchor text"],
   ["bio"],["image"]];
 /* Pull the PRIORITIZED FIXES body out of the report, stopping at the next ALL-CAPS header. */
-function fixesSectionOf(body){
+function fixesSectionOf(body){ return auditSectionOf(body,"PRIORITIZED FIXES"); }
+/* One section reader for the report, because a second one written beside it would drift
+   from this the first time a heading changed. */
+function auditSectionOf(body,header){
   const lines=String(body||"").split("\n");
-  const i=lines.findIndex(l=>/^\s*PRIORITIZED FIXES/i.test(l));
+  const re=new RegExp("^\\s*"+String(header).replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i");
+  const i=lines.findIndex(l=>re.test(l));
   if(i<0) return "";
   const out=[];
   for(let j=i+1;j<lines.length;j++){

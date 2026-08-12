@@ -7,6 +7,14 @@ that drives a real headless browser over every key page, measures the layout, lo
 screenshot, and only then writes the report. Everything runs behind Netlify serverless
 functions, so API keys never reach the browser.
 
+**The sidebar is a plan, not a menu.** The tools are ordered into a six step marketing
+program, numbered and ticked off from real state: audit the site and ship what it finds,
+lock the voice, know the competition, build the campaign, put it on dates, measure it.
+Step one deliberately does not complete when the report arrives, only when the critical
+fixes are shipped. The step you are on is filed as dated work, so the program itself lands
+in your calendar, and "Write the full strategy" turns everything done so far into a phased
+ninety day plan that is told exactly which steps are finished and which are not.
+
 **It is something you come back to, not something you run.** Every finding the audit files
 becomes tracked work with a status and a date, every calendar row becomes a dated post, and the
 whole plan leaves as a calendar file or a written update. Each business you add keeps its own
@@ -114,7 +122,7 @@ npm install
 npm test
 ```
 
-`npm test` runs 462 assertions across four suites: `passcode.test.js` (an unauthenticated
+`npm test` runs 500 assertions across four suites: `passcode.test.js` (an unauthenticated
 caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
 every real finding survives), `report-render.test.js` (the report renders, the print document
 builds, the evidence is in both, and every guard holds on the thing a human actually receives)
