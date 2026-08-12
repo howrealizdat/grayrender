@@ -15,6 +15,14 @@ fixes are shipped. The step you are on is filed as dated work, so the program it
 in your calendar, and "Write the full strategy" turns everything done so far into a phased
 ninety day plan that is told exactly which steps are finished and which are not.
 
+**Meeting Mode** (owner only, in private testing) listens to a live meeting through the
+browser's own speech recognition, with no key to paste and nothing to leak, and answers from
+the positioning, audit findings and open work this suite already holds, or turns the
+conversation into a recap, a follow-up email, a one-pager or a proposal outline before the
+call ends. Actions parsed out of it are filed as ordinary work, and an action the meeting
+gave no date for is filed without one rather than handed a deadline nobody agreed. Everyone
+else sees a coming-soon page.
+
 **It is something you come back to, not something you run.** Every finding the audit files
 becomes tracked work with a status and a date, every calendar row becomes a dated post, and the
 whole plan leaves as a calendar file or a written update. Each business you add keeps its own
@@ -122,7 +130,7 @@ npm install
 npm test
 ```
 
-`npm test` runs 505 assertions across four suites: `passcode.test.js` (an unauthenticated
+`npm test` runs 540 assertions across four suites: `passcode.test.js` (an unauthenticated
 caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
 every real finding survives), `report-render.test.js` (the report renders, the print document
 builds, the evidence is in both, and every guard holds on the thing a human actually receives)

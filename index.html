@@ -926,7 +926,63 @@
     border-radius:9px;font-size:12.5px;color:var(--accent);line-height:1.5}
   .st-row{display:flex;gap:8px;padding:0 20px 18px;flex-wrap:wrap}
 
+  /* ---- Meeting mode ------------------------------------------------------ */
+  .nav-tag{margin-left:auto;flex-shrink:0;font-size:8.5px;font-weight:800;letter-spacing:.7px;
+    text-transform:uppercase;color:var(--accent);border:1px solid rgba(138,109,59,.35);
+    border-radius:4px;padding:2px 5px}
+  .mt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border);
+    margin-right:9px;vertical-align:middle}
+  .mt-dot.on{background:#b4423f;box-shadow:0 0 0 0 rgba(180,66,63,.55);animation:pulse 1.6s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(180,66,63,0)}100%{box-shadow:0 0 0 0 rgba(180,66,63,0)}}
+  .mt-privacy{margin:16px 24px 0;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    font-size:11.5px;line-height:1.55;color:var(--ink-2);background:var(--surface)}
+  .mt-live{margin:14px 24px 0;padding:16px 18px;border:1px solid var(--border);border-radius:12px;
+    background:var(--surface);height:230px;overflow-y:auto;font-size:13.6px;line-height:1.62}
+  .mt-live p{margin:0 0 7px}
+  .mt-live p:last-child{margin-bottom:0}
+  .mt-interim{color:var(--ink-2);font-style:italic}
+  .mt-empty{color:var(--ink-2);font-size:13px}
+  .mt-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:16px 24px 4px}
+  .mt-bar select{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:11px 15px;min-height:44px;font-family:inherit;font-size:12.5px;font-weight:600;
+    color:var(--ink);outline:none;cursor:pointer}
+  .mt-bar select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  .mt-count{font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;margin-left:auto}
+  .mt-answer{margin:16px 24px 20px;border:1px solid var(--border);border-left:2px solid var(--accent);
+    border-radius:12px;padding:16px 18px;background:var(--surface)}
+  .mt-a-lbl{font-size:9.5px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+    color:var(--ink-2);margin-bottom:7px}
+  .mt-a-t{font-family:var(--display);font-size:20px;line-height:1.45;letter-spacing:-.2px}
+  .mt-art{margin-top:16px}
+  .mt-acts{padding:12px 18px;border-top:1px solid var(--border);font-size:12.5px;
+    line-height:1.55;color:var(--ink-2)}
+  .mt-acts b{color:var(--ink)}
+  .mt-ctx{list-style:none;margin:0;padding:6px 0}
+  .mt-ctx li{display:flex;justify-content:space-between;gap:14px;padding:11px 24px;
+    border-bottom:1px solid var(--border);font-size:13px}
+  .mt-ctx li:last-child{border-bottom:none}
+  .mt-ctx span{color:var(--ink-2)}
+  .mt-ctx b{font-weight:600;text-align:right}
+  .mt-ctx-foot{padding:14px 24px;border-top:1px solid var(--border);font-size:12px;
+    color:var(--ink-2);line-height:1.55}
+
+  /* the screen everyone else gets */
+  .soon{text-align:left;max-width:640px}
+  .soon-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:1.1px;
+    text-transform:uppercase;color:var(--accent);border:1px solid rgba(138,109,59,.35);
+    border-radius:5px;padding:3px 8px;margin-bottom:16px}
+  .soon h2{font-family:var(--display);font-size:27px;font-weight:400;letter-spacing:-.3px;
+    line-height:1.2;margin:0 0 14px}
+  .soon p{font-size:14px;line-height:1.68;color:var(--ink-2);margin:0 0 12px;max-width:58ch}
+  .soon-note{font-size:12.5px}
+  .soon .btn-gen{margin-top:10px}
+
   @media(max-width:900px){
+    .mt-privacy,.mt-live{margin-left:18px;margin-right:18px}
+    .mt-bar{padding-left:18px;padding-right:18px}
+    .mt-answer{margin-left:18px;margin-right:18px}
+    .mt-ctx li,.mt-ctx-foot{padding-left:18px;padding-right:18px}
+    .mt-count{margin-left:0}
     .pg-s{padding:14px 18px}
     .pg-s::before{left:31px}
     .pg-foot{padding:16px 18px}
@@ -983,6 +1039,11 @@
     <div class="nav-item" data-tool="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
       Today
+    </div>
+    <div class="nav-item" data-tool="meeting">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>
+      Meeting Mode
+      <span class="nav-tag">Beta</span>
     </div>
     <!-- THE PROGRAM. The tools used to be grouped by what they ARE. Grouped by WHEN YOU
          DO THEM, the sidebar stops being a menu and starts being a plan: you cannot position
@@ -1183,6 +1244,16 @@ const TOOLS = {
     title:"Today",
     hl:"Today",
     blurb:"What is open, what is due, and what has happened for this business.",
+    fields:[]
+  },
+  /* Listens to the room and answers from what this suite already knows about the business.
+     Not general release: it is one person's tool for now, so everybody else is told plainly
+     that it is coming rather than being handed a half-finished feature. */
+  meeting:{
+    meeting:true,
+    title:"Meeting Mode",
+    hl:"Meeting",
+    blurb:"Listens to the meeting and answers from everything Grayrender knows about this business, or turns the conversation into something you can send before it ends.",
     fields:[]
   },
   outreach:{
@@ -1554,6 +1625,9 @@ function setActiveNav(){
 /* One way in, used by the sidebar, the command palette and the setup flow. */
 function goTool(id){
   if(!TOOLS[id]) return;
+  /* Navigating away stops the microphone. A listener still running on a screen you have
+     left is the one bug this feature is not allowed to have. */
+  if(MEET.on && id!=="meeting") meetStop();
   current=id; setActiveNav(); renderTool();
   const el=document.querySelector(`.nav-item[data-tool="${id}"]`);
   if(el&&el.scrollIntoView) el.scrollIntoView({block:"nearest"});
@@ -1718,6 +1792,7 @@ function renderTool(){
   setActiveNav();
   const t=TOOLS[current];
   if(t&&t.workspace) return renderHome();
+  if(t&&t.meeting) return renderMeeting();
   if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
@@ -2857,6 +2932,142 @@ You are given the business, the work completed recently, and the open work with 
 Write a plain email body: one line of context, a short "what we did" list, a short "what is next" list with the dates you were given, and one closing line naming anything you need a decision on. Between 120 and 220 words.
 HARD RULES: use only the facts given to you. Never invent a metric, a percentage, a result, a person's name, a company name or a date that was not supplied. Do not write a subject line, a greeting with an invented name, or a signature block. No markdown, no bullets with asterisks, use plain hyphens.`;
 
+/* ---------------- MEETING MODE ----------------
+   Ported in spirit from Finesse, the live copilot Edmund already built, and deliberately NOT
+   ported in mechanism. Finesse streams to Deepgram with a key the user pastes into the
+   browser. This repo is public and its own rule is that keys never reach the browser, so
+   this uses the browser's built-in speech recognition instead: nothing to paste, nothing to
+   leak, nothing to expire.
+
+   Be straight about what that means. Chrome's implementation sends the audio to Google's
+   speech service to turn it into text; it is not local. Nothing reaches Grayrender until a
+   button is pressed, and the transcript is never written to storage. The UI says exactly
+   this, because a listening feature that is vague about where the audio goes deserves to be
+   distrusted.
+
+   What makes this worth having over any other notetaker is the context: it answers from the
+   positioning, the audit findings and the open work this suite already holds for the
+   business, so it is the only notetaker in the room that knows the company. */
+function speechCtor(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+let MEET={on:false,rec:null,lines:[],interim:"",startedAt:0,artifact:null,stopping:false};
+function meetReset(){ MEET.lines=[]; MEET.interim=""; MEET.artifact=null; MEET.startedAt=0; }
+function meetStart(){
+  const C=speechCtor(); if(!C) return;
+  let r;
+  try{ r=new C(); }catch(e){ meetStatus("This browser would not start its recogniser."); return; }
+  r.continuous=true; r.interimResults=true;
+  try{ r.lang=navigator.language||"en-US"; }catch(e){}
+  r.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const res=e.results[i], txt=(res[0]&&res[0].transcript||"").trim();
+      if(!txt) continue;
+      if(res.isFinal) MEET.lines.push({t:Date.now(),text:txt});
+      else interim+=txt+" ";
+    }
+    MEET.interim=interim.trim();
+    paintTranscript();
+  };
+  /* Chrome ends the session on its own after a pause. Without this the thing simply stops
+     listening mid-meeting and looks like it is still running, which is the worst possible
+     failure for a feature whose entire job is not missing anything. */
+  r.onend=()=>{ if(MEET.on && !MEET.stopping){ try{ r.start(); }catch(e){} } };
+  r.onerror=e=>{
+    const k=(e&&e.error)||"";
+    if(k==="no-speech"||k==="aborted") return;          // ordinary silence, not a failure
+    if(k==="not-allowed"||k==="service-not-allowed"){
+      MEET.on=false; meetStatus("Microphone access was refused. Allow it for this site and start again.");
+    }else{
+      meetStatus("The recogniser stopped: "+esc(k)+". Press start to pick it back up.");
+    }
+    paintMeetControls();
+  };
+  MEET.rec=r; MEET.on=true; MEET.stopping=false;
+  if(!MEET.startedAt) MEET.startedAt=Date.now();
+  try{ r.start(); }catch(e){}
+  paintMeetControls(); meetStatus("");
+}
+function meetStop(){
+  MEET.on=false; MEET.stopping=true;
+  try{ MEET.rec&&MEET.rec.stop(); }catch(e){}
+  MEET.rec=null;
+  if(MEET.interim){ MEET.lines.push({t:Date.now(),text:MEET.interim}); MEET.interim=""; }
+  paintMeetControls(); paintTranscript();
+}
+function meetText(limit){
+  const all=MEET.lines.map(l=>l.text);
+  const txt=all.join("\n");
+  if(!limit||txt.length<=limit) return txt;
+  return txt.slice(txt.length-limit);          // the end of a meeting is the part that matters
+}
+function meetWords(){ return meetText().split(/\s+/).filter(Boolean).length; }
+
+/* Everything this suite knows about the business, in the form a person in a meeting would
+   need it. This is the whole reason for the feature: any notetaker can transcribe, but this
+   one can answer because it has read the site, graded it, and knows what is still open. */
+function meetingContext(){
+  const bits=["BUSINESS: "+brandName(), brandContext()];
+  const a=LAST_OUT.audit;
+  if(a){
+    bits.push("SITE AUDIT: graded "+(a.mark||"ungraded")+" at "+cleanHost((a.vals&&a.vals.url)||"")+".");
+    const costing=auditSectionOf(a.body||"","WHAT IS COSTING YOU LEADS");
+    if(costing) bits.push("What the audit found costing leads: "+costing.replace(/\s+/g," ").trim().slice(0,600));
+  }
+  const b=LAST_OUT.brand;
+  if(b) bits.push("AGREED POSITIONING AND VOICE: "+splitBriefing(splitWatermark(b.raw||"").body).asset.replace(/\s+/g," ").slice(0,600));
+  const st=programState();
+  bits.push("MARKETING PROGRAM: "+st.map(s=>s.n+" "+s.label+" ("+(s.status==="done"?"done":s.status==="now"?"current":"not started")+")").join(", ")+".");
+  const open=openItems().slice(0,8);
+  if(open.length) bits.push("WORK CURRENTLY OPEN:\n"+itemLines(open));
+  if(PLAN.strategy&&PLAN.strategy.text&&daysSince(PLAN.strategy.at)<14)
+    bits.push("THE AGREED FOCUS: "+String(PLAN.strategy.text).replace(/\s+/g," ").replace(/\[\d+\]/g,"").slice(0,300));
+  return bits.filter(Boolean).join("\n");
+}
+const MEET_ANSWER_SYSTEM=`You are sitting beside someone in a live meeting, feeding them the answer to what was just asked. ${NODASH}
+You are given what this suite knows about their business and the last part of the meeting transcript.
+Answer the most recent question or challenge in the transcript. Under ninety words. Lead with the answer in the first sentence, then at most two sentences of support. Write it to be said out loud, so no headings, no bullets, no preamble like "you could say".
+HARD RULES: use only the business facts you were given and what was said in the meeting. Never invent a number, a percentage, a price, a date, a client name or a commitment. If the answer is not in what you were given, say plainly what IS known and name the one thing you would need to answer properly. Being obviously honest in a meeting is recoverable; being confidently wrong is not.`;
+const MEET_MAKE={
+  recap:{label:"Recap and actions",hint:"A record you can act on days later, with ticket-ready actions",
+    spec:`Write the meeting up in these sections: SUMMARY (three or four lines on what it was about and what changed), DECISIONS (each decision and who made the call), ACTION ITEMS, OPEN QUESTIONS (what was left unresolved and who needs to answer).
+The ACTION ITEMS section must be one item per line in exactly this shape, pipe separated and nothing else:
+- what needs doing | owner or the word unassigned | a date as YYYY-MM-DD or the words not set`},
+  email:{label:"Follow-up email",hint:"Ready to send before they have left the call",
+    spec:`Write the follow up email body only. One line of thanks and context, what was agreed, what happens next and by when if a date was actually stated, and one closing line naming what you need from them. Between 120 and 200 words. No subject line, no invented greeting name, no signature block.`},
+  onepager:{label:"One-pager",hint:"What you just talked through, on a page they can forward",
+    spec:`Write a one page brief for the people who were not in the room: THE SITUATION, WHAT WE ARE PROPOSING, WHY THIS AND NOT SOMETHING ELSE, WHAT IT TAKES, WHAT HAPPENS NEXT. Tight and concrete, no filler.`},
+  proposal:{label:"Proposal outline",hint:"The shape of the work, ready to price up later",
+    spec:`Write a proposal outline: THE PROBLEM IN THEIR WORDS, SCOPE (what is included, as a list), APPROACH (the phases in order), WHAT WE NEED FROM YOU, WHAT SUCCESS LOOKS LIKE. Never state a price, a rate or a total, because none was agreed.`}
+};
+function meetMakeSystem(kind){
+  const k=MEET_MAKE[kind]||MEET_MAKE.recap;
+  return `You are an exceptional chief of staff turning a live meeting into something that can be sent immediately. ${NODASH}
+You are given what this suite knows about the business and the meeting transcript.
+${k.spec}
+HARD RULES: use ONLY what is in the transcript and the business facts given to you. Never invent an owner, a date, a number, a price or a decision. If something was vague, write that it was not specified in the meeting and move on, because a made up assignee or deadline does more damage than an obvious gap. Attribute by the names people are actually called, and write unattributed rather than guessing. Leave a section out entirely if the meeting contained nothing for it. Plain text, no markdown.`;
+}
+/* Actions come back pipe separated for the same reason the content calendar does: this model
+   holds a delimited row far more reliably than it holds a prose convention, and a row that
+   does not parse is dropped rather than half filed. */
+function meetingActions(text){
+  const sec=String(text||"").split(/\n/);
+  const out=[]; let inSec=false;
+  sec.forEach(l=>{
+    const t=l.trim();
+    if(/^ACTION ITEMS/i.test(t)){ inSec=true; return; }
+    if(inSec && /^[A-Z][A-Z \/&]{3,}$/.test(t)){ inSec=false; return; }
+    if(!inSec) return;
+    const row=t.replace(/^[-•*]\s*/,"");
+    if(!row||!/\|/.test(row)) return;
+    const p=row.split("|").map(x=>x.trim());
+    const title=p[0]; if(!title||title.length<3) return;
+    const owner=(p[1]||"").replace(/^unassigned$/i,"");
+    const due=/^\d{4}-\d{2}-\d{2}$/.test(p[2]||"")?p[2]:"";
+    out.push({title:title,owner:owner,due:due});
+  });
+  return out;
+}
+
 /* ---------------- THE PROGRAM ----------------
    Twelve tools in a sidebar is a menu, and a menu does not tell anybody where to start.
    This is the order a marketing lead would actually work in, and the reasoning is not
@@ -3043,9 +3254,171 @@ function greeting(){
   const h=new Date().getHours();
   return h<12?"Good morning":h<18?"Good afternoon":"Good evening";
 }
-function srcLabel(s){ return s==="audit"?"From the audit":s==="calendar"?"Scheduled post":s==="program"?"Your program":"Added by you"; }
+function srcLabel(s){ return s==="audit"?"From the audit":s==="calendar"?"Scheduled post":s==="program"?"Your program":s==="meeting"?"From a meeting":"Added by you"; }
 
-/* ---------------- Today ---------------- */
+/* ---------------- Meeting Mode: the screen ----------------
+   Owner only for now, and honest about it to everyone else. The flag is a device marker,
+   not a lock: it decides what is SHOWN, while the passcode every function already enforces
+   is what decides what can be SPENT. Nobody can run up a bill by finding this. */
+function renderMeeting(){
+  try{window.scrollTo(0,0);}catch(e){}
+  setActiveNav();
+  if(!isOwner()) return renderMeetingSoon();
+  const supported=!!speechCtor();
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>Meeting <span class="hl">Mode</span></h1>
+      <p>${esc(TOOLS.meeting.blurb)}</p>
+    </div>
+    <div class="card wk-card">
+      <div class="wk-head">
+        <h2><span class="mt-dot" id="mtDot"></span><span id="mtState">Not listening</span></h2>
+        <div class="wk-acts">
+          <button type="button" class="btn-mini solid" id="mtToggle"${supported?"":" disabled"}>Start listening</button>
+          <button type="button" class="btn-mini" id="mtClear">Clear</button>
+        </div>
+      </div>
+      ${supported?"":`<div class="wk-note">This browser has no built-in speech recognition. Chrome or Edge on the desktop will run it. Nothing else here is affected.</div>`}
+      <div class="mt-privacy">Your browser does the listening, and on Chrome that means the audio goes to its own speech service to be turned into text. Nothing reaches Grayrender until you press one of the buttons below, and the transcript is never saved to this device.</div>
+      <div class="mt-live" id="mtLive" aria-live="off"><div class="mt-empty">Press start, and what is said appears here.</div></div>
+      <div class="mt-bar">
+        <button type="button" class="btn-mini solid" id="mtAnswer">Answer that</button>
+        <select id="mtKind" aria-label="What to make from this meeting">
+          ${Object.keys(MEET_MAKE).map(k=>`<option value="${esc(k)}">${esc(MEET_MAKE[k].label)}</option>`).join("")}
+        </select>
+        <button type="button" class="btn-mini" id="mtMake">Make it</button>
+        <span class="mt-count" id="mtCount"></span>
+      </div>
+      <div id="mtOut" aria-live="polite"></div>
+    </div>
+    <div class="card wk-card">
+      <div class="wk-head"><h2>What it answers from</h2></div>
+      <ul class="mt-ctx">
+        ${[["The business",BRAND?brandName():"nothing saved yet"],
+           ["The site audit",LAST_OUT.audit?("graded "+(LAST_OUT.audit.mark||"ungraded")):"not run yet"],
+           ["The positioning",LAST_OUT.brand?"locked in":"not written yet"],
+           ["The program",programDone()+" of "+PROGRAM.length+" steps done"],
+           ["Open work",openItems().length+(openItems().length===1?" item":" items")]]
+          .map(r=>`<li><span>${esc(r[0])}</span><b>${esc(r[1])}</b></li>`).join("")}
+      </ul>
+      <div class="mt-ctx-foot">This is what makes it worth having in the room. Any notetaker can transcribe. This one has read the site, graded it, and knows what is still open.</div>
+    </div>`;
+  document.getElementById("mtToggle").addEventListener("click",()=>{ MEET.on?meetStop():meetStart(); });
+  document.getElementById("mtClear").addEventListener("click",()=>{ meetStop(); meetReset(); paintTranscript(); mtOut(""); });
+  document.getElementById("mtAnswer").addEventListener("click",meetingAnswer);
+  document.getElementById("mtMake").addEventListener("click",meetingMake);
+  paintMeetControls(); paintTranscript();
+  if(MEET.artifact) paintArtifact(MEET.artifact);
+}
+function renderMeetingSoon(){
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>Meeting <span class="hl">Mode</span></h1>
+      <p>Coming soon.</p>
+    </div>
+    <div class="card soon">
+      <div class="soon-tag">In private testing</div>
+      <h2>It listens to the meeting, and it already knows your business.</h2>
+      <p>Grayrender has read your website, graded it, and holds your positioning, your open
+         work and the plan you agreed. Meeting Mode puts that in the room with you: ask it what
+         the audit found while somebody is asking you, or turn the last twenty minutes into a
+         recap, a follow-up email or a proposal outline before the call has ended, with the
+         actions filed straight into your workspace.</p>
+      <p class="soon-note">It is being tested on real meetings first. Everything else in the
+         suite is finished and available to you now.</p>
+      <button type="button" class="btn-gen" data-go="home">Back to Today${ARROW}</button>
+    </div>`;
+  main.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>goTool(b.getAttribute("data-go"))));
+}
+function meetStatus(msg){
+  const el=document.getElementById("mtOut");
+  if(msg&&el) el.innerHTML=`<div class="wk-note">${escMd(msg)}</div>`;
+}
+function mtOut(html){ const el=document.getElementById("mtOut"); if(el) el.innerHTML=html; }
+function paintMeetControls(){
+  const b=document.getElementById("mtToggle"), st=document.getElementById("mtState"), d=document.getElementById("mtDot");
+  if(b) b.textContent=MEET.on?"Stop":"Start listening";
+  if(st) st.textContent=MEET.on?"Listening":(MEET.lines.length?"Paused":"Not listening");
+  if(d) d.className="mt-dot"+(MEET.on?" on":"");
+}
+function paintTranscript(){
+  const el=document.getElementById("mtLive"); if(!el) return;
+  const c=document.getElementById("mtCount");
+  if(c) c.textContent=MEET.lines.length?meetWords()+" words heard":"";
+  if(!MEET.lines.length && !MEET.interim){
+    el.innerHTML=`<div class="mt-empty">Press start, and what is said appears here.</div>`; return;
+  }
+  /* One line per finished sentence, the way Finesse settled on, because a wall of unbroken
+     speech is unreadable at a glance and a glance is all anyone gets mid-meeting. */
+  el.innerHTML=MEET.lines.slice(-60).map(l=>`<p>${escMd(l.text)}</p>`).join("")+
+    (MEET.interim?`<p class="mt-interim">${escMd(MEET.interim)}</p>`:"");
+  el.scrollTop=el.scrollHeight;
+}
+async function meetingAnswer(){
+  const btn=document.getElementById("mtAnswer");
+  const heard=meetText(4000);
+  if(!heard) return mtOut(`<div class="wk-note">Nothing has been heard yet. Press start listening first.</div>`);
+  if(btn){ btn.disabled=true; btn.textContent="Thinking"; }
+  mtOut(`<div class="wk-note wk-wait">Working out the answer</div>`);
+  const msg=`WHAT THIS SUITE KNOWS:\n${meetingContext()}\n\nTHE MEETING SO FAR (the end is the most recent):\n${heard}\n\nAnswer the latest question now.`;
+  let text=await askModel(MEET_ANSWER_SYSTEM,msg,"meeting-answer",400);
+  if(btn){ btn.disabled=false; btn.textContent="Answer that"; }
+  if(!text) return mtOut(`<div class="wk-note">That did not come back. Try again.</div>`);
+  text=dropUnbackedFigures(text,msg);
+  logEvent("meeting","Answered a question in a meeting");
+  mtOut(`<div class="mt-answer"><div class="mt-a-lbl">Say this</div><div class="mt-a-t">${escMd(text)}</div>
+    <div class="wm-row"><button type="button" class="btn-mini" id="mtACopy">Copy</button></div></div>`);
+  const c=document.getElementById("mtACopy");
+  if(c) c.addEventListener("click",()=>{ navigator.clipboard.writeText(cleanCopy(text)).catch(()=>{});
+    c.textContent="Copied"; setTimeout(()=>c.textContent="Copy",1400); });
+}
+async function meetingMake(){
+  const btn=document.getElementById("mtMake");
+  const kind=(document.getElementById("mtKind")||{}).value||"recap";
+  const heard=meetText(9000);
+  if(!heard) return mtOut(`<div class="wk-note">There is no meeting to work from yet.</div>`);
+  if(btn){ btn.disabled=true; btn.textContent="Making"; }
+  mtOut(`<div class="wk-note wk-wait">Turning the meeting into ${esc(((MEET_MAKE[kind]||{}).label||"something").toLowerCase())}</div>`);
+  const msg=`WHAT THIS SUITE KNOWS:\n${meetingContext()}\n\nTHE MEETING TRANSCRIPT:\n${heard}\n\nWrite it now.`;
+  let text=await askModel(meetMakeSystem(kind),msg,"meeting-"+kind,1400);
+  if(btn){ btn.disabled=false; btn.textContent="Make it"; }
+  if(!text) return mtOut(`<div class="wk-note">That did not come back. Try again.</div>`);
+  text=cleanCopy(dropUnbackedFigures(text,msg));
+  MEET.artifact={kind:kind,text:text,at:Date.now()};
+  logEvent("meeting",((MEET_MAKE[kind]||{}).label||"Output")+" from a meeting",meetWords()+" words heard");
+  paintArtifact(MEET.artifact);
+}
+function paintArtifact(a){
+  const acts=a.kind==="recap"?meetingActions(a.text):[];
+  mtOut(`<div class="wk-mail mt-art">
+      <div class="wm-sub"><span>${esc((MEET_MAKE[a.kind]||{}).label||"Output")}</span><b>${esc(brandName())}</b></div>
+      <div class="wm-body">${escMd(a.text).replace(/\n/g,"<br/>")}</div>
+      ${acts.length?`<div class="mt-acts"><b>${acts.length} action${acts.length===1?"":"s"} found.</b>
+        Filing them puts them on Today and in your calendar export.${acts.some(x=>!x.due)?" The ones the meeting gave no date for are filed without one, rather than handed a deadline nobody agreed.":""}</div>`:""}
+      <div class="wm-row">
+        ${acts.length?`<button type="button" class="btn-mini solid" id="mtFile">File ${acts.length} action${acts.length===1?"":"s"}</button>`:""}
+        <button type="button" class="btn-mini" id="mtCopy">Copy</button>
+        <button type="button" class="btn-mini" id="mtDl">Download</button>
+        ${a.kind==="email"?`<button type="button" class="btn-mini" id="mtMail">Open in email</button>`:""}
+      </div>
+    </div>`);
+  const c=document.getElementById("mtCopy");
+  if(c) c.addEventListener("click",()=>{ navigator.clipboard.writeText(a.text).catch(()=>{});
+    c.textContent="Copied"; setTimeout(()=>c.textContent="Copy",1400); });
+  const d=document.getElementById("mtDl");
+  if(d) d.addEventListener("click",()=>downloadText(slugify(brandName())+"-"+a.kind+".md",a.text));
+  const m=document.getElementById("mtMail");
+  if(m) m.addEventListener("click",()=>{ navigator.clipboard.writeText(a.text).catch(()=>{});
+    location.href=mailtoLink("",brandName()+" follow up",a.text); });
+  const f=document.getElementById("mtFile");
+  if(f) f.addEventListener("click",()=>{
+    acts.forEach(x=>addItem({source:"meeting",title:x.title+(x.owner?" ("+x.owner+")":""),
+      detail:"Agreed in a meeting"+(x.owner?", owner "+x.owner:"")+(x.due?"":". No date was stated in the meeting."),
+      due:x.due}));
+    persistPlan(); logEvent("meeting",acts.length+" action"+(acts.length===1?"":"s")+" filed from a meeting");
+    f.textContent="Filed"; f.disabled=true;
+  });
+}
 function itemRow(it){
   const d=daysUntil(it.due), lateCls=d!==null&&d<0?" late":d===0?" now":"";
   const pri=it.priority?`<span class="fx ${it.priority==="Critical"?"crit":it.priority==="High"?"high":it.priority==="Low"?"low":"med"}">${esc(it.priority)}</span>`:"";

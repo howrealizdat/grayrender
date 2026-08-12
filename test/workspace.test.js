@@ -494,6 +494,102 @@ win.rememberOutput('intel', { kind: 'gen', raw: 'WHY WE WIN\nbecause', vals: {} 
 check('producing it ticks the sidebar without navigating anywhere', intelBadge() === '✓', intelBadge());
 check('and its program job closes itself', !win.openItems().some(x => x.key === 'program:intel'));
 
+console.log('\nMEETING MODE IS NOT GENERAL RELEASE');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', url: 'https://northwind.example',
+  offerings: ['Boiler install'], audiences: ['Homeowner'], goals: ['Leads'], proof: [] });
+win.eval("PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.localStorage.removeItem('wai_owner');
+win.eval("current='meeting';"); win.renderTool();
+check('everyone else is told it is coming, plainly', !!win.document.querySelector('.soon'));
+check('and gets no microphone controls at all', !win.document.getElementById('mtToggle'));
+check('nor a transcript pane', !win.document.getElementById('mtLive'));
+check('but it is still listed, so the roadmap is visible',
+  !!win.document.querySelector('.nav-item[data-tool="meeting"]'));
+
+win.localStorage.setItem('wai_owner', '1');
+win.renderTool();
+check('the owner gets the real thing', !!win.document.getElementById('mtToggle'));
+check('with the transcript pane', !!win.document.getElementById('mtLive'));
+
+console.log('\nIT SAYS WHERE THE AUDIO GOES');
+const priv = (win.document.querySelector('.mt-privacy') || {}).textContent || '';
+check('the privacy line admits the browser sends audio out to transcribe it',
+  /speech service/i.test(priv) && /Nothing reaches Grayrender until/i.test(priv), priv.slice(0, 90));
+check('and that the transcript is never stored', /never saved/i.test(priv));
+
+console.log('\nA BROWSER THAT CANNOT LISTEN SAYS SO');
+check('jsdom has no recogniser, and this is detected', win.speechCtor() === null);
+check('so the start button is disabled rather than dead',
+  win.document.getElementById('mtToggle').disabled === true);
+check('and it names a browser that will work',
+  /Chrome or Edge/.test(win.document.querySelector('.wk-note').textContent));
+check('starting anyway does not throw', (() => { try { win.meetStart(); return true; } catch (e) { return false; } })());
+
+console.log('\nTHE TRANSCRIPT');
+win.eval("MEET.lines=[{t:1,text:'We need the boiler page live before the cold snap.'},{t:2,text:'What did the audit say about our title tag?'}];");
+check('lines are kept in order', /cold snap[\s\S]*title tag/.test(win.meetText()));
+check('a limit keeps the END, because that is the part being asked about',
+  /title tag/.test(win.meetText(40)) && !/cold snap/.test(win.meetText(40)), win.meetText(40));
+win.paintTranscript();
+check('each sentence gets its own line, not a wall of speech',
+  win.document.querySelectorAll('.mt-live p').length === 2);
+check('and the word count is shown', /words heard/.test(win.document.getElementById('mtCount').textContent));
+
+console.log('\nIT ANSWERS FROM WHAT THE SUITE ALREADY KNOWS');
+win.rememberOutput('audit', { kind: 'audit',
+  body: 'WHAT IS COSTING YOU LEADS\n- No accreditation proof above the fold.\n\nPRIORITIZED FIXES\n- [Critical] Home page (/), title tag: placeholder. Current: "Home Final". Use: "Boiler Install | Northwind". Effort: 10 min (SEO specialist).\n',
+  vals: { url: 'https://northwind.example', platform: { name: 'WordPress', kind: 'cms' } }, mark: 'B-', raw: 'x', pages: [] });
+const ctx = win.meetingContext();
+check('the business is in the context', /Northwind HVAC/.test(ctx));
+check('so is the grade', /graded B-/.test(ctx), ctx.slice(0, 120));
+check('so is what the audit found costing leads', /accreditation proof/.test(ctx));
+check('so is the program', /MARKETING PROGRAM/.test(ctx));
+check('and the open work', /Home page \(\/\), title tag/.test(ctx));
+win.eval("clearBrand(); PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+check('with nothing set up it still builds a context rather than throwing',
+  typeof win.meetingContext() === 'string' && win.meetingContext().length > 0);
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', url: 'https://northwind.example', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] });
+
+console.log('\nACTIONS OUT OF A MEETING ARE NEVER INVENTED');
+const RECAP = [
+  'SUMMARY', 'We agreed to fix the site before the winter push.', '',
+  'DECISIONS', '- Winter campaign starts in September.', '',
+  'ACTION ITEMS',
+  '- Fix the home page title tag | Sam | 2026-08-20',
+  '- Book the photographer | unassigned | not set',
+  '- Send the landlord list | Priya | next week',
+  '- a malformed row with no pipes at all',
+  '', 'OPEN QUESTIONS', '- Who signs off the budget.'
+].join('\n');
+const acts = win.meetingActions(RECAP);
+check('every well formed action is picked up', acts.length === 3, JSON.stringify(acts));
+check('a row with no pipes is dropped rather than half filed',
+  !acts.some(a => /malformed/.test(a.title)));
+check('a real date is kept', acts[0].due === '2026-08-20');
+check('"unassigned" becomes no owner rather than a person called unassigned', acts[1].owner === '');
+check('"not set" becomes NO DATE, not a guessed one', acts[1].due === '');
+check('and a vague "next week" is left undated rather than turned into a deadline nobody agreed',
+  acts[2].due === '', JSON.stringify(acts[2]));
+check('lines outside the ACTION ITEMS section are ignored',
+  !acts.some(a => /September|budget/.test(a.title)));
+
+console.log('\nFILED, THEY BECOME ORDINARY WORK');
+win.eval("PLAN = blankPlan();");
+acts.forEach(a => win.addItem({ source: 'meeting', title: a.title + (a.owner ? ' (' + a.owner + ')' : ''), due: a.due }));
+win.eval("persistPlan();");
+check('they land in the plan', win.openItems().length === 3);
+check('the owner travels with the title', win.openItems().some(x => /\(Sam\)/.test(x.title)));
+check('they are labelled as coming from a meeting', win.srcLabel('meeting') === 'From a meeting');
+const icsM = win.buildIcs(win.openItems(), 'x');
+check('the dated one reaches the calendar file', icsM.ics.indexOf('Fix the home page title tag') > -1);
+check('and the undated ones are reported, not silently dropped', icsM.skipped.length === 2);
+
+console.log('\nTHE MICROPHONE CANNOT BE LEFT RUNNING');
+win.eval("MEET.on=true;");
+win.goTool('home');
+check('leaving the screen stops it', win.eval('MEET.on') === false);
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }
