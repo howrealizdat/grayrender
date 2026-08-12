@@ -564,6 +564,21 @@ win.renderTool();
 check('switching tools clears the previous draft', win.eval('REFINE === null'));
 check('and closes the dock', !win.document.getElementById('refineDock').classList.contains('open'));
 
+/* The subject gets its own field, so a "---" rule the model puts under it arrives as a
+   stray line of hyphens at the top of the email. Seen in a real run. */
+console.log('\nTHE EMAIL PREVIEW  (no stray separator under the subject)');
+win.eval("saveBrand(DEFAULT_BRAND); current='outreach';");
+win.renderTool();
+win.renderOutput('Subject: how meridian handles ai-native artists\n\n---\n\nMeridian\'s catalog skews traditional.\n\nWorth a 15 minute call?', { company: 'Meridian' });
+const emailTxt = win.document.querySelector('.email-card .body').textContent.trim();
+check('the separator rule is gone', !/^[-–—_*]{3,}/.test(emailTxt), JSON.stringify(emailTxt.slice(0, 40)));
+check('the body itself still starts correctly', /^Meridian/.test(emailTxt), emailTxt.slice(0, 40));
+check('the subject still renders in its own field',
+  /how meridian handles ai-native artists/.test(win.document.querySelector('.subject').textContent));
+check('a real hyphenated word is untouched',
+  (win.renderOutput('Subject: x\n\nWe are a full-stack team.', {}),
+   /full-stack/.test(win.document.querySelector('.email-card .body').textContent)));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }

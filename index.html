@@ -1838,6 +1838,10 @@ function renderOutput(raw,vals){
     let subject="",emailBody=body;
     const m=body.match(/^\s*subject:\s*(.*)$/im);
     if(m){subject=m[1].trim();emailBody=body.replace(m[0],"").trim();}
+    // The model often puts a "---" rule between the subject and the body. We render the
+    // subject in its own field, so that separator arrives as a stray line of hyphens at the
+    // top of the email. Drop a leading rule; it is punctuation for a format we do not use.
+    emailBody=emailBody.replace(/^\s*[-–—_*]{3,}\s*(?:\n|$)/,"").trim();
     out.innerHTML=`<div class="output-wrap"><div class="card email-card">
       <div class="row-between" style="margin-bottom:16px"><div class="out-title" style="margin:0">Outreach Email Preview</div>${copyBtn("c1")}</div>
       ${subject?`<div class="subject">Subject: ${escMd(subject)}</div>`:""}
