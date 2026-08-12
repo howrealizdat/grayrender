@@ -1,0 +1,15 @@
+{
+  "name": "grayrender",
+  "version": "1.0.0",
+  "description": "Grayrender \u2014 a full-site AI marketing audit that renders every page in a real browser. By Edmund Gray.",
+  "private": true,
+  "scripts": {
+    "test": "node test/passcode.test.js && node test/audit-guards.test.js && node test/report-render.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.65.0"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

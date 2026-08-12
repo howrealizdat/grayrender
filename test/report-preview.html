@@ -1,0 +1,164 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Report evidence preview (local visual test)</title>
+<!--
+  VISUAL TEST HARNESS. Renders the report's fix list with the new evidence blocks against a
+  synthetic "page screenshot" whose element positions are known exactly, so the crop maths can
+  be verified by eye and not just asserted in a unit test.
+
+  The fake page is 1280 x 1800 with three labelled blocks at known coordinates:
+      HEADLINE  at (40, 300)  260x60
+      CTA       at (40, 520)  200x50
+      IMAGE     at (40, 900)  300x120
+  If the crop is correct, each fix below shows ITS OWN block and nothing else.
+
+  Open this file directly in a browser. It uses the same CSS and the same rendering logic.
+-->
+<style>
+  body{font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#0D1B2A;
+       max-width:820px;margin:32px auto;padding:0 20px}
+  h1{font-size:20px;margin:0 0 4px}
+  .note{color:#64748b;font-size:13px;margin-bottom:26px}
+  ul{list-style:none;padding:0;margin:0}
+  .fx-li{border:1px solid #e6ecf2;border-radius:12px;padding:14px 16px;margin-bottom:14px;background:#fff}
+  .fx-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .fx{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:5px;color:#fff}
+  .fx.crit{background:#b91c1c}.fx.high{background:#ef4444}.fx.med{background:#f59e0b}.fx.low{background:#94a3b8}
+  .fx-loc{font-weight:700}
+  .fx-body{color:#475569;font-size:13.5px;margin-bottom:4px}
+  .fx-ba{margin-top:8px}
+  .fx-cur,.fx-new{display:flex;gap:8px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:13px}
+  .fx-cur{background:#f6f8fa;color:#64748b;text-decoration:line-through}
+  .fx-new{background:#f0fdf6;border:1px solid #cfe8d8;font-weight:600}
+  .fx-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border-radius:4px;background:#e2e8f0;color:#475569;align-self:flex-start}
+  .fx-new .fx-tag{background:#16794a;color:#fff}
+  .fx-eff{margin-top:6px;font-size:12px;color:#94a3b8}
+
+  /* ---- the styles under test, copied verbatim from index.html ---- */
+  .fx-ev{margin:10px 0 12px;padding:0}
+  .fx-shot{border:1px solid #dbe3ea;border-radius:8px;background-repeat:no-repeat;background-color:#fff;
+    box-shadow:0 1px 3px rgba(13,27,42,.10);max-width:100%}
+  .fx-ev figcaption{margin-top:5px;font-size:11px;letter-spacing:.02em;text-transform:uppercase;color:#8a99a8;font-weight:600}
+  .fx-serp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}
+  .serp{border:1px solid #dbe3ea;border-radius:8px;padding:10px 12px;background:#fff}
+  .serp-now{border-color:#e6d2d2;background:#fffafa}
+  .serp-new{border-color:#cfe8d8;background:#f7fdf9}
+  .serp-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;color:#94a3b8}
+  .serp-now .serp-lbl{color:#b4726f}.serp-new .serp-lbl{color:#3f8f66}
+  .serp-url{font-size:11px;color:#5f6b76;margin-bottom:2px;word-break:break-all}
+  .serp-title{font-size:14px;line-height:1.3;color:#1a0dab;font-weight:600;margin-bottom:3px}
+  .serp-desc{font-size:11.5px;line-height:1.45;color:#4d5156}
+</style>
+
+<h1>Report evidence &mdash; visual test</h1>
+<p class="note">Synthetic page, 1280&times;1800. Each fix should crop to <b>its own</b> block and nothing else.</p>
+<ul id="out"></ul>
+
+<script>
+/* A fake page screenshot with blocks at exactly known coordinates. */
+const FAKE_PAGE = (() => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1800">
+    <rect width="1280" height="1800" fill="#ffffff"/>
+    <rect x="0" y="0" width="1280" height="70" fill="#0D1B2A"/>
+    <text x="40" y="45" fill="#fff" font-family="sans-serif" font-size="22">northwind.example</text>
+    <rect x="40" y="300" width="260" height="60" fill="#29ABE2"/>
+    <text x="52" y="338" fill="#fff" font-family="sans-serif" font-size="20">HEADLINE (H1)</text>
+    <rect x="40" y="520" width="200" height="50" fill="#F7931E"/>
+    <text x="52" y="552" fill="#fff" font-family="sans-serif" font-size="17">THE CTA</text>
+    <rect x="40" y="900" width="300" height="120" fill="#94a3b8"/>
+    <text x="52" y="965" fill="#fff" font-family="sans-serif" font-size="18">IMAGE BLOCK</text>
+    <text x="700" y="340" fill="#cbd5e1" font-family="sans-serif" font-size="15">(other page content)</text>
+    <text x="700" y="930" fill="#cbd5e1" font-family="sans-serif" font-size="15">(other page content)</text>
+  </svg>`;
+  return btoa(unescape(encodeURIComponent(svg)));
+})();
+
+const SHOTS = { "/": {
+  shot: FAKE_PAGE, w: 1280, h: 1800,
+  isSvg: true,
+  title: "Home Final - Northwind",
+  meta: "Every leader we talk to is fighting the same fight: roles that won't close, roadmaps that stall.",
+  elements: [
+    { kind:"heading", text:"The tech talent you need. Right now.", x:40, y:300, w:260, h:60 },
+    { kind:"button",  text:"Find Your Next Hire",                 x:40, y:520, w:200, h:50 },
+    { kind:"image",   text:"recruiting team photo",               x:40, y:900, w:300, h:120 }
+  ]
+}};
+
+const esc = s => String(s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* --- the functions under test, mirrored from index.html --- */
+function shotForLocation(loc){
+  const m=String(loc||"").match(/\(([^)]*\/[^)]*)\)/);
+  let path=m?m[1].trim():"";
+  if(!path && /home/i.test(loc||"")) path="/";
+  path=path.replace(/\/+$/,"")||"/";
+  return SHOTS[path]||null;
+}
+function elementForFix(shot,loc,current){
+  if(!shot||!shot.elements||!shot.elements.length) return null;
+  const els=shot.elements, norm=t=>String(t||"").toLowerCase().replace(/\s+/g," ").trim();
+  const cur=norm(current).replace(/^\(|\)$/g,"");
+  if(cur && cur.length>3){
+    const hit=els.find(e=>{const t=norm(e.text);return t&&(t===cur||(cur.length>8&&t.includes(cur))||(t.length>8&&cur.includes(t)));});
+    if(hit) return hit;
+  }
+  if(/\bh1\b|headline|heading/i.test(loc||"")) return els.find(e=>e.kind==="heading")||null;
+  if(/\b(cta|button|subscribe|sign ?up|form)\b/i.test(loc||"")) return els.find(e=>e.kind==="button")||null;
+  return null;
+}
+function evidenceCrop(shot,el,caption){
+  if(!shot||!el||!shot.shot) return "";
+  const PAD=28, MAXW=560;
+  const x=Math.max(0,el.x-PAD), y=Math.max(0,el.y-PAD);
+  const w=Math.min(shot.w-x, el.w+PAD*2), h=Math.min((shot.h||el.y+el.h+PAD)-y, el.h+PAD*2);
+  if(w<=0||h<=0) return "";
+  const k=Math.min(1, MAXW/w);
+  const mime = shot.isSvg ? "image/svg+xml" : "image/jpeg";
+  const st=[`width:${Math.round(w*k)}px`,`height:${Math.round(h*k)}px`,
+    `background-image:url(data:${mime};base64,${shot.shot})`,
+    `background-size:${Math.round(shot.w*k)}px auto`,
+    `background-position:-${Math.round(x*k)}px -${Math.round(y*k)}px`].join(";");
+  return `<figure class="fx-ev"><div class="fx-shot" style="${st}"></div>${caption?`<figcaption>${esc(caption)}</figcaption>`:""}</figure>`;
+}
+function serpPreview(host,path,curTitle,curMeta,newTitle,newMeta){
+  const url=(host||"")+(path&&path!=="/"?path:"");
+  const card=(t,m,cls,label)=>`<div class="serp ${cls}"><div class="serp-lbl">${esc(label)}</div>`+
+    `<div class="serp-url">${esc(url)}</div><div class="serp-title">${esc(t||"(no title)")}</div>`+
+    `<div class="serp-desc">${esc(m||"(no meta description)")}</div></div>`;
+  return `<div class="fx-serp">${card(curTitle,curMeta,"serp-now","How Google shows it now")}${card(newTitle,newMeta,"serp-new","After the fix")}</div>`;
+}
+
+/* --- three fixes, one of each evidence type --- */
+const FIXES = [
+  { chip:"crit", loc:"Home page (/), the title tag", reason:"A placeholder artifact wastes the most valuable SEO slot on the site.",
+    current:"Home Final - Northwind", use:"Tech Staffing & Recruiting | Northwind | Since 1997", effort:"10 min (SEO specialist)" },
+  { chip:"high", loc:"Home page (/), H1 structure", reason:"Two H1 tags dilute the primary keyword signal.",
+    current:"The tech talent you need. Right now.", use:'Keep only "The tech talent you need. Right now." as the sole H1', effort:"20 min (developer)" },
+  { chip:"high", loc:"Home page (/), the primary CTA", reason:"The label does not say what the visitor gets.",
+    current:"Find Your Next Hire", use:"Get 3 vetted candidates in 4 days", effort:"5 min (owner)" }
+];
+
+document.getElementById("out").innerHTML = FIXES.map(f=>{
+  const shot=shotForLocation(f.loc);
+  let ev="";
+  const isTitle=/\btitle tag\b/i.test(f.loc), isMeta=/\bmeta description\b/i.test(f.loc);
+  if((isTitle||isMeta) && f.current && f.use){
+    ev = isTitle ? serpPreview("northwind.example","/",f.current,shot.meta,f.use,shot.meta)
+                 : serpPreview("northwind.example","/",shot.title,f.current,shot.title,f.use);
+  } else if(shot){
+    const el=elementForFix(shot,f.loc,f.current);
+    if(el) ev=evidenceCrop(shot,el,"On the live page today");
+  }
+  return `<li class="fx-li">
+    <div class="fx-row"><span class="fx ${f.chip}">${f.chip==="crit"?"Critical":"High"}</span><span class="fx-loc">${esc(f.loc)}</span></div>
+    <div class="fx-body">${esc(f.reason)}</div>
+    ${ev}
+    <div class="fx-ba">
+      <div class="fx-cur"><span class="fx-tag">Now</span><span>${esc(f.current)}</span></div>
+      <div class="fx-new"><span class="fx-tag">Use this</span><span>${esc(f.use)}</span></div>
+    </div>
+    <div class="fx-eff">Effort: ${esc(f.effort)}</div>
+  </li>`;
+}).join("");
+</script>

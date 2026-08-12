@@ -1,0 +1,20 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Always serve fresh HTML. The suite is a single index.html; without this,
+# Netlify/browsers can cache a stale copy, which shows up as a blank/old page
+# on return visits. max-age=0 + must-revalidate keeps the page current while
+# still allowing efficient 304s when nothing changed.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

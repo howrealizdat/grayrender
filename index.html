@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grayrender AI Marketing Suite</title>
+<!-- Favicon drops the corner crop marks: at 16px they turn to mush. Frame + reticle only. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231D1D1F'/%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='2'%3E%3Crect x='6.5' y='8.5' width='19' height='15' rx='3'/%3E%3C/g%3E%3Cg fill='none' stroke='%230071E3' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='16' cy='16' r='3'/%3E%3Cpath d='M16 10.5v11M10.5 16h11'/%3E%3C/g%3E%3C/svg%3E" />
+<meta name="description" content="Grayrender AI Marketing Suite. A full-site AI marketing audit that renders each page in a real browser, plus outreach, content, ad, and competitive-intelligence generation." />
+<!-- No webfont. SF Pro is already on every Apple device and system-ui elsewhere,
+     so the type matches the OS and there is no render-blocking font request. -->
+<style>
+  :root{
+    /* Starck: poetic dematerialisation. Warm bone rather than cold grey, near-black
+       ink, one bronze metallic, hairlines instead of boxes, and a neoclassical French
+       display face set inside a frosted modern shell (the Ghost Chair move). */
+    --bg:#F2EFEA;
+    --surface:rgba(255,255,255,.66);
+    --surface-solid:#FDFCFA;
+    --surface-2:rgba(255,255,255,.42);
+    --ink:#111111;
+    --ink-2:#6B665F;
+    --accent:#8A6D3B;
+    --accent-dark:#6E5530;
+    --amber:#A8531B;
+    --navy:#141210;
+    --border:rgba(17,17,17,.13);
+    --radius:20px;
+    --shadow:none;
+    --font:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',system-ui,sans-serif;
+    --display:'Didot','Bodoni 72','Playfair Display',Georgia,'Times New Roman',serif;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  ::selection{background:rgba(138,109,59,.18);color:var(--ink)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+  /* Numbers in meters, grades and timers must not jitter as they tick. */
+  .cc,.sp-badge,.pg-grade,.sc-grade,.sp-timer{font-variant-numeric:tabular-nums}
+  /* Craft is also knowing when to stop moving. */
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  }
+  @keyframes rowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  @keyframes badgePop{0%{opacity:0;transform:scale(.6)}60%{transform:scale(1.09)}100%{opacity:1;transform:scale(1)}}
+  @keyframes sweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+  @keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  html,body{height:100%}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    font-weight:400;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:54px;
+  }
+  a{color:inherit;text-decoration:none}
+  .brand-line{display:none}
+
+  /* ---------- top bar ---------- */
+  header.topbar{
+    background:rgba(253,252,250,.7);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid rgba(0,0,0,.08);
+    padding:0 30px;
+    height:74px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:20;
+  }
+  .logo{display:flex;align-items:center;gap:11px}
+  .logo svg.mark{display:block}
+  .brandtext{display:flex;flex-direction:column;justify-content:center;line-height:1.05}
+  .wordmark{font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.5px;color:var(--ink);display:flex;align-items:center}
+  .wordmark .rn{color:var(--accent);font-style:italic}
+  .byline{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-2);margin-top:4px}
+  .product-tag{margin-left:14px;padding-left:15px;border-left:1px solid var(--border);color:var(--ink-2);font-size:13px;font-weight:500}
+  .product-tag b{color:var(--ink);font-weight:700}
+  .top-right{display:flex;align-items:center;gap:12px}
+  .brand-chip[hidden]{display:none}
+  .brand-chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--font);font-size:12px;
+    font-weight:500;color:var(--ink-2);background:transparent;border:1px solid var(--border);
+    border-radius:980px;padding:6px 13px;cursor:pointer;transition:all .15s;max-width:230px}
+  .brand-chip:hover{color:var(--ink);border-color:var(--ink-2)}
+  .brand-chip span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .bw-msg{margin-top:12px;font-size:13px;color:var(--amber);font-weight:500}
+  .bc-list{margin-top:18px;border-top:1px solid var(--border)}
+  .bc-row{display:flex;gap:16px;padding:11px 2px;border-bottom:1px solid var(--border);font-size:13.5px}
+  .bc-row:last-child{border-bottom:none}
+  .bc-k{flex:0 0 150px;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);font-weight:600;padding-top:3px}
+  .bc-v{flex:1;color:var(--ink);line-height:1.5}
+
+/* ---------------- The passcode screen ----------------
+     The mark arrives first and the rest follows, because the first thing a
+     stranger should meet is whose work this is. */
+  @keyframes markPop{0%{opacity:0;transform:scale(.7) translateY(8px)}
+                     62%{opacity:1;transform:scale(1.07) translateY(0)}
+                     100%{opacity:1;transform:scale(1)}}
+  @keyframes lockRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-6px)}}
+  @keyframes okOut{to{opacity:0;transform:scale(.97)}}
+  .lock-back{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+    padding:24px;background:rgba(242,239,234,.82);
+    -webkit-backdrop-filter:saturate(160%) blur(22px);backdrop-filter:saturate(160%) blur(22px)}
+  .lock-card{width:min(500px,100%);background:var(--surface-solid);border:1px solid var(--border);
+    border-radius:24px;padding:40px 38px 32px;text-align:center;
+    box-shadow:0 30px 90px rgba(17,17,17,.16);animation:lockRise .42s var(--ease)}
+  .lock-card.shake{animation:shake .42s ease}
+  .lock-card.ok{animation:okOut .26s ease forwards}
+  .lock-mark{margin-bottom:22px;animation:markPop .62s var(--ease) both}
+  .lock-mark svg{display:block;margin:0 auto}
+  .lock-word{font-family:var(--display);font-size:25px;letter-spacing:.6px;color:var(--ink);margin-top:12px}
+  .lock-word span{color:var(--accent);font-style:italic}
+  .lock-by{font-size:9.5px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ink-2);margin-top:5px}
+  .lock-card h2{font-family:var(--display);font-size:29px;font-weight:400;line-height:1.15;
+    margin:26px 0 14px;color:var(--ink);animation:lockRise .5s var(--ease) .08s both}
+  .lock-card h2 em{color:var(--accent)}
+  .lock-card p{font-size:14px;line-height:1.62;color:var(--ink-2);margin:0 auto 12px;max-width:390px;
+    animation:lockRise .5s var(--ease) .14s both}
+  .lock-ask a{color:var(--accent);border-bottom:1px solid rgba(138,109,59,.4);white-space:nowrap}
+  .lock-row{display:flex;gap:9px;margin-top:22px;animation:lockRise .5s var(--ease) .2s both}
+  .lock-row input{flex:1;background:var(--surface-solid);border:1px solid var(--border);border-radius:980px;
+    padding:13px 20px;font-family:var(--font);font-size:15px;color:var(--ink);outline:none;
+    text-align:center;letter-spacing:1px;transition:border-color .15s,box-shadow .15s}
+  .lock-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.12)}
+  .lock-row button{background:var(--ink);color:#fff;border:none;border-radius:980px;padding:0 26px;
+    font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+  .lock-row button:hover{background:var(--accent)}
+  .lock-row button:disabled{opacity:.6;cursor:default}
+  .lock-msg{min-height:19px;margin-top:13px;font-size:12.5px;color:var(--amber);font-weight:500}
+  @media (max-width:520px){ .lock-card{padding:32px 22px 26px} .lock-card h2{font-size:24px} }
+
+  /* Command palette. Eleven tools in a sidebar is a menu; one keystroke is a product. */
+  .pal-back{position:fixed;inset:0;background:rgba(17,17,17,.28);z-index:60;display:flex;
+    justify-content:center;align-items:flex-start;padding-top:14vh;
+    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:paneIn .16s var(--ease)}
+  .pal{width:min(560px,92vw);background:var(--surface-solid);border:1px solid var(--border);
+    border-radius:18px;overflow:hidden;box-shadow:0 24px 70px rgba(17,17,17,.22)}
+  .pal input{width:100%;border:none;border-bottom:1px solid var(--border);background:transparent;
+    padding:17px 20px;font-family:var(--font);font-size:16px;color:var(--ink);outline:none}
+  .pal-list{max-height:46vh;overflow-y:auto;padding:6px}
+  .pal-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:11px;
+    cursor:pointer;font-size:14px;color:var(--ink)}
+  .pal-item .pal-sub{margin-left:auto;font-size:11px;color:var(--ink-2)}
+  .pal-item.sel{background:rgba(138,109,59,.10)}
+  .pal-empty{padding:20px;color:var(--ink-2);font-size:13.5px;text-align:center}
+  .pal-hint{display:flex;gap:14px;padding:9px 16px;border-top:1px solid var(--border);
+    font-size:10.5px;color:var(--ink-2);letter-spacing:.3px}
+  .env-pill{font-size:11.5px;font-weight:600;letter-spacing:.4px;color:var(--accent-dark);background:rgba(138,109,59,.1);border:1px solid rgba(138,109,59,.3);padding:5px 11px;border-radius:999px}
+
+  /* ---------- access gate ---------- */
+
+  /* preview lock notice on outputs */
+
+  /* ---------- layout ---------- */
+  .shell{display:flex;min-height:calc(100vh - 131px)}
+  aside.sidebar{
+    width:256px;flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:22px 14px;
+  }
+  .nav-label{font-size:11px;letter-spacing:1.2px;color:var(--ink-2);text-transform:uppercase;font-weight:700;padding:0 12px 12px}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 13px;margin-bottom:5px;
+    border-radius:10px;cursor:pointer;
+    color:var(--ink-2);font-weight:600;font-size:14px;
+    border:1px solid transparent;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .nav-item svg{width:19px;height:19px;flex-shrink:0}
+  .nav-item:hover{background:var(--surface-2);color:var(--ink)}
+  .nav-item.active{
+    background:rgba(138,109,59,.09);
+    color:var(--accent-dark);
+    border-color:rgba(138,109,59,.28);
+  }
+  .nav-foot{margin-top:24px;padding:14px 12px 0;border-top:1px solid var(--border);color:var(--ink-2);font-size:11.5px;line-height:1.6}
+
+  /* audit feature-lock gate */
+  .lockgate{text-align:center;max-width:470px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:36px 28px}
+  .lg-icon{width:54px;height:54px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:rgba(247,147,30,.12);border:1px solid rgba(247,147,30,.35);color:#c2410c}
+  .lg-icon svg{width:26px;height:26px}
+  .lg-title{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+  .lg-sub{font-size:13.5px;color:var(--ink-2);line-height:1.55;max-width:390px}
+  .lg-row{display:flex;gap:8px;width:100%;max-width:330px;margin-top:4px}
+  .lg-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 12px;font-family:inherit;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s}
+  .lg-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  .lg-row button{background:var(--accent);color:#fff;border:none;border-radius:980px;padding:0 20px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s}
+  .lg-row button:hover{background:var(--accent-dark)}
+  .lg-note{font-size:12.5px;color:var(--ink-2);min-height:16px}
+  .lg-note.bad{color:#b4232a}
+
+  main{flex:1;min-width:0;padding:32px 38px;max-width:1160px}
+  /* renderTool() replaces these on every switch, so the animation retriggers. */
+  .tool-head{margin-bottom:22px;animation:paneIn .34s var(--ease)}
+  #main .card{animation:paneIn .40s var(--ease) 45ms backwards}
+  .tool-head h1{font-family:var(--display);font-size:42px;font-weight:400;letter-spacing:-.4px;line-height:1.08}
+  .tool-head h1 .hl{color:var(--accent);font-style:italic;position:relative}
+  .tool-head p{color:var(--ink-2);font-size:15px;margin-top:8px;max-width:660px}
+
+  /* ---------- cards / forms ---------- */
+  .field.span2{grid-column:1/-1}
+  .ta{width:100%;background:var(--surface-solid);border:1px solid var(--border);color:var(--ink);
+    padding:12px 13px;border-radius:12px;font-family:var(--font);font-size:14px;line-height:1.5;
+    outline:none;resize:vertical;transition:border-color .15s,box-shadow .15s}
+  .ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.12)}
+
+  /* Calendar: a real grid, because a calendar rendered as prose is not a calendar. */
+  .cal-wk{margin-bottom:26px}
+  .cal-wk-h{font-family:var(--display);font-size:19px;margin-bottom:10px;color:var(--ink)}
+  .cal-scroll{overflow-x:auto;max-width:100%;border:1px solid var(--border);border-radius:14px;background:var(--surface-solid)}
+  table.cal{width:100%;border-collapse:collapse;font-size:13px;min-width:820px}
+  table.cal th{text-align:left;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--ink-2);font-weight:600;padding:11px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+  table.cal td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.45}
+  table.cal tr:last-child td{border-bottom:none}
+  table.cal tr:hover td{background:rgba(138,109,59,.035)}
+  .cal-day{font-weight:600;white-space:nowrap}
+  .cal-hook{font-weight:600;color:var(--ink)}
+  .cal-cap{color:var(--ink-2);font-size:12.5px;margin-top:3px}
+  .cal-cta{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);
+    border:1px solid rgba(138,109,59,.32);border-radius:980px;padding:2px 9px;white-space:nowrap}
+  .cal-asset{color:var(--ink-2);font-size:12px}
+  .ch{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    padding:3px 8px;border-radius:980px;white-space:nowrap}
+  .ch-li{color:#0a66c2;background:rgba(10,102,194,.10);border:1px solid rgba(10,102,194,.28)}
+  .ch-ig{color:#b8256f;background:rgba(184,37,111,.10);border:1px solid rgba(184,37,111,.26)}
+  .ch-yt{color:#b31217;background:rgba(179,18,23,.09);border:1px solid rgba(179,18,23,.24)}
+  .ch-x{color:var(--ink);background:rgba(17,17,17,.06);border:1px solid rgba(17,17,17,.18)}
+  .cal-fmt{font-size:12px;color:var(--ink-2);white-space:nowrap}
+
+  /* Multi-channel output: one card per platform. */
+  .chan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .chan-card{background:var(--surface-solid);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column}
+  .chan-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+  .chan-body{white-space:pre-wrap;font-size:13.5px;line-height:1.6;color:var(--ink);flex:1}
+  .chan-meta{margin-top:11px;font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+  .chan-meta.over{color:var(--amber);font-weight:600}
+
+  /* Generic sectioned output, shared by comms / brand / performance / editor. */
+  .sec-card{background:var(--surface-solid);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:14px}
+  .sec-h{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;font-weight:700;color:var(--ink-2);
+    padding:13px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+  .sec-b{padding:16px 18px;white-space:pre-wrap;line-height:1.62;font-size:14px}
+  .sec-b ul{margin:0;padding-left:18px}
+  .sec-b li{margin:5px 0}
+  .sec-card.lead .sec-h{color:#fff;background:var(--navy);border-bottom:none}
+
+  .card{
+    background:var(--surface);
+    -webkit-backdrop-filter:saturate(140%) blur(18px);
+    backdrop-filter:saturate(140%) blur(18px);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:30px;
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field label{font-size:10px;font-weight:600;color:var(--ink-2);letter-spacing:1.3px;text-transform:uppercase}
+  .field input,.field select{
+    background:var(--surface);border:1px solid var(--border);color:var(--ink);
+    padding:12px 13px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;
+    outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  .field input::placeholder{color:#9fb0c2}
+  .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  .field select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234A6580' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+
+  .btn-gen{
+    margin-top:20px;
+    display:inline-flex;align-items:center;gap:9px;justify-content:center;
+    background:var(--ink);color:#fff;border:none;border-radius:980px;
+    padding:14px 30px;font-size:14px;font-weight:500;font-family:inherit;
+    cursor:pointer;letter-spacing:.1px;
+    transition:background .15s,box-shadow .2s,transform .1s;
+  }
+  .btn-gen svg{width:17px;height:17px}
+  .btn-gen:hover{background:var(--accent)}
+  .btn-gen:active{transform:scale(.978)}
+  .btn-gen{will-change:transform}
+  .btn-gen:disabled{cursor:default;background:var(--accent);opacity:.92}
+  .btn-gen.loading .arrow{display:none}
+  .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
+  .gen-row .btn-gen{margin-top:0}
+  .gen-hint{color:var(--ink-2);font-size:12px;font-weight:500}
+  .gen-hint kbd{font-family:inherit;font-size:11px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 6px}
+
+  /* ---------- output ---------- */
+  .output-wrap{margin-top:26px}
+  .out-title{font-size:12px;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-bottom:12px}
+  .row-between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .btn-copy{
+    background:var(--surface);border:1px solid var(--border);color:var(--accent-dark);
+    font-family:inherit;font-size:12.5px;font-weight:700;
+    padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap;
+  }
+  .btn-copy:hover{border-color:var(--accent);background:var(--surface-2)}
+  .btn-copy.done{color:#fff;background:var(--accent);border-color:var(--accent)}
+  .watermark{color:#8496a8;font-size:11.5px;margin-top:18px;padding-top:13px;border-top:1px solid var(--border)}
+
+  /* email preview */
+  .email-card .subject{font-weight:800;font-size:16px;margin-bottom:14px;color:var(--ink)}
+  .email-card .body{white-space:pre-wrap;color:#33475b;font-size:14.5px;line-height:1.7}
+
+  /* linkedin preview */
+  .li-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:560px;box-shadow:var(--shadow)}
+  .li-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .li-avatar{width:48px;height:48px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px}
+  .li-name{font-weight:700;font-size:14.5px;color:var(--ink)}
+  .li-meta{font-size:12px;color:var(--ink-2)}
+  .li-body{white-space:pre-wrap;font-size:14.5px;line-height:1.6;color:#33475b}
+  .li-actions{display:flex;gap:8px;border-top:1px solid var(--border);margin-top:16px;padding-top:12px;color:var(--ink-2);font-size:13px;font-weight:600}
+  .li-actions span{padding:4px 10px;border-radius:6px}
+  .li-count{font-size:12px;color:var(--ink-2);margin-top:12px}
+  .li-count.over{color:var(--amber)}
+  /* custom-dropdown text box */
+  .custom-input{margin-top:8px;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:11px 13px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;outline:none;transition:border-color .15s,box-shadow .15s}
+  .custom-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  /* DALL·E image on LinkedIn posts */
+  .li-btns{display:flex;gap:8px}
+  .img-controls{display:flex;gap:8px;margin-bottom:12px}
+  .img-prompt{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:10px 12px;border-radius:9px;font-family:inherit;font-size:13.5px;outline:none;transition:border-color .15s,box-shadow .15s}
+  .img-prompt::placeholder{color:#9fb0c2}
+  .img-prompt:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  .img-controls .btn-copy{white-space:nowrap}
+  .img-area:empty{display:none}
+  .img-area{margin-top:12px}
+  .li-photo{display:block;width:100%;border-radius:10px;border:1px solid var(--border)}
+  .img-dl{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;color:var(--accent-dark)}
+  .img-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 20px;background:var(--surface-2);border:1px dashed var(--border);border-radius:10px}
+  .img-note{margin-top:2px;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--ink-2);line-height:1.5}
+  .img-note b{color:var(--ink)}
+
+  /* ad studio */
+  .ad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .ad-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .ad-card .ad-tag{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--accent-dark);font-weight:800;margin-bottom:13px;display:flex;align-items:center;gap:7px}
+  .ad-card .ad-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .ad-card:nth-child(2) .ad-tag::before{background:var(--amber)}
+  .ad-card:nth-child(3) .ad-tag::before{background:var(--ink)}
+  .ad-card .ad-body{white-space:pre-wrap;font-size:13.5px;color:#33475b;line-height:1.65;flex:1}
+  .cc-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)}
+  .cc{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.2px;padding:3px 7px;border-radius:6px;white-space:nowrap}
+  .cc.ok{color:#0a7d4f;background:rgba(0,201,126,.11);border:1px solid rgba(0,201,126,.3)}
+  .cc.over{color:#9a6a00;background:rgba(247,147,30,.12);border:1px solid rgba(247,147,30,.4)}
+  .ad-card .btn-copy{margin-top:14px;align-self:flex-start}
+
+  /* brief */
+  .brief h3{font-size:13px;color:var(--accent-dark);margin:20px 0 9px;text-transform:uppercase;letter-spacing:.5px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .brief h3::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--amber)}
+  .brief h3:first-child{margin-top:0}
+  .brief ul{margin:0 0 4px 4px;list-style:none}
+  .brief li{margin-bottom:9px;font-size:14px;color:#33475b;padding-left:18px;position:relative}
+  .brief li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .brief .talk{white-space:pre-wrap;font-size:14px;color:#33475b;background:var(--surface-2);border-left:3px solid var(--accent);padding:14px 16px;border-radius:8px}
+
+  /* AI Marketing Audit report */
+  .aud-card{padding:0;overflow:hidden}
+  .aud-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 24px;background:linear-gradient(180deg,#0B1929,#111111);color:#fff}
+  .aud-head-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#8fb9d6;font-weight:700;margin-bottom:4px}
+  .aud-url{font-size:19px;font-weight:800;letter-spacing:-.3px;color:#fff;border-bottom:1px dashed rgba(255,255,255,.28)}
+  .aud-plat{margin-top:7px;font-size:12.5px;font-weight:600;color:#8fb9d6}
+  .aud-plat strong{color:#fff;font-weight:800}
+  .aud-head-r{text-align:center;flex-shrink:0}
+  .grade-badge{display:inline-flex;align-items:center;justify-content:center;min-width:56px;height:56px;padding:0 12px;border-radius:14px;font-size:28px;font-weight:900;letter-spacing:-1px;line-height:1}
+  .grade-badge.g-good{background:rgba(0,201,126,.16);color:#3ee08f;border:1.5px solid rgba(0,201,126,.5)}
+  .grade-badge.g-mid{background:rgba(247,147,30,.16);color:#ffb454;border:1.5px solid rgba(247,147,30,.55)}
+  .grade-badge.g-bad{background:rgba(255,107,74,.16);color:#ff8a6b;border:1.5px solid rgba(255,107,74,.55)}
+  .grade-cap{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:#8fb9d6;font-weight:700;margin-top:7px}
+  .aud-sec{padding:20px 24px;border-top:1px solid var(--border)}
+  .aud-sec:first-of-type{border-top:none}
+  .aud-overview{background:var(--surface-2)}
+  .aud-overview .aud-sec-body{font-size:15px;line-height:1.65;color:var(--ink);font-weight:500}
+  .aud-h{font-size:13px;letter-spacing:.5px;text-transform:uppercase;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:13px}
+  .aud-h::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--accent);flex-shrink:0}
+  .aud-good .aud-h{color:#0a7d4f}.aud-good .aud-h::before{background:#0a7d4f}
+  .aud-bad .aud-h{color:#c2410c}.aud-bad .aud-h::before{background:var(--amber)}
+  .aud-bad{background:linear-gradient(180deg,#fffaf5,#fff)}
+  .aud-quick .aud-h{color:var(--accent-dark)}.aud-quick .aud-h::before{background:var(--accent)}
+  .aud-strat .aud-h{color:var(--ink)}.aud-strat .aud-h::before{background:var(--ink)}
+  .aud-ai .aud-h{color:#7c3aed}.aud-ai .aud-h::before{background:#7c3aed}
+  .aud-ai{background:linear-gradient(180deg,#faf8ff,#fff)}
+  /* ---- Visual evidence: the element itself, cropped from the live page ---- */
+  .fx-ev{margin:10px 0 12px;padding:0}
+  .fx-shot{position:relative;overflow:hidden;border:1px solid #dbe3ea;border-radius:8px;background:#fff;
+    box-shadow:0 1px 3px rgba(17,17,17,.10);max-width:100%}
+  .fx-img{position:absolute;display:block;max-width:none}
+  .fx-ev figcaption{margin-top:5px;font-size:11px;letter-spacing:.02em;text-transform:uppercase;color:#8a99a8;font-weight:600}
+  /* ---- SERP preview: a title/meta is invisible on the page, so show the Google result ---- */
+  .fx-serp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}
+  .serp{border:1px solid #dbe3ea;border-radius:8px;padding:10px 12px;background:#fff}
+  .serp-now{border-color:#e6d2d2;background:#fffafa}
+  .serp-new{border-color:#cfe8d8;background:#f7fdf9}
+  .serp-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;color:#94a3b8}
+  .serp-now .serp-lbl{color:#b4726f}.serp-new .serp-lbl{color:#3f8f66}
+  .serp-url{font-size:11px;color:#5f6b76;margin-bottom:2px;word-break:break-all}
+  .serp-title{font-size:14px;line-height:1.3;color:#1a0dab;font-weight:600;margin-bottom:3px}
+  .serp-desc{font-size:11.5px;line-height:1.45;color:#4d5156}
+  @media (max-width:640px){ .fx-serp{grid-template-columns:1fr} }
+  .aud-impact .aud-h{color:#0e7490}.aud-impact .aud-h::before{background:#0e7490}
+  .aud-impact{background:linear-gradient(180deg,#f2fbfd,#fff)}
+  .aud-impact .aud-list li::before{background:#0e7490}
+  .aud-list{margin:0;list-style:none}
+  .aud-list li{margin-bottom:11px;font-size:14px;color:#33475b;line-height:1.6;padding-left:20px;position:relative}
+  .aud-list li:last-child{margin-bottom:0}
+  .aud-list li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .aud-good .aud-list li::before{background:#0a7d4f}
+  .aud-bad .aud-list li::before{background:var(--amber)}
+  .aud-ai .aud-list li::before{background:#7c3aed}
+  .aud-card .watermark{margin:0;padding:14px 24px 18px}
+  .aud-fix .aud-h{color:var(--accent-dark)}.aud-fix .aud-h::before{background:var(--accent)}
+  .aud-req{background:var(--surface-2)}
+  .aud-req .aud-h{color:var(--navy)}.aud-req .aud-h::before{background:var(--navy)}
+  .aud-req .aud-list li::before{background:var(--navy)}
+  .aud-unver .aud-h{color:#64748b}.aud-unver .aud-h::before{background:#94a3b8}
+  .aud-unver{background:#f8fafc}
+  .aud-unver .aud-list li{color:#64748b;font-size:12.5px}
+  .aud-unver .aud-list li::before{background:#94a3b8}
+
+  /* full-site audit progress panel */
+  .site-prog{padding:22px 24px}
+  .sp-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .sp-head .dots{flex-shrink:0}
+  .sp-title{font-size:15px;font-weight:700;color:var(--ink)}
+  .sp-sub{font-size:12.5px;color:var(--ink-2);margin-top:1px}
+  .sp-list{display:flex;flex-direction:column}
+    .sp-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-top:1px solid var(--border);position:relative;overflow:hidden;animation:rowIn .42s var(--ease) backwards}
+  /* A row sweeps while its scan is genuinely in flight, so three sweeping at once IS
+     the concurrency, visible. Nothing here is decorative. */
+  .sp-row.live::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,transparent,rgba(138,109,59,.13),transparent);
+    animation:sweep 1.6s ease-in-out infinite}
+  .sp-badge.landed{animation:badgePop .44s var(--ease)}
+  .sp-timer{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.3px}
+  .sp-head{display:flex;align-items:center;gap:12px}
+  .sp-row:first-child{border-top:none}
+  .sp-name{font-weight:600;font-size:13.5px;color:var(--ink);min-width:120px}
+  .sp-path{flex:1;font-family:var(--mono);font-size:12px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sp-badge{flex-shrink:0;min-width:30px;text-align:center;font-size:12px;font-weight:800;padding:2px 8px;border-radius:6px;font-family:var(--mono)}
+  .sp-badge.wait{color:var(--ink-2);background:var(--surface-2);border:1px solid var(--border)}
+  .sp-badge.run{color:var(--accent);background:rgba(138,109,59,.10);border:1px solid rgba(138,109,59,.28);letter-spacing:-1px}
+  .sp-badge.bad{color:#b4232a;background:rgba(180,35,42,.1);border:1px solid rgba(180,35,42,.3)}
+  .sp-badge.g-good{color:#0a7d4f;background:rgba(0,201,126,.12);border:1px solid rgba(0,201,126,.35)}
+  .sp-badge.g-mid{color:#9a6a00;background:rgba(247,147,30,.14);border:1px solid rgba(247,147,30,.4)}
+  .sp-badge.g-bad{color:#b4232a;background:rgba(180,35,42,.1);border:1px solid rgba(180,35,42,.35)}
+
+  /* per-page grade strip inside the site report */
+  .pg-sec{background:var(--surface-2)}
+  .pg-strip-label{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-2);margin-bottom:9px}
+  .pg-strip{display:flex;flex-wrap:wrap;gap:8px}
+  .pg-item{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 11px}
+  .pg-grade{font-family:var(--mono);font-size:12px;font-weight:700;padding:1px 7px;border-radius:5px}
+  .pg-grade.g-good{color:#0a7d4f;background:rgba(0,201,126,.12);border:1px solid rgba(0,201,126,.35)}
+  .pg-grade.g-mid{color:#9a6a00;background:rgba(247,147,30,.14);border:1px solid rgba(247,147,30,.4)}
+  .pg-grade.g-bad{color:#b4232a;background:rgba(180,35,42,.1);border:1px solid rgba(180,35,42,.35)}
+  .pg-name{font-size:12.5px;font-weight:600;color:var(--ink)}
+
+  /* category sub-score chips */
+  .scorecard{display:flex;flex-wrap:wrap;gap:8px;padding:16px 24px 4px}
+  .sc-item{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:6px 10px}
+  .sc-cat{font-size:12px;font-weight:600;color:var(--ink-2)}
+  .sc-grade{font-family:var(--mono);font-size:12px;font-weight:600;padding:1px 7px;border-radius:5px}
+  .sc-grade.g-good{color:#0a7d4f;background:rgba(0,201,126,.12);border:1px solid rgba(0,201,126,.35)}
+  .sc-grade.g-mid{color:#9a6a00;background:rgba(247,147,30,.14);border:1px solid rgba(247,147,30,.4)}
+  .sc-grade.g-bad{color:#b4232a;background:rgba(180,35,42,.1);border:1px solid rgba(180,35,42,.35)}
+  .sc-grade.sc-na{color:#94a3b8;background:#f1f5f9;border:1px dashed #cbd5e1}
+
+  /* prioritized-fix priority chips (two-line block: [chip] Location / change) */
+  .fx-list li{padding-left:0}
+  .fx-list li::before{display:none}
+  .fx-li{display:block;margin-bottom:13px}
+  .fx-list li:last-child{margin-bottom:0}
+  .fx-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+  .fx-loc{font-weight:700;color:var(--ink);font-size:13.5px}
+  .fx-body{color:#33475b;font-size:13.5px;line-height:1.55}
+  .fx-ba{margin:6px 0 2px;display:flex;flex-direction:column;gap:5px}
+  .fx-cur,.fx-new{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.5;border-radius:8px;padding:6px 10px}
+  .fx-cur{background:#f4f6f9;color:#7a8ba0}
+  .fx-cur .fx-txt{text-decoration:line-through;text-decoration-color:#c2ccd8}
+  .fx-new{background:#eaf7f0;border-left:3px solid #0a7d4f}
+  .fx-new .fx-txt{color:#111111;font-weight:600}
+  .fx-tag{flex:none;font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:5px;margin-top:1px}
+  .fx-cur .fx-tag{background:#e2e8f0;color:#64748b}
+  .fx-new .fx-tag{background:#0a7d4f;color:#fff}
+  .fx-txt{flex:1}
+  .fx-eff{font-size:11.5px;color:#6B665F;margin-top:5px;font-weight:600}
+  .fx{flex-shrink:0;display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+  .fx.crit{color:#fff;background:#b4232a}
+  .fx.high{color:#b4232a;background:rgba(180,35,42,.1);border:1px solid rgba(180,35,42,.4)}
+  .fx.med{color:#9a6a00;background:rgba(247,147,30,.13);border:1px solid rgba(247,147,30,.42)}
+  .fx.low{color:#6B665F;background:rgba(74,101,128,.1);border:1px solid rgba(74,101,128,.3)}
+
+  /* ===== Print / Save as PDF document ===== */
+  #printMount{display:none}
+  .pr-doc{max-width:730px;margin:0 auto;color:#111111;font-family:var(--font);line-height:1.55}
+  .pr-top{display:flex;justify-content:space-between;align-items:flex-start;border-top:4px solid var(--accent);padding-top:12px;margin-bottom:20px}
+  .pr-brand{font-weight:900;font-size:18px;letter-spacing:-.3px;color:#111111}
+  .pr-brand span{display:block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent-dark);margin-top:2px}
+  .pr-gradebox{text-align:center;border:2px solid var(--border);border-radius:12px;padding:6px 14px;min-width:64px}
+  .pr-gradebox b{display:block;font-size:26px;font-weight:900;line-height:1}
+  .pr-gradebox span{font-size:8px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-2)}
+  .pr-gradebox.g-good{border-color:#0a7d4f}.pr-gradebox.g-good b{color:#0a7d4f}
+  .pr-gradebox.g-mid{border-color:#F7931E}.pr-gradebox.g-mid b{color:#c2410c}
+  .pr-gradebox.g-bad{border-color:#b4232a}.pr-gradebox.g-bad b{color:#b4232a}
+  .pr-title{font-size:26px;font-weight:800;letter-spacing:-.6px}
+  .pr-meta{font-size:12px;color:var(--ink-2);margin-top:4px}
+  .pr-pages{font-size:11px;color:var(--ink-2);margin-top:10px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+  .pr-pages-label{font-weight:800;text-transform:uppercase;letter-spacing:.4px;font-size:9px}
+  .pr-pg{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#26374a}
+  .pr-pg-g{font-family:var(--mono);font-weight:700;font-size:10px;padding:1px 5px;border-radius:4px}
+  .pr-pg-g.g-good{color:#0a7d4f;background:rgba(0,201,126,.12)}
+  .pr-pg-g.g-mid{color:#9a6a00;background:rgba(247,147,30,.14)}
+  .pr-pg-g.g-bad{color:#b4232a;background:rgba(180,35,42,.1)}
+  .pr-rule{border:none;border-top:1px solid var(--border);margin:16px 0}
+  .pr-sec{margin-bottom:16px}
+  .pr-eyebrow{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-dark);margin-bottom:5px}
+  .pr-lead{font-size:13.5px;line-height:1.6}
+  .pr-h{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#111111;margin:0 0 9px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+  .pr-list{margin:0;list-style:none}
+  .pr-list li{font-size:12.5px;line-height:1.55;color:#26374a;margin-bottom:8px;padding-left:16px;position:relative}
+  .pr-list li::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .pr-list.fx-list li{padding-left:0}
+  .pr-list.fx-list li::before{display:none}
+  .pr-doc .fx-loc{font-size:12.5px}
+  .pr-doc .fx-body{font-size:12px;color:#26374a}
+  .pr-doc .fx-li{margin-bottom:9px}
+  .pr-doc .fx-ba{gap:3px;margin:4px 0 2px}
+  .pr-doc .fx-cur,.pr-doc .fx-new{font-size:11px;padding:4px 8px;border:1px solid #E4E0DA;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pr-doc .fx-cur{background:#f6f8fa;color:#6b7c90}
+  .pr-doc .fx-new{background:#eef7f2;border-color:#bfe3cf}
+  .pr-doc .fx-new .fx-txt{color:#111111;font-weight:700}
+  .pr-doc .fx-tag{font-size:8px}
+  .pr-doc .fx-eff{font-size:10.5px;margin-top:3px}
+  /* Single clean end-of-document footer. A per-page fixed footer overlaps body
+     text in Chrome's print engine (no reliable per-page footer without @page
+     margin boxes, which Chrome does not support), so we keep one tidy footer. */
+  .pr-foot{margin-top:24px;padding-top:12px;border-top:1px solid var(--border);font-size:9.5px;color:var(--ink-2);text-align:center}
+  @media print{
+    html,body{background:#fff !important}
+    body>*:not(#printMount){display:none !important}
+    #printMount{display:block !important}
+    .pr-doc,.pr-doc *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    /* Let big sections flow to fill pages, but never orphan a heading or split a bullet. */
+    .pr-h{page-break-after:avoid;break-after:avoid}
+    .pr-list li,.fx-li,.pr-foot{page-break-inside:avoid;break-inside:avoid}
+    /* The evidence is the point of the fix, and the PDF is the deliverable. The crop is a
+       real <img> inside a clipped box (not a CSS background), because a browser printing to
+       PDF will drop background images and silently delete every screenshot from the one
+       artefact a client actually reads. Belt and braces: force colour anyway, and never let a
+       fix be split from its evidence across a page break. */
+    .fx-shot,.fx-img,.serp{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+    .fx-img{position:absolute !important}
+    .fx-ev,.fx-serp,.serp,.fx-shot{page-break-inside:avoid;break-inside:avoid}
+    @page{margin:14mm}
+  }
+
+  /* loading */
+  .loading{display:flex;flex-direction:column;align-items:center;gap:18px;padding:40px 0}
+  .dots{display:flex;gap:9px}
+  .dots span{width:11px;height:11px;border-radius:50%;background:var(--accent);animation:bounce 1.1s ease-in-out infinite}
+  .dots span:nth-child(2){animation-delay:.16s}
+  .dots span:nth-child(3){animation-delay:.32s}
+  @keyframes bounce{0%,80%,100%{transform:scale(.5);opacity:.35}40%{transform:scale(1);opacity:1}}
+  .load-text{color:var(--ink-2);font-size:14px;font-weight:600}
+
+  .error-box{color:#b4232a;background:#fdf0f0;border:1px solid #f3cccd;padding:15px;border-radius:10px;font-size:14px}
+  .error-box span{color:#a05a5c}
+
+  /* footer */
+  footer{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--surface);border-top:1px solid var(--border);
+    text-align:center;padding:16px;font-size:12px;color:var(--ink-2);z-index:5;
+  }
+
+  /* mobile */
+  @media(max-width:860px){
+    header.topbar{padding:0 16px;height:64px}
+    .product-tag{display:none}
+    .shell{flex-direction:column}
+    aside.sidebar{width:100%;display:flex;gap:8px;overflow-x:auto;padding:12px;border-right:none;border-bottom:1px solid var(--border)}
+    .nav-label,.nav-foot{display:none}
+    .nav-item{margin-bottom:0;white-space:nowrap}
+    .grid{grid-template-columns:1fr}
+    .ad-grid{grid-template-columns:1fr}
+    main{padding:22px 18px}
+    .tool-head h1{font-size:31px}
+  }
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="logo">
+    <!-- The mark: a viewport with crop marks and a reticle at its centre. Line art, no
+         fills, drawn from primitives so it stays crisp at 16px and takes the theme colours. -->
+    <svg class="mark" viewBox="0 0 32 32" width="30" height="30" role="img" aria-label="Grayrender">
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5.5" width="26" height="21" rx="4.5" stroke="var(--ink)" stroke-width="1.9"/>
+        <g stroke="var(--ink)" stroke-width="1.5">
+          <path d="M7.6 12.6V9.6h3"/><path d="M21.4 9.6h3v3"/>
+          <path d="M7.6 19.4v3h3"/><path d="M21.4 22.4h3v-3"/>
+        </g>
+        <g stroke="var(--accent)" stroke-width="1.5">
+          <circle cx="16" cy="16" r="3.1"/>
+          <path d="M16 9.9v12.2M9.9 16h12.2"/>
+        </g>
+      </g>
+    </svg>
+    <span class="brandtext">
+      <span class="wordmark">GRAY<span class="rn">RENDER</span></span>
+      <span class="byline">by Edmund Gray</span>
+    </span>
+    <span class="product-tag"><b>AI Marketing Suite</b></span>
+  </div>
+  <div class="top-right">
+    <button class="brand-chip" id="brandChip" hidden title="Change the brand this suite writes for">
+      <span class="bc-dot"></span><span id="brandChipName">Your brand</span>
+    </button>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="nav-label">Marketing Tools</div>
+
+    <div class="nav-item active" data-tool="outreach">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      Client Outreach Generator
+    </div>
+    <div class="nav-item" data-tool="linkedin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg>
+      LinkedIn Content Engine
+    </div>
+    <div class="nav-item" data-tool="ads">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg>
+      Campaign Ad Studio
+    </div>
+    <div class="nav-item" data-tool="intel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.7v5.1c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V5.7z"/></svg>
+      Competitive Intelligence
+    </div>
+
+    <div class="nav-label" style="margin-top:18px">Social &amp; Comms</div>
+    <div class="nav-item" data-tool="calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      Content Calendar Builder
+    </div>
+    <div class="nav-item" data-tool="social">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="6.5" r="2.6"/><circle cx="17.5" cy="17.5" r="2.6"/><path d="m8.4 10.8 6.8-3.2M8.4 13.2l6.8 3.2"/></svg>
+      Multi-Channel Studio
+    </div>
+    <div class="nav-item" data-tool="comms">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11v12H4z"/><path d="M15 9h3.5L20 11v7h-5"/><path d="M7 9h5M7 12h5"/></svg>
+      Comms &amp; PR Kit
+    </div>
+    <div class="nav-item" data-tool="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 4.5 8v8L12 20.5 19.5 16V8z"/><path d="M12 9.5 8.5 11.5v3L12 16.5l3.5-2v-3z"/></svg>
+      Brand Voice &amp; Messaging
+    </div>
+    <div class="nav-item" data-tool="report">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6.5 20V13M11 20V7M15.5 20v-5M20 20V10"/></svg>
+      Social Performance
+    </div>
+    <div class="nav-item" data-tool="editor">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 20 4-1 10-10-3-3L5 16z"/><path d="m14.5 6.5 3 3"/></svg>
+      Copy Editor
+    </div>
+
+    <div class="nav-label" style="margin-top:18px">Site Intelligence</div>
+    <div class="nav-item" data-tool="audit" id="navAudit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6M11 8v6" opacity=".55"/></svg>
+      AI Marketing Audit
+    </div>
+
+    <div class="nav-foot">Rendered, measured,<br/>then graded.</div>
+  </aside>
+
+  <main id="main"><!-- rendered by JS --></main>
+</div>
+
+<footer>Grayrender &nbsp;·&nbsp; by Edmund Gray &nbsp;·&nbsp; Built on Anthropic Claude &nbsp;·&nbsp; Demo build</footer>
+
+<script>
+const WATERMARK = "Generated by Edmund Gray AI Systems | Demo Build | Not for Redistribution";
+const NODASH = "Write in a plain, human voice and NEVER use em dashes or en dashes (the — or – characters) anywhere in your output; use commas, periods, or parentheses instead. Ordinary hyphens in compound words (like full-stack) are fine.";
+
+/* ------------------------------------------------------------------------
+   THE BRAND. Everything in this suite runs on one profile, learned from a
+   website in one step. It used to be two constants you edited in source,
+   which meant the product only ever really belonged to one company.
+   The defaults below are deliberately industry-neutral so the tools are
+   usable before setup and never pretend to know a business they have not read.
+------------------------------------------------------------------------ */
+const DEFAULT_BRAND = {
+  name:"", what:"", industry:"", tone:"Confident and plain-spoken",
+  audiences:["Business Buyers & Operators","Small Business Owners","Enterprise Teams","Marketing Leaders","Operations Leaders","Existing Customers"],
+  offerings:["Core Product","Professional Services","Onboarding & Support","Implementation","Training","Partnerships"],
+  topics:["Industry Trends","A Customer Success Story","Behind The Product","Common Mistakes We See","How It Actually Works","Team & Culture"],
+  goals:["Brand Awareness","Lead Generation","Product Adoption","Community & Engagement","Event Or Launch Promotion","Thought Leadership"],
+  buyers:["Founder / Owner","Operations Lead","Marketing Lead","Finance Lead","IT Lead"],
+  proof:[], profile:""
+};
+let BRAND = loadBrand();
+function loadBrand(){
+  try{ const raw=localStorage.getItem("gr_brand"); if(!raw) return null;
+       return Object.assign({},DEFAULT_BRAND,JSON.parse(raw)); }catch(e){ return null; }
+}
+function saveBrand(b){
+  BRAND=Object.assign({},DEFAULT_BRAND,b||{});
+  try{ localStorage.setItem("gr_brand",JSON.stringify(BRAND)); }catch(e){}
+}
+function clearBrand(){ BRAND=null; try{ localStorage.removeItem("gr_brand"); }catch(e){} }
+function B(){ return BRAND||DEFAULT_BRAND; }
+function brandName(){ return (B().name||"").trim() || "the company"; }
+/* The paragraph every generator is briefed with. Built from the learned profile,
+   and honest about it when nothing has been learned yet. */
+function brandContext(){
+  const b=B();
+  if(!b.profile && !b.what) return "a business whose specifics have not been provided. Write for a general professional audience and never invent facts, numbers, or customer names about them.";
+  const bits=[b.profile||b.what];
+  if(b.industry) bits.push("Industry: "+b.industry+".");
+  if(b.proof&&b.proof.length) bits.push("Evidenced proof points: "+b.proof.join("; ")+".");
+  bits.push("Never invent a statistic, customer name, or claim beyond what is stated here.");
+  return bits.join(" ");
+}
+
+/* ---------------- tool definitions (demo client business) ---------------- */
+const TOOLS = {
+  outreach:{
+    title:"Client Outreach Generator",
+    hl:"Outreach",
+    blurb:"Generate a personalized cold outreach email for your team to send to a company that needs the service you sell.",
+    btn:"Generate Outreach Email",
+    fields:[
+      {id:"company",label:"Target Company Name",type:"text",placeholder:"e.g. Meridian Financial"},
+      {id:"industry",label:"Their Industry",type:"select",options:b=>["Technology / SaaS","Financial Services","Healthcare","Manufacturing","Professional Services","Retail & eCommerce","Education","Hospitality","Construction & Trades","Nonprofit"]},
+      {id:"need",label:"What They Need From You",type:"select",options:b=>b.offerings},
+      {id:"tone",label:"Tone",type:"select",options:["Professional","Consultative","Bold"]}
+    ],
+    system:`You are an elite B2B cold-email copywriter writing for __CO__. ${NODASH}EXPERT STANDARD: write to the bar set by Josh Braun on cold outreach (earn the second sentence, never assume the problem), the Challenger Sale research of Dixon and Adamson (teach them something about their own business before you ask for anything), and Robert Cialdini on which proof persuades. If the email could have been sent to any company in the industry, it has failed. Write ONE cold outreach email from an account executive at __CO_NAME__ to a decision maker (CIO, VP of Engineering, or Talent Acquisition leader) at the target company. Follow these expert rules exactly:
+- SUBJECT: 3-8 words, specific and curiosity-driving, ideally a question tied to their hiring pain. No ALL CAPS, no emojis, no clickbait. Put it on the first line labeled "Subject:".
+- LENGTH: 50-125 words total (aim ~90). It must be readable in under 10 seconds on a phone.
+- STRUCTURE (4 beats): (1) open with a specific observation about THEM and their industry/hiring need, never open with "I'm from __CO_NAME__"; (2) name the real problem for their role; (3) ONE concrete proof point with a number, drawn only from the company profile above; (4) ONE soft, low-friction CTA to a 20-minute discovery call.
+- VOICE: peer-to-peer, plain-spoken, confident, not salesy. 1-3 sentences per paragraph with white space.
+- AVOID entirely: buzzwords and spam-trigger words (free, guaranteed, act now, limited time, urgent, 100%, opportunity), exclamation stacks, feature lists, multiple CTAs, and jargon.
+Make it specific to the industry and hiring need provided. Match the requested tone.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Target Company: ${v.company||"[unnamed company]"}\nIndustry: ${v.industry}\nHiring Need: ${v.need}\nTone: ${v.tone}`
+  },
+  linkedin:{
+    title:"LinkedIn Content Engine",
+    hl:"Content",
+    blurb:"Generate a LinkedIn post positioning your company as a thought leader in its field.",
+    btn:"Generate LinkedIn Post",
+    fields:[
+      {id:"topic",label:"Topic",type:"select",options:b=>b.topics},
+      {id:"style",label:"Post Style",type:"select",options:["Insight / Thought Leadership","Client Success Story","Industry Stat Hook","Question-Based Engagement"]},
+      {id:"audience",label:"Target Audience",type:"select",options:b=>b.buyers}
+    ],
+    system:`You are an elite LinkedIn ghostwriter for __CO__. ${NODASH}EXPERT STANDARD: write to the bar set by Justin Welsh on LinkedIn structure (one idea per post, the first two lines carry everything, white space is a feature) and Ann Handley on quality (nobody woke up wanting to read this, so earn it). No engagement bait, no fake vulnerability, no broetry. Write ONE thought-leadership post on the given topic for the target audience. Follow these expert rules:
+- HOOK: the first 1-2 lines must earn the click on their own (only ~140 characters show before "see more" on mobile). Put your strongest, most specific or contrarian line FIRST. Do not start with the word "I" and no throat-clearing like "I'm excited to share".
+- LENGTH: 1,300-2,000 characters.
+- STRUCTURE: hook -> white space -> a tension or insight -> a short story or real data point -> an actionable or contrarian takeaway -> a genuine closing question that invites replies.
+- SPECIFICITY: use real numbers and lived detail, never generic platitudes. Commit to one clear point of view.
+- FORMAT: one idea per line, 1-2 sentence paragraphs, generous line breaks for mobile skimming. Do NOT use markdown bold or asterisks (they render as odd glyphs on LinkedIn).
+- END with 3-5 relevant hashtags. Do NOT put any external link in the body. No engagement-bait ("comment YES below").
+Make it sound like a sharp human, not a corporate memo. Match the requested post style.
+End with this exact line: ${WATERMARK}`,
+    user:v=>`Topic: ${v.topic}\nPost Style: ${v.style}\nTarget Audience: ${v.audience}`
+  },
+  ads:{
+    title:"Campaign Ad Studio",
+    hl:"Ad Studio",
+    blurb:"Generate three ad variations (Google Ad, LinkedIn Ad, and a landing page hero) for one of your services.",
+    btn:"Generate Ad Campaign",
+    fields:[
+      {id:"service",label:"What You Are Promoting",type:"select",options:b=>b.offerings},
+      {id:"buyer",label:"Target Buyer",type:"select",options:b=>b.buyers},
+      {id:"goal",label:"Campaign Goal",type:"select",options:["Book a Call","Start a Free Trial","Request a Demo","Download a Guide","Register for an Event","Buy Now"]}
+    ],
+    system:`You are an elite performance-marketing copywriter for __CO__. ${NODASH}EXPERT STANDARD: write to the bar set by David Ogilvy on the promise in the headline, Joanna Wiebe on conversion copy (use the words the buyer already uses), and current Google Responsive Search Ad guidance on asset variety. Specificity beats cleverness every time, and a headline that fits the limit but says nothing is a wasted slot. Generate three ad variations. Label each with these exact headers on their own lines: "GOOGLE AD", "LINKEDIN AD", "LANDING PAGE".
+
+Output PLAIN TEXT ONLY, no markdown, asterisks, or bold anywhere.
+GOOGLE AD (Responsive Search Ad), these are HARD Google limits; going over gets the ad rejected, so COUNT characters and keep them short:
+- Headline 1: 30 characters max (aim ~24).
+- Headline 2: 30 characters max (aim ~24).
+- Description: aim for about 70 characters and NEVER exceed 90, ONE short sentence (about 11 words) ending in a 2-3 word CTA. Shorter is safer. Example of a compliant 84-char description: "Vetted engineers deployed in days, not months. 400+ ready. Book a free discovery call."
+Front-load the value and a keyword in the first ~15 characters. Make H1 and H2 distinct: one benefit/keyword-led, one with a number or CTA. Do not restate the headlines.
+
+LINKEDIN AD (Sponsored Content): Headline (aim under 60 chars, 70 max), Intro text (aim about 120 chars and never exceed 150; open with a stat, question, or bold claim that speaks to the buyer's pain, not the product), and a CTA button label matched to the campaign goal.
+
+LANDING PAGE (hero): H1 (5-10 words, a clear outcome, not clever wordplay), Subheadline (1-2 sentences on how it works / who it's for, plus a reassurance), and a benefit-led CTA button label in first person (e.g., "Get My Shortlist").
+
+Lead with benefits over features and use credible numbers. End with this exact line: ${WATERMARK}`,
+    user:v=>`Service: ${v.service}\nTarget Buyer: ${v.buyer}\nCampaign Goal: ${v.goal}`
+  },
+  intel:{
+    title:"Competitive Intelligence",
+    hl:"Intelligence",
+    blurb:"Generate a competitive positioning brief showing how you win against a named competitor for a specific engagement.",
+    btn:"Generate Competitive Brief",
+    fields:[
+      {id:"competitor",label:"Competitor Name",type:"text",placeholder:"Robert Half, TEKsystems, Insight Global, Randstad, Toptal...",list:["Robert Half","TEKsystems","Insight Global","Randstad","Toptal"]},
+      {id:"usecase",label:"What Is Being Bought",type:"select",options:b=>b.offerings},
+      {id:"deal",label:"Deal Size",type:"select",options:["Small / single purchase","Mid-sized deal","Large / enterprise program"]}
+    ],
+    system:`You are an elite competitive-intelligence and sales-enablement analyst for __CO__. ${NODASH}EXPERT STANDARD: work to April Dunford's positioning discipline (name the real competitive alternative honestly, including doing nothing) and the Challenger Sale approach of reframing the buyer's problem. Never disparage a competitor on something you cannot evidence; a battle card that overclaims gets a rep caught on a call. Create a competitive battle card a rep can scan in under a minute and use live on a call. Use these exact section headers on their own lines: "WHY WE WIN", "COMPETITOR WEAKNESSES TO EXPLOIT", "SUGGESTED TALK TRACK".
+
+WHY WE WIN: exactly 3 bullets, each starting with "- ". Each bullet follows Fact -> Impact for the buyer, and pairs the company directly against the named competitor, using only proof points from the company profile above. Emphasize the differentiators named in the company profile above.
+
+COMPETITOR WEAKNESSES TO EXPLOIT: exactly 3 bullets, each starting with "- ". Frame each as a discovery question the rep can plant that exposes a real, known weakness of the named competitor (e.g., "Ask how fast they can staff a niche role, large firms often take weeks"). Be specific to that competitor, not generic.
+
+SUGGESTED TALK TRACK: 2-3 verbatim, speakable sentences the rep can say almost word-for-word, tailored to the engagement type and size.
+
+Be concrete and credible, named advantages and numbers, no vague claims or theory. End with this exact line: ${WATERMARK}`,
+    user:v=>`Competitor: ${v.competitor||"[unnamed competitor]"}\nEngagement Type: ${v.usecase}\nEngagement Size: ${v.deal}`
+  },
+
+  /* ---- Social & communications suite ---------------------------------------
+     Built to the shape of a B2B social/comms brief: strategy and calendar,
+     multi-channel execution, PR artefacts, brand voice, and reporting that ends
+     in a decision rather than a number. ---------------------------------- */
+  calendar:{
+    maxTokens:4096,
+    title:"Content Calendar Builder",
+    hl:"Calendar",
+    blurb:"Build a four-week, multi-channel organic content calendar with a hook, caption, CTA and required asset for every single post.",
+    btn:"Build the Calendar",
+    fields:[
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
+      {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
+      {id:"channels",label:"Channels",type:"select",options:["LinkedIn + YouTube + Instagram","LinkedIn only","LinkedIn + Instagram","LinkedIn + YouTube","All channels + X/Threads"]},
+      {id:"cadence",label:"Weekly Cadence",type:"select",options:["3 posts per week","4 posts per week","5 posts per week","Daily (7 per week)"]}
+    ],
+    system:`You are a senior B2B social media strategist building a real, shippable organic content calendar. ${NODASH}EXPERT STANDARD: plan to the bar set by Byron Sharp on mental availability and distinctive brand assets (show up consistently, look like yourself every time, and reach beyond the small in-market group), Amanda Natividad and Rand Fishkin on zero-click content (deliver the whole value inside the post rather than teasing a link), Dave Gerhardt on B2B social voice (a company account should sound like a person with a point of view), and Paddy Galloway on YouTube packaging (the title carries the click, the video keeps the promise). Ann Handley's rule governs every caption: nobody woke up wanting your content, so earn the read.
+Return FOUR weeks. Start each week on its own line exactly as "WEEK 1", "WEEK 2", "WEEK 3", "WEEK 4".
+Under each week, output ONE LINE PER POST, starting with "- " and containing EXACTLY seven fields separated by a pipe character, in this order and nothing else:
+Day | Channel | Format | Hook | Caption | CTA | Asset needed
+RULES:
+- Day is a weekday name. Channel is one of the requested channels only. Format is the real native format (LinkedIn: text post, document carousel, poll, video; YouTube: long-form, Short; Instagram: Reel, carousel, single image, Story).
+- Hook is the actual first line a human will read, written out in full. It must earn the second line. Never a topic label like "customer story".
+- Caption is real, publishable copy, kept tight because this is a plan and not the final draft: 30 to 55 words on every channel. Write the real words, never a description of the words. Full-length copy comes from the Multi-Channel Studio later.
+- CTA is 2 to 6 words, specific, and varies across the calendar. Never "learn more" on every row.
+- Asset needed names the concrete thing production must make (e.g. "8-slide carousel, dealer dashboard screenshots").
+- NEVER use a pipe character inside a field. Keep each field on one line.
+ARC: week 1 establishes the category problem and the brand's point of view, week 2 proves it with evidence and product truth, week 3 activates community and social proof, week 4 converts toward the goal. Vary format deliberately: no more than two of the same format in a week.
+Ground every post in the brand and audience given. Invent no statistics, customer names, or testimonials; where proof is needed, write a bracketed placeholder like [verified metric, sourced].
+After the four weeks, add a final line "POSTING NOTES" followed by 3 bullets on best posting times, what to boost, and what to repurpose.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAudience: ${v.audience}\nGoal: ${v.goal}\nChannels: ${v.channels}\nCadence: ${v.cadence}`
+  },
+  social:{
+    maxTokens:2400,
+    title:"Multi-Channel Content Studio",
+    hl:"Multi-Channel",
+    blurb:"One brief in, native content out for LinkedIn, Instagram, YouTube and short-form video. Same message, genuinely rewritten for each platform.",
+    btn:"Create the Content Set",
+    fields:[
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"topic",label:"Topic or Announcement",type:"text",placeholder:"e.g. new one-click parts reordering for dealers"},
+      {id:"audience",label:"Audience",type:"select",options:b=>b.audiences},
+      {id:"tone",label:"Tone",type:"select",options:["Confident and plain-spoken","Consultative","Bold and contrarian","Warm and community-led"]}
+    ],
+    system:`You are an elite social media content creator who writes natively for each platform, not once for all of them. ${NODASH}EXPERT STANDARD: write to the bar set by Joanna Wiebe on conversion copy (lead with the outcome, use the words the reader already uses), Ann Handley on earning attention, Paddy Galloway on titles (front-load the searchable term, curiosity without a lie), and Nancy Duarte on structure (contrast between what is and what could be). Same message in every room, genuinely rewritten for how people read in that room.
+Output these SIX sections, each header alone on its own line, in this exact order and wording:
+LINKEDIN POST
+INSTAGRAM CAPTION
+YOUTUBE TITLE
+YOUTUBE DESCRIPTION
+SHORT-FORM SCRIPT
+HASHTAGS
+RULES PER SECTION:
+- LINKEDIN POST: 120 to 220 words. Hook in the first 2 lines before the "see more" fold. Short paragraphs, generous white space, no markdown, no emoji spam, at most one emoji and only if it earns its place. End with one question or one CTA.
+- INSTAGRAM CAPTION: 40 to 90 words, first line works alone, warmer and more human than LinkedIn, line breaks between thoughts.
+- YOUTUBE TITLE: under 60 characters, specific, no clickbait, front-load the searchable term.
+- YOUTUBE DESCRIPTION: 50 to 90 words, first sentence carries the keyword, then a short "In this video:" list of 3 timestamped beats written as 0:00 style chapters.
+- SHORT-FORM SCRIPT: a 30 second script for a Reel or Short as spoken lines with bracketed visual directions, e.g. [dashboard close-up]. Hook must land in the first 3 seconds.
+- HASHTAGS: one line, 5 to 8 tags, mixed reach, genuinely relevant, no hashtag stuffing.
+The SAME core message must run through all six, rewritten for each platform's actual reading behaviour, never copy-pasted. Invent no statistics or customer quotes; use bracketed placeholders where proof is needed.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nTopic: ${v.topic||"[no topic given]"}\nAudience: ${v.audience}\nTone: ${v.tone}`
+  },
+  comms:{
+    maxTokens:3000,
+    title:"Comms & PR Kit",
+    hl:"Comms",
+    blurb:"Press releases, newsletters, one-pagers, case studies and webinar abstracts, written to publish and consistent with your brand voice.",
+    btn:"Write the Asset",
+    fields:[
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"asset",label:"Asset Type",type:"select",options:["Press release","Customer newsletter","One-pager / sell sheet","Case study","Webinar abstract & promo","White paper outline","Internal announcement"]},
+      {id:"subject",label:"Subject",type:"text",placeholder:"e.g. platform launch, 500th dealer enrolled, Q3 feature release"},
+      {id:"audience",label:"Audience",type:"select",options:b=>["Customers & Prospects"].concat(b.audiences.slice(0,3),["Trade press","Internal team","Partners & vendors"])}
+    ],
+    system:`You are a senior marketing communications and PR writer. ${NODASH}EXPERT STANDARD: write to AP style and the inverted pyramid, most newsworthy fact first, so a trade journalist could publish your lede unedited. Apply Ann Handley on clarity and Nancy Duarte on structure for webinars and white papers. A release earns coverage through a fact, never an adjective. If the news is not actually newsworthy, say so plainly and state what would make it so.
+Write the requested asset COMPLETE and ready to publish, in the correct professional structure for its type:
+- Press release: dateline, headline, subhead, lede answering who/what/why-it-matters, two body paragraphs, ONE executive quote clearly marked with a bracketed placeholder name and title, a boilerplate "About" paragraph, and a media contact block with bracketed placeholders.
+- Customer newsletter: subject line, preview text, a short warm intro, 3 scannable sections with subheads, and one clear CTA.
+- One-pager: headline, one-sentence positioning statement, the problem, 3 capability blocks each with a benefit line, proof section, and a CTA.
+- Case study: challenge, approach, solution, results, and a customer quote, all with bracketed placeholders for any number or name.
+- Webinar abstract: title, 60-word abstract, 4 "what you will learn" bullets, speaker block, and a promotional post.
+- White paper outline: working title, thesis, section-by-section outline with the argument each section makes, and the data required for each.
+- Internal announcement: subject, what is changing, why, what it means for you, and what happens next.
+Use ALL-CAPS section headers on their own lines so the structure is unmistakable.
+NEVER invent a statistic, customer name, executive name, or quote. Use clearly bracketed placeholders like [Executive name, title] and [verified metric, sourced], and say plainly what must be filled in.
+Match a professional trade-press standard. No hype, no superlatives without evidence.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAsset type: ${v.asset}\nSubject: ${v.subject||"[no subject given]"}\nAudience: ${v.audience}`
+  },
+  brand:{
+    maxTokens:3200,
+    title:"Brand Voice & Messaging",
+    hl:"Brand Voice",
+    blurb:"A messaging framework and a usable voice guide: positioning, pillars, proof, the words you use, the words you never use.",
+    btn:"Build the Framework",
+    fields:[
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
+      {id:"stage",label:"Brand Stage",type:"select",options:["New brand launch","Brand refresh","Early-stage / startup","Established, needs consistency"]},
+      {id:"principles",label:"Core Principles (comma separated)",type:"text",placeholder:"e.g. Dealers First, Excellence, Transparency"}
+    ],
+    system:`You are a brand strategist writing a framework a team can actually apply on Monday. ${NODASH}EXPERT STANDARD: apply April Dunford's positioning method properly (competitive alternatives, unique attributes, the value those enable, and who cares a lot and why), Marty Neumeier on the brand gap (a brand is not what you say it is, it is what they say it is), Byron Sharp on distinctive assets and category entry points, Donald Miller's customer-as-hero narrative, and Robert Cialdini on which proof actually persuades. A framework nobody can apply on Monday is decoration.
+Output these sections, each header alone on its own line, in this exact order and wording:
+POSITIONING STATEMENT
+MESSAGE HOUSE
+AUDIENCE AND WHAT THEY ACTUALLY WANT
+VOICE PRINCIPLES
+WORDS WE USE
+WORDS WE NEVER USE
+MESSAGING BY CHANNEL
+PROOF WE NEED TO EARN
+RULES:
+- POSITIONING STATEMENT: one paragraph, in the Dunford shape (for [audience] who [need], [brand] is the [category] that [differentiator], unlike [alternative]). Name the real competitive alternative, including "doing nothing".
+- MESSAGE HOUSE: one core message, then exactly 3 pillars, each with a one-line claim and two supporting points.
+- AUDIENCE: 3 bullets on the job they are hiring this product to do, and 3 on what they privately fear. Write like someone who has spoken to them.
+- VOICE PRINCIPLES: 4 principles, each written as "We are X, not Y" with one sentence of guidance.
+- WORDS WE USE / WORDS WE NEVER USE: two lists of 8 to 12 concrete terms each. The "never" list must include the specific industry cliches this brand should avoid.
+- MESSAGING BY CHANNEL: how the core message flexes for LinkedIn, YouTube, Instagram, email, and sales conversation. One or two lines each.
+- PROOF WE NEED TO EARN: the specific evidence this positioning requires but the brand may not yet have, as an honest to-do list.
+If core principles are provided, thread them through the framework rather than restating them.
+Invent no statistics or customer names.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAudience: ${v.audience}\nStage: ${v.stage}\nCore principles: ${v.principles||"[none given]"}`
+  },
+  report:{
+    maxTokens:2400,
+    title:"Social Performance Report",
+    hl:"Performance",
+    blurb:"Paste last month's numbers. Get the read a stakeholder actually needs: what moved, why, and the three things to change next month.",
+    btn:"Analyze Performance",
+    fields:[
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"period",label:"Reporting Period",type:"select",options:["Last 30 days","Last quarter","Month over month","Since launch"]},
+      {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
+      {id:"data",label:"Paste Your Metrics",type:"textarea",placeholder:"Paste anything: followers, impressions, engagement rate, clicks, top posts, per-channel numbers. Rough notes are fine."}
+    ],
+    system:`You are a social media analyst reporting to a marketing director who has ten minutes and needs to make decisions. ${NODASH}EXPERT STANDARD: hold Avinash Kaushik's line. Every metric must survive the 'so what?' test three times before it earns a place in this report. Impressions and follower counts are context, never conclusions. Report segments rather than averages, because an average hides the finding. No metric without an owner and a next action.
+Output these sections, each header alone on its own line, in this exact order and wording:
+HEADLINE
+WHAT THE NUMBERS SAY
+WHAT IS WORKING
+WHAT IS NOT WORKING
+DO THESE THREE THINGS NEXT
+WHAT WE STILL CANNOT SEE
+RULES:
+- HEADLINE: two sentences maximum. The single most important thing that happened, stated plainly, tied to the stated goal.
+- WHAT THE NUMBERS SAY: quote ONLY numbers the user actually pasted, verbatim. Compute a rate or a delta only when both inputs were given, and show the arithmetic in parentheses. If a number was not provided, do not estimate it, do not infer it, and do not fill the gap with an industry benchmark.
+- WHAT IS WORKING / WHAT IS NOT WORKING: 3 bullets each, every bullet anchored to a specific figure or a named post from the data.
+- DO THESE THREE THINGS NEXT: exactly 3 recommendations. Each states the action, the metric it should move, and how you will know within 30 days whether it worked. Be specific enough to assign to a person.
+- WHAT WE STILL CANNOT SEE: the honest gaps. Which metrics were missing, which conclusions therefore cannot be drawn, and what to start tracking. This section is mandatory and must never be empty.
+Never invent a benchmark, a competitor figure, or a percentage that was not derivable from the pasted data. If the data is thin, say so plainly and report only what it supports.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nPeriod: ${v.period}\nPrimary goal: ${v.goal}\n\nPASTED METRICS:\n${v.data||"[no data provided]"}`
+  },
+  editor:{
+    maxTokens:2600,
+    title:"Copy Editor",
+    hl:"Editor",
+    blurb:"Paste any draft. Get a clean edit, a plain-language reason for every change, and a flag on anything that reads as a claim you cannot back.",
+    btn:"Edit This Copy",
+    fields:[
+      {id:"kind",label:"What Is This?",type:"select",options:["Social post","Email","Press release","Web page copy","Newsletter","Ad copy","Internal comms"]},
+      {id:"voice",label:"Target Voice",type:"select",options:["Confident and plain-spoken","Consultative","Warm and community-led","Formal / corporate","Bold and contrarian"]},
+      {id:"draft",label:"Paste Your Draft",type:"textarea",placeholder:"Paste the copy you want edited…"}
+    ],
+    system:`You are a ruthless but fair senior copy editor. ${NODASH}EXPERT STANDARD: edit to William Zinsser's On Writing Well (clutter is the disease, so strip every word serving no function), Ann Handley on respecting the reader's time, Joanna Wiebe on specificity beating cleverness, and Strunk and White on the active voice. Edit to make the writer sound more like themselves, never more like you.
+Output these sections, each header alone on its own line, in this exact order and wording:
+EDITED VERSION
+WHAT I CHANGED AND WHY
+CLAIMS TO VERIFY
+READABILITY
+RULES:
+- EDITED VERSION: the full corrected copy, ready to publish. Preserve the writer's meaning and voice; do not rewrite it into your own. Cut what is not working rather than padding.
+- WHAT I CHANGED AND WHY: up to 6 bullets, each "changed X to Y, because Z". Plain language, no grammar jargon. If you cut something, say what and why.
+- CLAIMS TO VERIFY: every statistic, superlative, or factual assertion in the draft that would need a source before publishing. If there are none, say "None, nothing in this draft asserts a fact that needs sourcing."
+- READABILITY: word count before and after, roughly what reading level it lands at, and one sentence on whether the length suits the format.
+Fix grammar, cut hedging and filler, kill passive voice where it weakens the line, and tighten. Never add a statistic or claim that was not in the draft.
+End with this exact line on a new line: ${WATERMARK}`,
+    user:v=>`Type: ${v.kind}\nTarget voice: ${v.voice}\n\nDRAFT:\n${v.draft||"[no draft provided]"}`
+  },
+  audit:{
+    title:"AI Marketing Audit",
+    hl:"Audit",
+    blurb:"Enter a website. Grayrender finds the site's key pages, audits each one live, and delivers a director-level site-wide teardown: what's working, what's costing you leads across pages, a prioritized fix list, and cross-page moves. Takes about a minute.",
+    btn:"Run Full-Site Audit",
+    endpoint:"audit",
+    fields:[
+      {id:"url",label:"Website to audit",type:"text",placeholder:"e.g. https://www.example.com"}
+    ]
+  }
+};
+
+const LOAD_MSGS=["Analyzing target...","Drafting content...","Applying brand positioning...","Finalizing output..."];
+const AUDIT_LOAD=["Fetching the live page...","Reading the content and structure...","Checking messaging, SEO, and trust signals...","Scoring conversion and lead capture...","Writing the strategic audit..."];
+const ARROW='<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+let current="outreach";
+const main=document.getElementById("main");
+const MODKEY=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘":"Ctrl";
+
+// Cmd/Ctrl+Enter generates from anywhere in the form
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==="Enter"){
+    const btn=document.getElementById("genBtn");
+    if(btn&&!btn.disabled){e.preventDefault();generate();}
+  }
+});
+
+function setActiveNav(){
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.tool===current));
+}
+/* One way in, used by the sidebar, the command palette and the setup flow. */
+function goTool(id){
+  if(!TOOLS[id]) return;
+  current=id; setActiveNav(); renderTool();
+  const el=document.querySelector(`.nav-item[data-tool="${id}"]`);
+  if(el&&el.scrollIntoView) el.scrollIntoView({block:"nearest"});
+}
+document.querySelectorAll(".nav-item").forEach(el=>{
+  el.addEventListener("click",()=>goTool(el.dataset.tool));
+});
+document.getElementById("brandChip").addEventListener("click",()=>renderBrandSetup());
+
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+// Strip stray markdown so the model can never leak **bold**, __ or backticks into a plain-text card.
+function stripMd(s){return (s||"")
+  .replace(/\*\*(.+?)\*\*/g,"$1").replace(/__(.+?)__/g,"$1")
+  .replace(/\*\*/g,"").replace(/`/g,"").replace(/^\s*#{1,6}\s+/gm,"");}
+// Remove the "AI tell" dashes: em/en dashes become commas (or hyphens in number ranges).
+// Ordinary hyphens in compound words (full-stack) are left alone.
+function deDash(s){return (s||"")
+  .replace(/(\d)\s*[–—]\s*(\d)/g,"$1-$2")   // 4–6 -> 4-6
+  .replace(/\s*[—–]\s*/g,", ")               // any other em/en dash -> comma
+  .replace(/\s+,/g,",").replace(/,\s*,/g,", ")
+  .replace(/,\s*([.!?;:])/g,"$1");}
+function escMd(s){return esc(stripMd(deDash(s)));}
+// What lands on the clipboard: dashes and markdown stripped, HTML entities NOT escaped.
+function cleanCopy(s){return deDash(stripMd(s));}
+
+/* ---------------- The site passcode ----------------
+   One lock for everything. The passcode is never in this source; it is validated
+   by the serverless functions against the SITE_PASSCODE environment variable, so
+   reading this file (or the repo) gets you nothing. The screen below is courtesy,
+   not security: the real gate is that every function refuses to work without it. */
+// Owner tagging: visit the site once with ?owner=1 on each of your devices to mark it as
+// yours, so your own use never triggers the "outside visitor" alert. Stored per-device.
+try{ if(/owner/i.test(location.search+location.hash)) localStorage.setItem("wai_owner","1"); }catch(e){}
+function isOwner(){ try{ return localStorage.getItem("wai_owner")==="1"; }catch(e){ return false; } }
+
+function getPasscode(){ try{ return localStorage.getItem("gr_pass")||""; }catch(e){ return ""; } }
+function setPasscode(v){ try{ v?localStorage.setItem("gr_pass",v):localStorage.removeItem("gr_pass"); }catch(e){} }
+function isUnlocked(){ return !!getPasscode(); }
+
+const LOCK_CONTACT="edmundgrayworks@gmail.com";
+
+function showLock(msg){
+  if(document.getElementById("lockBack")) { if(msg) setLockMsg(msg); return; }
+  const el=document.createElement("div");
+  el.id="lockBack"; el.className="lock-back";
+  el.innerHTML=`
+    <div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+      <div class="lock-mark">
+        <svg viewBox="0 0 32 32" width="66" height="66" role="img" aria-label="Grayrender">
+          <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5.5" width="26" height="21" rx="4.5" stroke="var(--ink)" stroke-width="1.6"/>
+            <g stroke="var(--ink)" stroke-width="1.3">
+              <path d="M7.6 12.6V9.6h3"/><path d="M21.4 9.6h3v3"/>
+              <path d="M7.6 19.4v3h3"/><path d="M21.4 22.4h3v-3"/>
+            </g>
+            <g stroke="var(--accent)" stroke-width="1.3">
+              <circle cx="16" cy="16" r="3.1"/><path d="M16 9.9v12.2M9.9 16h12.2"/>
+            </g>
+          </g>
+        </svg>
+        <div class="lock-word">GRAY<span>RENDER</span></div>
+        <div class="lock-by">by Edmund Gray</div>
+      </div>
+      <h2 id="lockTitle">This one is by <em>invitation</em>.</h2>
+      <p>As much as I would love to let everyone loose in here, Grayrender is reserved for
+         employers considering Edmund Gray for a role. Every click renders real pages and
+         calls a real model, so the door stays shut.</p>
+      <p class="lock-ask">If that is you, get in touch and a passcode comes straight back.
+         <a href="mailto:${LOCK_CONTACT}?subject=Grayrender%20passcode">${LOCK_CONTACT}</a></p>
+      <div class="lock-row">
+        <input id="lockIn" type="password" placeholder="Passcode" autocomplete="off" spellcheck="false" aria-label="Passcode"/>
+        <button id="lockGo">Unlock</button>
+      </div>
+      <div class="lock-msg" id="lockMsg" role="status">${msg?esc(msg):""}</div>
+    </div>`;
+  document.body.appendChild(el);
+  const inp=document.getElementById("lockIn");
+  document.getElementById("lockGo").addEventListener("click",tryUnlock);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter") tryUnlock(); });
+  setTimeout(()=>inp.focus(),320);
+}
+function setLockMsg(m){ const el=document.getElementById("lockMsg"); if(el) el.textContent=m||""; }
+function hideLock(){ const el=document.getElementById("lockBack"); if(el) el.remove(); }
+
+async function tryUnlock(){
+  const inp=document.getElementById("lockIn"); const v=(inp&&inp.value||"").trim();
+  if(!v){ setLockMsg("Enter the passcode you were sent."); return; }
+  const btn=document.getElementById("lockGo");
+  btn.disabled=true; btn.textContent="Checking…"; setLockMsg("");
+  let d={};
+  try{ d=await postAudit({mode:"brand",validateOnly:true,passcode:v}); }catch(e){ d={}; }
+  btn.disabled=false; btn.textContent="Unlock";
+  if(d&&d.ok===true){
+    setPasscode(v);
+    const card=document.querySelector(".lock-card");
+    if(card) card.classList.add("ok");
+    setTimeout(()=>{ hideLock(); reflectBrand(); renderTool(); },260);
+    return;
+  }
+  if(d&&d.reason==="unset"){ setLockMsg("This deployment has no passcode configured yet. Contact Edmund."); return; }
+  setLockMsg("That passcode is not right. Check it and try again.");
+  if(inp){ inp.select(); }
+  const card=document.querySelector(".lock-card");
+  if(card){ card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake"); }
+}
+/* Any function can revoke at any time (passcode rotated, env var cleared). */
+function handleLocked(d){
+  if(d && d.locked){
+    setPasscode("");
+    showLock(d.reason==="unset" ? "This deployment has no passcode configured yet. Contact Edmund."
+                                : "That passcode is no longer valid. Contact Edmund for the current one.");
+    return true;
+  }
+  return false;
+}
+
+function renderTool(){
+  window.scrollTo(0,0);
+  if(!BRAND) return renderBrandSetup();
+  const t=TOOLS[current];
+  let dl="";
+  const fieldsHtml=t.fields.map(f=>{
+    if(f.type==="select"){
+      return `<div class="field"><label>${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
+    }
+    if(f.type==="textarea"){
+      return `<div class="field span2"><label>${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${f.placeholder||""}"></textarea></div>`;
+    }
+    if(f.list){dl=`<datalist id="dl_${f.id}">${f.list.map(o=>`<option value="${o}">`).join("")}</datalist>`;}
+    return `<div class="field"><label>${f.label}</label><input id="f_${f.id}" type="text" placeholder="${f.placeholder||""}" ${f.list?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
+  }).join("");
+
+  const title=t.title.replace(t.hl,`<span class="hl">${t.hl}</span>`);
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>${title}</h1>
+      <p>${t.blurb}</p>
+    </div>
+    <div class="card">
+      <div class="grid">${fieldsHtml}</div>
+      ${dl}
+      <div class="gen-row">
+        <button class="btn-gen" id="genBtn">${t.btn}${ARROW}</button>
+        <span class="gen-hint"><kbd>${MODKEY}</kbd> + <kbd>Enter</kbd></span>
+      </div>
+    </div>
+    <div id="outArea"></div>
+  `;
+  document.getElementById("genBtn").addEventListener("click",generate);
+  // Custom-dropdown: reveal a text box when "Custom (type your own)" is selected
+  t.fields.forEach(f=>{
+    if(f.type!=="select")return;
+    const sel=document.getElementById("f_"+f.id), ci=document.getElementById("c_"+f.id);
+    sel.addEventListener("change",()=>{ if(sel.value==="__custom__"){ci.hidden=false;ci.focus();}else{ci.hidden=true;} });
+  });
+  const first=main.querySelector("input,select");
+  if(first) first.focus();
+}
+
+/* ---------------- audit feature lock screen ---------------- */
+/* Prompts are template literals evaluated once at parse time, so the company cannot be
+   interpolated at definition. They carry __CO__ / __CO_NAME__ tokens instead, swapped for
+   the live brand here, at the moment the request is sent. */
+function withBrand(tpl){
+  return String(tpl||"").replace(/__CO_NAME__/g, brandName()).replace(/__CO__/g, brandContext());
+}
+/* An options list may be a plain array or a function of the brand, so a dropdown can
+   offer this company's actual services instead of somebody else's. */
+function optsOf(f){
+  const o = (typeof f.options==="function") ? f.options(B()) : f.options;
+  return (o||[]).filter(Boolean);
+}
+
+/* ---------------- Brand setup: the whole configuration story ----------------
+   One URL. We render the site with the same engine the audit uses, learn who this
+   company is, and every tool in the suite is correct for their industry from then
+   on. There is a manual path because a first-run experience that can dead-end on a
+   network error is not a first-run experience. */
+function renderBrandSetup(msg){
+  window.scrollTo(0,0);
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>Who are we <span class="hl">writing</span> for?</h1>
+      <p>Give me your website. I will read it the way a browser does and learn your name, what you sell, who buys it and how you sound, so every tool here is already correct for your business.</p>
+    </div>
+    <div class="card">
+      <div class="field span2">
+        <label>Your website</label>
+        <input id="bwUrl" type="text" placeholder="e.g. https://www.yourcompany.com" autocomplete="off"/>
+      </div>
+      ${msg?`<div class="bw-msg">${esc(msg)}</div>`:""}
+      <div class="gen-row">
+        <button class="btn-gen" id="bwGo">Learn my brand${ARROW}</button>
+        <button class="btn-copy" id="bwManual">Enter it by hand</button>
+        <span class="gen-hint"><kbd>${MODKEY}</kbd> + <kbd>Enter</kbd></span>
+      </div>
+    </div>
+    <div id="outArea"></div>`;
+  const go=document.getElementById("bwGo");
+  go.addEventListener("click",runBrandSetup);
+  const u=document.getElementById("bwUrl");
+  u.addEventListener("keydown",e=>{ if(e.key==="Enter") runBrandSetup(); });
+  u.focus();
+  document.getElementById("bwManual").addEventListener("click",()=>renderBrandManual());
+}
+function renderBrandManual(prefill){
+  window.scrollTo(0,0);
+  const b=Object.assign({},DEFAULT_BRAND,prefill||{});
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>Tell me about <span class="hl">your</span> business</h1>
+      <p>Two answers is enough to start. Everything else has a sensible default you can change later.</p>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div class="field"><label>Company or product name</label><input id="mbName" type="text" value="${esc(b.name)}" placeholder="e.g. Northwind Systems" autocomplete="off"/></div>
+        <div class="field"><label>Industry</label><input id="mbInd" type="text" value="${esc(b.industry)}" placeholder="e.g. dental practice, SaaS, roofing" autocomplete="off"/></div>
+        <div class="field span2"><label>What you do, in one sentence</label>
+          <textarea id="mbWhat" class="ta" rows="3" placeholder="e.g. We fit and maintain commercial HVAC systems for schools and hospitals across the Midwest.">${esc(b.what)}</textarea></div>
+      </div>
+      <div class="gen-row">
+        <button class="btn-gen" id="mbSave">Save and start${ARROW}</button>
+        <button class="btn-copy" id="mbBack">Use my website instead</button>
+      </div>
+    </div>`;
+  document.getElementById("mbBack").addEventListener("click",()=>renderBrandSetup());
+  document.getElementById("mbSave").addEventListener("click",()=>{
+    const name=document.getElementById("mbName").value.trim();
+    const what=document.getElementById("mbWhat").value.trim();
+    if(!name && !what){ renderBrandManual(); return; }
+    saveBrand(Object.assign({},DEFAULT_BRAND,{
+      name:name, what:what, industry:document.getElementById("mbInd").value.trim(),
+      profile:what
+    }));
+    reflectBrand(); current="outreach"; setActiveNav(); renderTool();
+  });
+  document.getElementById("mbName").focus();
+}
+async function runBrandSetup(){
+  const el=document.getElementById("bwUrl"); const url=(el&&el.value||"").trim();
+  if(!(url && url.indexOf(".")>0)){ renderBrandSetup("Enter a website address, for example yourcompany.com."); return; }
+  const btn=document.getElementById("bwGo");
+  btn.disabled=true; btn.textContent="Reading your site…";
+  const out=document.getElementById("outArea");
+  out.innerHTML=`<div class="output-wrap"><div class="card site-prog"><div class="sp-head">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div><div class="sp-title">Rendering the page and reading it…</div><div class="sp-sub">${esc(url)}</div></div>
+    <div class="sp-timer" id="spTimer">0.0s</div></div></div></div>`;
+  startSiteTimer();
+  let d={};
+  try{ d=await postAudit({mode:"brand",url:url,owner:isOwner()}); }
+  catch(e){ d={error:"network"}; }
+  btn.disabled=false; btn.textContent="Learn my brand";
+  if(!d||!d.profile||(!d.profile.name&&!d.profile.profile)){
+    renderBrandSetup("I could not read that site from here. You can try another URL, or enter your details by hand.");
+    return;
+  }
+  renderBrandConfirm(d.profile,url);
+}
+function renderBrandConfirm(prof,url){
+  window.scrollTo(0,0);
+  const rows=[["What you do",prof.what],["Industry",prof.industry],["How you sound",prof.tone],
+              ["Who buys",(prof.audiences||[]).slice(0,4).join(", ")],
+              ["What you offer",(prof.offerings||[]).slice(0,4).join(", ")],
+              ["Proof on your site",(prof.proof||[]).join(", ")||"Nothing verifiable found, so nothing will be claimed"]];
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>Here is what I <span class="hl">read</span>.</h1>
+      <p>From ${esc(url)}. Change the name if I got it wrong, then start. You can redo this any time from the brand chip in the header.</p>
+    </div>
+    <div class="card">
+      <div class="field span2"><label>Company or product name</label>
+        <input id="bcName" type="text" value="${esc(prof.name||"")}" autocomplete="off"/></div>
+      <div class="bc-list">${rows.map(r=>`<div class="bc-row"><span class="bc-k">${esc(r[0])}</span><span class="bc-v">${escMd(r[1]||"Not stated")}</span></div>`).join("")}</div>
+      <div class="gen-row">
+        <button class="btn-gen" id="bcGo">Start using this${ARROW}</button>
+        <button class="btn-copy" id="bcRedo">Read a different site</button>
+      </div>
+    </div>`;
+  document.getElementById("bcRedo").addEventListener("click",()=>renderBrandSetup());
+  document.getElementById("bcGo").addEventListener("click",()=>{
+    prof.name=document.getElementById("bcName").value.trim()||prof.name;
+    saveBrand(prof); reflectBrand(); current="outreach"; setActiveNav(); renderTool();
+  });
+}
+/* The header chip is the only permanent reminder of whose voice this is speaking in. */
+function reflectBrand(){
+  const el=document.getElementById("brandChip"); if(!el) return;
+  const b=BRAND;
+  el.hidden=!b;
+  if(b) el.querySelector("#brandChipName").textContent=b.name||"Your brand";
+}
+
+/* ---------------- Command palette ----------------
+   Eleven tools do not fit in anyone's head. Cmd+K is muscle memory for the people
+   this is built for, and it is also the fastest path for people who have never
+   heard of it, because the list is right there the moment they press it. */
+let PAL_SEL=0, PAL_HITS=[];
+function palItems(){
+  return Object.keys(TOOLS).map(k=>({id:k,title:TOOLS[k].title,sub:TOOLS[k].hl}))
+    .concat([{id:"__brand__",title:"Change brand",sub:BRAND?(BRAND.name||"set"):"not set"}]);
+}
+function openPalette(){
+  if(document.getElementById("palBack")) return;
+  const el=document.createElement("div");
+  el.className="pal-back"; el.id="palBack";
+  el.innerHTML=`<div class="pal" role="dialog" aria-modal="true" aria-label="Jump to a tool">
+    <input id="palIn" type="text" placeholder="Jump to a tool…" autocomplete="off" aria-label="Search tools"/>
+    <div class="pal-list" id="palList"></div>
+    <div class="pal-hint"><span>↑↓ to move</span><span>↵ to open</span><span>esc to close</span></div>
+  </div>`;
+  document.body.appendChild(el);
+  el.addEventListener("click",e=>{ if(e.target===el) closePalette(); });
+  const inp=document.getElementById("palIn");
+  inp.addEventListener("input",()=>paintPalette(inp.value));
+  inp.addEventListener("keydown",palKey);
+  paintPalette(""); inp.focus();
+}
+function closePalette(){ const e=document.getElementById("palBack"); if(e) e.remove(); }
+function paintPalette(q){
+  q=(q||"").toLowerCase().trim();
+  PAL_HITS=palItems().filter(i=>!q||(i.title+" "+i.sub).toLowerCase().includes(q));
+  PAL_SEL=0;
+  const list=document.getElementById("palList");
+  list.innerHTML=PAL_HITS.length
+    ? PAL_HITS.map((i,n)=>`<div class="pal-item ${n===0?"sel":""}" data-i="${n}">${esc(i.title)}<span class="pal-sub">${esc(i.sub)}</span></div>`).join("")
+    : `<div class="pal-empty">Nothing matches “${esc(q)}”.</div>`;
+  [...list.querySelectorAll(".pal-item")].forEach(el=>{
+    el.addEventListener("click",()=>runPalette(+el.dataset.i));
+    el.addEventListener("mousemove",()=>{ PAL_SEL=+el.dataset.i; markPalette(); });
+  });
+}
+function markPalette(){
+  document.querySelectorAll("#palList .pal-item").forEach((el,n)=>el.classList.toggle("sel",n===PAL_SEL));
+  const sel=document.querySelector("#palList .pal-item.sel");
+  if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:"nearest"});
+}
+function palKey(e){
+  if(e.key==="Escape"){ closePalette(); return; }
+  if(e.key==="ArrowDown"){ e.preventDefault(); PAL_SEL=Math.min(PAL_SEL+1,PAL_HITS.length-1); markPalette(); return; }
+  if(e.key==="ArrowUp"){ e.preventDefault(); PAL_SEL=Math.max(PAL_SEL-1,0); markPalette(); return; }
+  if(e.key==="Enter"){ e.preventDefault(); runPalette(PAL_SEL); }
+}
+function runPalette(n){
+  const item=PAL_HITS[n]; if(!item) return;
+  closePalette();
+  if(item.id==="__brand__") return renderBrandSetup();
+  goTool(item.id);
+}
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){ e.preventDefault(); openPalette(); }
+});
+
+/* ---------------- generate ---------------- */
+async function generate(){
+  const t=TOOLS[current];
+  const vals={};
+  t.fields.forEach(f=>{
+    let v=document.getElementById("f_"+f.id).value.trim();
+    if(f.type==="select" && v==="__custom__"){ const ci=document.getElementById("c_"+f.id); v=(ci&&ci.value.trim())||""; }
+    vals[f.id]=v;
+  });
+
+  const out=document.getElementById("outArea");
+  const isAudit=t.endpoint==="audit";
+
+  // The audit tool runs a multi-step full-site flow (discover -> scan -> synthesize).
+  if(isAudit){ return runSiteAudit(vals); }
+
+  // Audit needs a URL; validate before spending a call.
+  if(isAudit && !(vals.url && vals.url.indexOf(".")>0)){
+    out.innerHTML=`<div class="output-wrap"><div class="error-box">Enter a valid website URL to audit, for example https://www.example.com.</div></div>`;
+    const f=document.getElementById("f_url"); if(f) f.focus();
+    return;
+  }
+
+  const btn=document.getElementById("genBtn");
+  btn.disabled=true;btn.classList.add("loading");
+
+  const msgs=isAudit?AUDIT_LOAD:LOAD_MSGS;
+  out.innerHTML=`<div class="output-wrap"><div class="card"><div class="loading">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="load-text" id="loadText">${msgs[0]}</div>
+  </div></div></div>`;
+  let i=0;
+  const timer=setInterval(()=>{i=(i+1)%msgs.length;const lt=document.getElementById("loadText");if(lt)lt.textContent=msgs[i];},1400);
+
+  const endpoint=isAudit?"/.netlify/functions/audit":"/.netlify/functions/generate";
+  const payload=isAudit
+    ? {url:vals.url,focus:vals.focus,passcode:getPasscode(),owner:isOwner()}
+    : {systemPrompt:withBrand(t.system),userMessage:t.user(vals),tool:current,inputs:vals,maxTokens:t.maxTokens||1500,passcode:getPasscode(),owner:isOwner()};
+
+  try{
+    const res=await fetch(endpoint,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+    clearInterval(timer);
+    const data=await res.json().catch(()=>({}));
+    // The one gate: if the server rejects the passcode, revoke it and ask again.
+    if(handleLocked(data)) return;
+    // Friendly server-side errors (bad URL, unreachable page, no key) come back as {error,message}.
+    if(data && data.error && !data.result){
+      out.innerHTML=`<div class="output-wrap"><div class="error-box">${esc(data.message||data.error)}</div></div>`;
+      return;
+    }
+    if(!res.ok && !data.result){throw new Error("Server returned "+res.status);}
+    renderOutput((data.result||"").trim(),vals);
+  }catch(err){
+    clearInterval(timer);
+    out.innerHTML=`<div class="output-wrap"><div class="error-box">Could not complete the request: ${esc(err.message)}.<br/><span>Check that the Netlify function is deployed and ANTHROPIC_API_KEY is set.</span></div></div>`;
+  }finally{
+    btn.disabled=false;btn.classList.remove("loading");
+  }
+}
+
+function splitWatermark(text){
+  // Match the watermark regardless of leading dash style (— – -), markdown, or spacing.
+  const i=text.search(/Generated by Edmund Gray AI Systems/i);
+  if(i===-1) return {body:text.trim(),mark:WATERMARK};
+  let s=i; while(s>0 && text[s-1]!=="\n") s--; // back up to the start of that line
+  return {body:text.slice(0,s).trim(),mark:WATERMARK};
+}
+
+/* ---------------- per-tool output rendering ---------------- */
+/* ---------------- Social & comms renderers ----------------
+   A model returns prose. These turn it into the artefact a marketer actually uses:
+   a calendar you can hand to production, channel cards you can copy one at a time,
+   and sectioned documents that survive being pasted into a deck. */
+
+// Any ALL-CAPS line is a section header. Cheap, and it holds because every prompt
+// above specifies the headers verbatim.
+function capSections(body){
+  const out=[]; let cur=null;
+  String(body||"").split("\n").forEach(line=>{
+    const t=line.trim();
+    const isHdr = t.length>2 && t.length<64 && /[A-Z]/.test(t) && !/[a-z]/.test(t) &&
+                  !/^[-•*\d]/.test(t) && !t.includes("|");
+    if(isHdr){ cur={h:t,lines:[]}; out.push(cur); }
+    else if(cur) cur.lines.push(line);
+    else if(t){ cur={h:"",lines:[line]}; out.push(cur); }
+  });
+  return out.map(sec=>({h:sec.h, body:sec.lines.join("\n").trim()})).filter(x=>x.h||x.body);
+}
+function secBody(text){
+  const lines=String(text||"").split("\n");
+  const isBul=l=>/^\s*[-•*]\s+/.test(l);
+  if(lines.filter(isBul).length>=2){
+    const items=lines.filter(isBul).map(l=>`<li>${escMd(l.replace(/^\s*[-•*]\s+/,""))}</li>`).join("");
+    const rest=lines.filter(l=>l.trim()&&!isBul(l)).map(l=>escMd(l)).join("\n");
+    return (rest?`<div>${rest}</div>`:"")+`<ul>${items}</ul>`;
+  }
+  return escMd(text);
+}
+function renderSectioned(body,mark,title,leadFirst){
+  const secs=capSections(body);
+  const cards=secs.map((sec,i)=>
+    `<div class="sec-card${leadFirst&&i===0?" lead":""}">`+
+    (sec.h?`<div class="sec-h">${escMd(sec.h)}</div>`:"")+
+    `<div class="sec-b">${secBody(sec.body)}</div></div>`).join("");
+  return `<div class="output-wrap">
+    <div class="row-between" style="margin-bottom:12px"><div class="out-title" style="margin:0">${esc(title)}</div>${copyBtn("c1")}</div>
+    ${cards}
+    <div class="watermark">${esc(mark)}</div>
+  </div>`;
+}
+
+function chanClass(name){
+  const n=String(name||"").toLowerCase();
+  if(n.includes("linkedin")) return "ch-li";
+  if(n.includes("instagram")||n.includes("ig")) return "ch-ig";
+  if(n.includes("youtube")||n.includes("yt")||n.includes("short")) return "ch-yt";
+  return "ch-x";
+}
+
+/* Calendar: rows are "Day | Channel | Format | Hook | Caption | CTA | Asset". Anything
+   that is not seven fields is a malformed row, and a malformed row is dropped rather
+   than rendered half-populated into a table a human is about to schedule from. */
+let CAL_ROWS=[];
+function parseCalendar(body){
+  const weeks=[]; let cur=null, inNotes=false, notes=[];
+  String(body||"").split("\n").forEach(line=>{
+    const t=line.trim();
+    if(/^WEEK\s+\d+/i.test(t)){ cur={title:t,rows:[]}; inNotes=false; weeks.push(cur); return; }
+    if(/^POSTING NOTES/i.test(t)){ cur=null; inNotes=true; return; }
+    if(inNotes){ if(t) notes.push(t); return; }
+    if(!cur || !/^[-•*]\s/.test(t)) return;
+    const parts=t.replace(/^[-•*]\s*/,"").split("|").map(x=>x.trim());
+    if(parts.length<7) return;
+    const [day,channel,format,hook,caption,cta,asset]=parts;
+    cur.rows.push({day,channel,format,hook,caption,cta,asset});
+  });
+  return {weeks, notes:notes.join("\n").trim()};
+}
+function calendarCsv(rows){
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const head=["Week","Day","Channel","Format","Hook","Caption","CTA","Asset needed"];
+  return [head.map(q).join(",")].concat(rows.map(r=>[r.week,r.day,r.channel,r.format,r.hook,r.caption,r.cta,r.asset].map(q).join(","))).join("\r\n");
+}
+function renderCalendar(body,mark){
+  const {weeks,notes}=parseCalendar(body);
+  if(!weeks.length||!weeks.some(w=>w.rows.length))
+    return renderSectioned(body,mark,"Content Calendar");
+  CAL_ROWS=[];
+  weeks.forEach(w=>w.rows.forEach(r=>CAL_ROWS.push(Object.assign({week:w.title},r))));
+  const total=CAL_ROWS.length;
+  const tbl=weeks.filter(w=>w.rows.length).map(w=>`
+    <div class="cal-wk">
+      <div class="cal-wk-h">${esc(w.title)}</div>
+      <div class="cal-scroll"><table class="cal">
+        <thead><tr><th>Day</th><th>Channel</th><th>Format</th><th>Post</th><th>CTA</th><th>Asset needed</th></tr></thead>
+        <tbody>${w.rows.map(r=>`<tr>
+          <td class="cal-day">${escMd(r.day)}</td>
+          <td><span class="ch ${chanClass(r.channel)}">${escMd(r.channel)}</span></td>
+          <td class="cal-fmt">${escMd(r.format)}</td>
+          <td><div class="cal-hook">${escMd(r.hook)}</div><div class="cal-cap">${escMd(r.caption)}</div></td>
+          <td><span class="cal-cta">${escMd(r.cta)}</span></td>
+          <td class="cal-asset">${escMd(r.asset)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </div>`).join("");
+  return `<div class="output-wrap">
+    <div class="row-between" style="margin-bottom:14px">
+      <div class="out-title" style="margin:0">Content Calendar · ${total} posts</div>
+      <div style="display:flex;gap:8px"><button class="btn-copy" id="calCsv">Download CSV</button>${copyBtn("c1")}</div>
+    </div>
+    ${tbl}
+    ${notes?`<div class="sec-card"><div class="sec-h">Posting Notes</div><div class="sec-b">${secBody(notes)}</div></div>`:""}
+    <div class="watermark">${esc(mark)}</div>
+  </div>`;
+}
+function bindCalendarCsv(){
+  const b=document.getElementById("calCsv"); if(!b) return;
+  b.addEventListener("click",()=>{
+    const blob=new Blob([calendarCsv(CAL_ROWS)],{type:"text/csv;charset=utf-8;"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="content-calendar.csv";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },0);
+    b.textContent="Downloaded"; setTimeout(()=>{ b.textContent="Download CSV"; },1600);
+  });
+}
+
+/* Multi-channel: one card per platform, each independently copyable, each showing the
+   limit that actually bites on that platform. */
+const CHAN_LIMITS={"LINKEDIN POST":{n:3000,fold:210,label:"LinkedIn"},
+  "INSTAGRAM CAPTION":{n:2200,label:"Instagram"},
+  "YOUTUBE TITLE":{n:60,label:"YouTube title"},
+  "YOUTUBE DESCRIPTION":{n:5000,label:"YouTube description"},
+  "SHORT-FORM SCRIPT":{label:"Short-form script"},
+  "HASHTAGS":{label:"Hashtags"}};
+function renderChannels(body,mark){
+  const secs=capSections(body).filter(x=>x.h);
+  if(!secs.length) return renderSectioned(body,mark,"Content Set");
+  const cards=secs.map((sec,i)=>{
+    const lim=CHAN_LIMITS[sec.h.toUpperCase()]||{};
+    const len=sec.body.length;
+    const over=lim.n&&len>lim.n;
+    let meta=`${len} characters`;
+    if(lim.n) meta+= over?` · over the ${lim.n} limit`:` · limit ${lim.n}`;
+    if(lim.fold) meta+= ` · first ${lim.fold} show before the fold`;
+    return `<div class="chan-card">
+      <div class="chan-head"><span class="ch ${chanClass(sec.h)}">${escMd(lim.label||sec.h)}</span>${copyBtn("ch"+i)}</div>
+      <div class="chan-body">${escMd(sec.body)}</div>
+      <div class="chan-meta ${over?"over":""}">${esc(meta)}</div>
+    </div>`;
+  }).join("");
+  return `<div class="output-wrap">
+    <div class="out-title">Content Set · ${secs.length} channels</div>
+    <div class="chan-grid">${cards}</div>
+    <div class="watermark">${esc(mark)}</div>
+  </div>`;
+}
+
+function renderOutput(raw,vals){
+  const out=document.getElementById("outArea");
+  const {body,mark}=splitWatermark(raw);
+
+  if(current==="outreach"){
+    let subject="",emailBody=body;
+    const m=body.match(/^\s*subject:\s*(.*)$/im);
+    if(m){subject=m[1].trim();emailBody=body.replace(m[0],"").trim();}
+    out.innerHTML=`<div class="output-wrap"><div class="card email-card">
+      <div class="row-between" style="margin-bottom:16px"><div class="out-title" style="margin:0">Outreach Email Preview</div>${copyBtn("c1")}</div>
+      ${subject?`<div class="subject">Subject: ${escMd(subject)}</div>`:""}
+      <div class="body">${escMd(emailBody)}</div>
+      <div class="watermark">${esc(mark)}</div>
+    </div></div>`;
+    bindCopy("c1",raw);return;
+  }
+
+  if(current==="linkedin"){
+    const count=body.length;
+    const seed=(vals&&vals.topic)?vals.topic:"tech talent and hiring";
+    out.innerHTML=`<div class="output-wrap">
+      <div class="row-between" style="margin-bottom:12px"><div class="out-title" style="margin:0">LinkedIn Post Preview</div>${copyBtn("c1")}</div>
+      <div class="img-controls">
+        <input id="imgPrompt" class="img-prompt" type="text" placeholder="Optional: describe the image you want (or leave blank to auto-match the post)…" autocomplete="off"/>
+        <button class="btn-copy" id="genImg">Generate image (DALL·E)</button>
+      </div>
+      <div class="li-card">
+        <div class="li-top">
+          <div class="li-avatar">W</div>
+          <div><div class="li-name">${brandName()}</div><div class="li-meta">B2B Technology Services · Promoted</div></div>
+        </div>
+        <div class="li-body">${escMd(body)}</div>
+        <div id="imgArea" class="img-area"></div>
+        <div class="li-actions"><span>Like</span><span>Comment</span><span>Repost</span><span>Send</span></div>
+      </div>
+      <div class="li-count ${count>1300?'over':''}">${count} characters ${count>1300?'· over 1,300':'· under 1,300'}</div>
+      <div class="watermark">${esc(mark)}</div>
+    </div>`;
+    bindCopy("c1",raw);
+    const gi=document.getElementById("genImg");
+    if(gi) gi.addEventListener("click",()=>generateImage(seed));
+    return;
+  }
+
+  if(current==="ads"){
+    const parts=splitAds(body);
+    out.innerHTML=`<div class="output-wrap">
+      <div class="out-title">Ad Campaign: 3 Variations</div>
+      <div class="ad-grid">
+        ${adCard("Google Ad",parts.google,"a1")}
+        ${adCard("LinkedIn Sponsored",parts.linkedin,"a2")}
+        ${adCard("Landing Page Hero",parts.landing,"a3")}
+      </div>
+      <div class="watermark">${esc(mark)}</div>
+    </div>`;
+    bindCopy("a1",parts.google);bindCopy("a2",parts.linkedin);bindCopy("a3",parts.landing);
+    return;
+  }
+
+  if(current==="intel"){
+    const s=splitBrief(body);
+    out.innerHTML=`<div class="output-wrap">
+      <div class="row-between" style="margin-bottom:12px"><div class="out-title" style="margin:0">Competitive Briefing</div>${copyBtn("c1")}</div>
+      <div class="card brief">
+        <h3>Why We Win</h3><ul>${bullets(s.wins)}</ul>
+        <h3>Competitor Weaknesses to Exploit</h3><ul>${bullets(s.weak)}</ul>
+        <h3>Suggested Talk Track</h3><div class="talk">${escMd(s.talk||body)}</div>
+        <div class="watermark">${esc(mark)}</div>
+      </div>
+    </div>`;
+    bindCopy("c1",raw);return;
+  }
+
+  if(current==="calendar"){
+    out.innerHTML=renderCalendar(body,mark);
+    bindCalendarCsv(); bindCopy("c1",raw); return;
+  }
+  if(current==="social"){
+    out.innerHTML=renderChannels(body,mark);
+    capSections(body).filter(x=>x.h).forEach((sec,i)=>bindCopy("ch"+i,sec.body));
+    return;
+  }
+  const SECTIONED={comms:"Communications Asset",brand:"Brand Voice & Messaging Framework",
+                   report:"Social Performance Report",editor:"Edited Copy"};
+  if(SECTIONED[current]){
+    out.innerHTML=renderSectioned(body,mark,SECTIONED[current],current==="report");
+    bindCopy("c1",raw); return;
+  }
+
+  if(current==="audit"){
+    renderAudit(body,vals,mark,raw);return;
+  }
+}
+
+/* ---------------- Full-site audit orchestration ---------------- */
+async function postAudit(payload){
+  const r=await fetch("/.netlify/functions/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  return r.json().catch(()=>({}));
+}
+// Run fn over items with at most n in flight at once.
+async function runPool(items,n,fn){
+  let i=0;
+  const workers=Array.from({length:Math.min(n,items.length)},async()=>{
+    while(i<items.length){ const idx=i++; await fn(items[idx],idx); }
+  });
+  await Promise.all(workers);
+}
+function auditErrBox(msg){ return `<div class="output-wrap"><div class="error-box">${esc(msg)}</div></div>`; }
+function pathOf(u){ try{ const x=new URL(u); return (x.pathname+x.search)||"/"; }catch(e){ return u; } }
+
+let SITE_PAGES=[], SITE_RESULTS=[];
+function siteProgressShell(url){
+  let host=url; try{ host=new URL(/^https?:/i.test(url)?url:"https://"+url).hostname.replace(/^www\./,""); }catch(e){}
+  return `<div class="output-wrap"><div class="card site-prog">
+    <div class="sp-head">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div><div class="sp-title" id="spStatus">Finding your site's key pages…</div><div class="sp-sub">${esc(host)}</div></div>
+      <div class="sp-timer" id="spTimer">0.0s</div>
+    </div>
+    <div class="sp-list" id="spList"></div>
+  </div></div>`;
+}
+/* Rows are built ONCE and then patched in place. Re-rendering the whole list on every
+   state change was cheap to write and wrong: it restarts every animation on every tick,
+   so a grade landing on page 2 re-popped every other badge. Build once, touch only what
+   actually changed, and each badge animates exactly when its own scan finishes. */
+function badgeFor(r){
+  if(r&&r.grade&&r.grade!=="?") return {cls:gradeClass(r.grade),txt:r.grade,done:true};
+  if(r&&r.grade==="?")          return {cls:"bad",txt:"!",done:true};
+  if(r&&r.busy)                 return {cls:"run",txt:"•••",done:false};
+  return {cls:"wait",txt:"…",done:false};
+}
+function renderSitePageList(){
+  const list=document.getElementById("spList"); if(!list) return;
+  if(list.children.length!==SITE_PAGES.length){
+    list.innerHTML=SITE_PAGES.map((p,i)=>
+      `<div class="sp-row" data-i="${i}" style="animation-delay:${i*55}ms">`+
+      `<span class="sp-name">${esc(p.label||"Page")}</span>`+
+      `<span class="sp-path">${esc(pathOf(p.url))}</span>`+
+      `<span class="sp-badge wait">…</span></div>`).join("");
+  }
+  SITE_PAGES.forEach((p,i)=>{
+    const row=list.querySelector(`.sp-row[data-i="${i}"]`); if(!row) return;
+    const el=row.querySelector(".sp-badge"), b=badgeFor(SITE_RESULTS[i]);
+    row.classList.toggle("live", b.cls==="run");
+    const key=b.cls+"|"+b.txt;
+    if(row.dataset.state===key) return;          // nothing changed; leave the DOM alone
+    row.dataset.state=key;
+    el.className="sp-badge "+b.cls+(b.done?" landed":"");
+    el.textContent=b.txt;
+  });
+}
+/* Elapsed time, because the honest answer to "is it stuck?" is a number. Self-cancelling:
+   when the report replaces the panel the element is gone and the interval clears itself. */
+function startSiteTimer(){
+  const t0=Date.now();
+  const tick=setInterval(()=>{
+    const el=document.getElementById("spTimer");
+    if(!el){ clearInterval(tick); return; }
+    el.textContent=((Date.now()-t0)/1000).toFixed(1)+"s";
+  },100);
+}
+function setSiteStatus(t){ const s=document.getElementById("spStatus"); if(s) s.textContent=t; }
+
+async function runSiteAudit(vals){
+  const out=document.getElementById("outArea");
+  const btn=document.getElementById("genBtn");
+  const url=((vals&&vals.url)||"").trim();
+  if(!(url && url.indexOf(".")>0)){ out.innerHTML=auditErrBox("Enter a valid website, for example https://www.example.com."); const f=document.getElementById("f_url"); if(f) f.focus(); return; }
+  btn.disabled=true; btn.classList.add("loading");
+  const base={featureCode:getPasscode(), passcode:getPasscode(), owner:isOwner()};
+  SITE_PAGES=[]; SITE_RESULTS=[];
+  try{
+    out.innerHTML=siteProgressShell(url);
+    startSiteTimer();
+    // 1) discover the site's key pages
+    const d=await postAudit(Object.assign({mode:"discover", url}, base));
+    if(handleLocked(d)) return;
+    if(!(d.pages&&d.pages.length)){ out.innerHTML=auditErrBox(d.message||d.error||"Could not find pages to audit on that site."); return; }
+    SITE_PAGES=d.pages.slice(0,5); SITE_RESULTS=new Array(SITE_PAGES.length).fill(null);
+    setSiteStatus(`Auditing ${SITE_PAGES.length} key pages…`);
+    renderSitePageList();
+    // 2) scan each page, up to 3 at a time, updating the progress list live
+    await runPool(SITE_PAGES,3,async(p,idx)=>{
+      SITE_RESULTS[idx]={busy:true}; renderSitePageList();
+      const r=await postAudit(Object.assign({mode:"scan", url:p.url, label:p.label}, base)).catch(()=>({}));
+      // Carry the page OUTLINE and the completeness flag through to the synthesis: without
+      // them the synthesis only ever saw a prefix, and reported what it could not see as missing.
+      SITE_RESULTS[idx]= (r&&r.summary) ? {url:p.url,label:p.label,grade:r.grade||"?",scores:r.scores||"",summary:r.summary,platform:r.platform,signals:r.signals,excerpt:r.excerpt,outline:r.outline,complete:r.complete,geo:r.geo,rendered:r.rendered} : {url:p.url,label:p.label,grade:"?",summary:""};
+      renderSitePageList();
+    });
+    const good=SITE_RESULTS.filter(r=>r&&r.summary&&r.grade&&r.grade!=="?");
+    if(!good.length){ out.innerHTML=auditErrBox("We reached the site but could not read its pages (they may be JavaScript-rendered). Try a different site."); return; }
+    // the platform the site runs on (same across pages); drives fair, platform-aware grading and fixes
+    const sitePlatform=(SITE_RESULTS.find(r=>r&&r.platform)||{}).platform||null;
+    // Site-wide OBSERVED FACTS, merged across the audited pages. These are deterministic
+    // presence/absence facts (email form, FAQ, bio, countdown, word count) computed in code.
+    // They are passed to the impact/requirements calls so those steps cannot claim something
+    // is missing when it demonstrably is not: if ANY page has it, the site has it.
+    // Generic merge: ANY boolean fact ORs across pages, ANY numeric fact MAXes. Kept generic
+    // so a fact added server-side is merged automatically rather than silently dropped here.
+    const siteFacts=(function(){
+      let m=null;
+      good.forEach(r=>{
+        const f=r&&r.signals&&r.signals.facts; if(!f) return;
+        if(!m){ m=Object.assign({},f); return; }
+        Object.keys(f).forEach(k=>{
+          if(typeof f[k]==="boolean") m[k]=(m[k]===true)||(f[k]===true);
+          else if(typeof f[k]==="number") m[k]=Math.max(m[k]||0,f[k]||0);
+        });
+      });
+      return m;
+    })();
+    /* The screenshots are for the REPORT. They must never be posted back to the server.
+       SITE_RESULTS now carries a full-page screenshot per page (hundreds of KB each) plus the
+       raw element boxes, and this payload used to be sent verbatim to the synthesis: five
+       screenshots the synthesis has no use for, in a request with a hard size and time budget.
+       That is what made the analysis step return nothing. Send the model what it reasons from,
+       and keep the pictures in the browser where the report is built. */
+    const leanPages=good.map(r=>({
+      url:r.url, label:r.label, grade:r.grade, scores:r.scores, summary:r.summary,
+      platform:r.platform, signals:r.signals, excerpt:r.excerpt,
+      outline:r.outline, complete:r.complete, rendered:r.rendered,
+      geo:r.geo?Object.assign({},r.geo,{elementsRaw:undefined}):null   // boxes are for cropping, not for reasoning
+    }));
+    // 3) synthesize the site-level report from the per-page scans
+    setSiteStatus("Synthesizing the site-level audit…");
+    let s=await postAudit(Object.assign({mode:"synthesize", url, pages:leanPages, platform:sitePlatform}, base));
+    // Retry once if synthesis came back without a usable report (transient API blip), so a
+    // one-off failure self-heals instead of surfacing during a demo.
+    if(!(s && s.feature) && !(s && s.result && /OVERVIEW/i.test(s.result))){
+      setSiteStatus("Finalizing the site-level audit…");
+      s=await postAudit(Object.assign({mode:"synthesize", url, pages:leanPages, platform:sitePlatform}, base));
+    }
+    if(handleLocked(s)) return;
+    if(s.error && !s.result){ out.innerHTML=auditErrBox(s.message||s.error); return; }
+    let reportBody=(s.result||"").trim();
+    // Robustness: the synthesis must be a real report (starts at OVERVIEW). If it came back
+    // empty or malformed (a transient API blip), STOP with a clean error. Never proceed to
+    // the impact/requirements calls with empty context, whose "please provide the audit"
+    // meta-commentary would otherwise be inserted and rendered as the report.
+    if(!reportBody || !/(^|\n)\s*OVERVIEW\b/i.test(reportBody)){
+      out.innerHTML=auditErrBox("The audit did not complete (the analysis step returned no result). Please run it again.");
+      return;
+    }
+    // 3b) append the closing "what it takes to fix this" section as its own fast call
+    // (keeps each call well under the timeout; skipped in preview, where output is truncated).
+    if(!s.locked){
+      setSiteStatus("Scoping the plan and the expert impact…");
+      const ctx=reportBody;
+      // Two bounded, independent calls run in parallel off the synthesis: the expert
+      // "why these changes matter" summary (inserted right after the fix list) and the
+      // "what it takes to fix this" section (appended at the end). Both skip in preview.
+      // rendered:true only if at least one page was actually driven through a browser. Without
+      // it the impact/requirements steps must not talk about layout either.
+      const siteRendered=good.some(r=>r&&r.geo);
+      const [imp,req]=await Promise.all([
+        postAudit(Object.assign({mode:"impact", url, context:ctx, platform:sitePlatform, facts:siteFacts, rendered:siteRendered}, base)).catch(()=>null),
+        postAudit(Object.assign({mode:"requirements", url, context:ctx, platform:sitePlatform, facts:siteFacts, rendered:siteRendered}, base)).catch(()=>null)
+      ]);
+      // Require the section header at the START (not merely present), so a model that
+      // replies with meta-commentary mentioning the header in prose is not inserted.
+      if(imp && imp.result && /^\s*WHY THESE CHANGES MATTER/i.test(imp.result.trim())) reportBody=insertAfterFixes(reportBody, imp.result.trim());
+      if(req && req.result && /^\s*WHAT IT TAKES/i.test(req.result.trim())){
+        // Keep the "Not Verified" honesty appendix as the report's LAST section: splice
+        // the implementation plan in before it when present, else append at the end.
+        const uv=reportBody.search(/^\s*NOT VERIFIED IN THIS AUDIT/mi);
+        reportBody = uv>=0
+          ? reportBody.slice(0,uv).replace(/\s+$/,"")+"\n\n"+req.result.trim()+"\n\n"+reportBody.slice(uv)
+          : reportBody+"\n\n"+req.result.trim();
+      }
+    }
+    // 3c) make the overall grade and category scores a deterministic average of the
+    // per-page grades so the same site scores the same way every run.
+    /* Fetch the evidence screenshots in their OWN pass, after the analysis is safely done.
+       They used to be taken inside each scan, which already renders the page, measures every
+       element and makes a vision call against one 26 second budget: adding a full-page JPEG of
+       a 7,000px page to that is what timed the audit out.
+
+       Now they are a separate, model-free call (~8s each), and crucially they are OPTIONAL:
+       the report is already complete at this point, so if a shot is slow or fails, the audit
+       still delivers and simply renders without pictures. Evidence never gates the analysis. */
+    try{
+      setSiteStatus("Capturing the page screenshots for the report…");
+      // runPool drives a callback (it returns nothing), so write each result in by index.
+      await runPool(good, 3, async (r, idx)=>{
+        try{
+          const sh=await postAudit(Object.assign({mode:"shot", url:r.url}, base));
+          if(sh && sh.shotFull){
+            good[idx].shotFull=sh.shotFull;
+            good[idx].pageW=sh.pageW; good[idx].pageH=sh.pageH;
+            good[idx].geo=Object.assign({}, good[idx].geo||{}, {elementsRaw:sh.elementsRaw||[]});
+          }
+        }catch(e){ /* one missing picture must never fail the audit */ }
+      });
+    }catch(e){ /* the report is already complete; pictures are a bonus */ }
+
+    registerShots(good);           // visual evidence for the fixes
+    reportBody=applyDeterministicScores(reportBody, SITE_RESULTS);
+    // 4) render the site report + the per-page grade strip
+    const pages=SITE_PAGES.map((p,i)=>({label:p.label,url:p.url,grade:(SITE_RESULTS[i]||{}).grade}));
+    renderAudit(reportBody,{url:url, platform:sitePlatform}, WATERMARK, reportBody, pages);
+  }catch(err){
+    out.innerHTML=auditErrBox("Could not complete the site audit: "+((err&&err.message)||"unknown error")+".");
+  }finally{
+    btn.disabled=false; btn.classList.remove("loading");
+  }
+}
+// Per-page grade strip shown under the site report header (and in the PDF).
+function pagesStripHtml(pages){
+  if(!pages||!pages.length) return "";
+  const ok=pages.filter(p=>p&&p.grade&&p.grade!=="?");
+  if(!ok.length) return "";
+  const items=ok.map(p=>`<div class="pg-item"><span class="pg-grade ${gradeClass(p.grade)}">${esc(p.grade)}</span><span class="pg-name">${esc(p.label||"Page")}</span></div>`).join("");
+  return `<div class="aud-sec pg-sec"><div class="pg-strip-label">Pages audited (${ok.length})</div><div class="pg-strip">${items}</div></div>`;
+}
+// Print-styled per-page strip for the PDF.
+function prPagesStrip(pages){
+  if(!pages||!pages.length) return "";
+  const ok=pages.filter(p=>p&&p.grade&&p.grade!=="?");
+  if(!ok.length) return "";
+  const items=ok.map(p=>`<span class="pr-pg"><span class="pr-pg-g ${gradeClass(p.grade)}">${esc(p.grade)}</span>${esc(p.label||"Page")}</span>`).join("");
+  return `<div class="pr-pages"><span class="pr-pages-label">Pages audited:</span> ${items}</div>`;
+}
+
+/* ---------------- AI Marketing Audit rendering ---------------- */
+/* build: tethered-narrative (impact maps to filed fixes; UX unassessed; disclosure protected) */
+const AUDIT_DEFS=[
+  {key:"overview", re:/^\s*OVERVIEW\b/i, label:"Overview", cls:"aud-overview"},
+  {key:"working", re:/WHAT IS WORKING|WHAT'?S WORKING|STRENGTHS/i, label:"What's Working", cls:"aud-good"},
+  {key:"issues", re:/COSTING YOU|WHAT IS COSTING|HOLDING (IT|YOU) BACK|WHAT'?S NOT WORKING/i, label:"What's Costing You Leads", cls:"aud-bad"},
+  {key:"fixes", re:/PRIORITI[SZ]ED FIXES|THE FIX LIST|FIX LIST|WHAT TO FIX|QUICK WINS/i, label:"Prioritized Fixes &middot; What, Where &amp; When", cls:"aud-fix"},
+  {key:"impact", re:/WHY THESE CHANGES MATTER|WHY THIS MATTERS|WHY IT MATTERS|EXPERT (READ|IMPACT)|RANK(ING)? (AND|&) CONVERSION/i, label:"Why These Changes Matter &middot; Rank &amp; Conversion Impact", cls:"aud-impact"},
+  {key:"strategic", re:/STRATEGIC MOVES|STRATEGIC RECOMMEND|THIS QUARTER/i, label:"Strategic Moves &middot; This Quarter", cls:"aud-strat"},
+  {key:"ai", re:/WHERE AI|AI CREATES|AI LEVERAGE/i, label:"Where AI Creates Leverage", cls:"aud-ai"},
+  {key:"req", re:/WHAT IT TAKES|TOOLS[^\n]{0,4}(ACCESS|TIMELINE)|IMPLEMENTATION (PLAN|REQUIREMENTS)|RESOURCES (AND|&) TIMELINE|WHAT YOU.?LL NEED/i, label:"What It Takes To Fix This &middot; Tools, Access &amp; Timeline", cls:"aud-req"},
+  {key:"unverified", re:/NOT VERIFIED IN THIS AUDIT|COULD NOT VERIFY|SCOPE (AND|&) LIMITS/i, label:"Not Verified in This Audit &middot; Scope &amp; Limits", cls:"aud-unver"}
+];
+// Split the report into its labeled sections. A header is a short line that
+// matches one of the known section patterns; content is everything until the
+// next header line. Tolerant of case, markdown, and minor wording drift.
+function parseSections(body,defs){
+  const lines=body.split("\n");
+  const hits=[];
+  lines.forEach((line,idx)=>{
+    const bare=line.replace(/[*#>_`:]/g,"").trim();
+    if(bare.length>62) return;
+    for(let d=0;d<defs.length;d++){
+      if(defs[d].re.test(line)){ hits.push({def:defs[d],idx}); break; }
+    }
+  });
+  hits.sort((a,b)=>a.idx-b.idx);
+  // Slice content between consecutive headers, then keep only the FIRST time each
+  // section appears (guards against a model that repeats a header mid-report).
+  const seen={};
+  return hits.map((h,n)=>{
+    const end=n+1<hits.length?hits[n+1].idx:lines.length;
+    return {def:h.def, content:lines.slice(h.idx+1,end).join("\n").trim()};
+  }).filter(s=>{ if(seen[s.def.key])return false; seen[s.def.key]=1; return true; });
+}
+// Insert a section block into the report body right after the PRIORITIZED FIXES
+// section (before the next section header), so it renders immediately below the fix
+// list. Falls back to appending if the fixes or a following header can't be found.
+function insertAfterFixes(body,block){
+  if(!block) return body;
+  const lines=body.split("\n");
+  const fixIdx=lines.findIndex(l=>/PRIORITI[SZ]ED FIXES|FIX LIST|WHAT TO FIX|QUICK WINS/i.test(l) && l.replace(/[*#>_`:]/g,"").trim().length<=62);
+  if(fixIdx<0) return body+"\n\n"+block;
+  const HDR=/STRATEGIC MOVES|WHERE AI|AI CREATES|WHAT IT TAKES|TOOLS[^\n]{0,4}(ACCESS|TIMELINE)|WHY THESE CHANGES/i;
+  let nextIdx=-1;
+  for(let i=fixIdx+1;i<lines.length;i++){
+    const bare=lines[i].replace(/[*#>_`:]/g,"").trim();
+    if(bare.length<=62 && HDR.test(lines[i])){ nextIdx=i; break; }
+  }
+  if(nextIdx<0) return body.replace(/\s+$/,"")+"\n\n"+block;
+  const before=lines.slice(0,nextIdx).join("\n").replace(/\s+$/,"");
+  const after=lines.slice(nextIdx).join("\n");
+  return before+"\n\n"+block+"\n\n"+after;
+}
+// Clean display host from any URL the user typed (with or without protocol/www).
+function cleanHost(u){
+  u=(u||"").trim();
+  try{ if(!/^https?:\/\//i.test(u)) u="https://"+u; return new URL(u).hostname.replace(/^www\./i,""); }
+  catch(e){ return u.replace(/^https?:\/\//i,"").replace(/^www\./i,"").replace(/\/.*$/,""); }
+}
+/* Deterministic scores: derive the overall grade and the six category sub-scores
+   from the per-page scans, so the same site grades the same way every run and the
+   overall is a defensible average of the pages, not a fresh model opinion. */
+const GRADE_ORDER=["F","D-","D","D+","C-","C","C+","B-","B","B+","A-","A","A+"];
+function gradeToNum(g){ return GRADE_ORDER.indexOf((g||"").toUpperCase().trim()); }
+function numToGrade(n){ return GRADE_ORDER[Math.max(0,Math.min(GRADE_ORDER.length-1,Math.round(n)))]; }
+function avgGrades(gs){ const ns=gs.map(gradeToNum).filter(n=>n>=0); return ns.length?numToGrade(ns.reduce((a,b)=>a+b,0)/ns.length):""; }
+function averageCategoryLine(results){
+  const cats=["Conversion","Messaging","Copy","SEO","Trust","UX"];
+  const acc=cats.map(c=>({c:c,sum:0,n:0}));
+  results.forEach(r=>{ if(!r||!r.scores) return; acc.forEach(a=>{ const m=r.scores.match(new RegExp(a.c+"\\s*:\\s*([A-F][+-]?)","i")); if(m){ const v=gradeToNum(m[1]); if(v>=0){ a.sum+=v; a.n++; } } }); });
+  // If a category came back ungraded on every page (UX used to do exactly this, coming back
+  // "n/a" from each scan), this used to discard the WHOLE line and silently fall back to the
+  // model's own scores, so one missing category quietly threw away all six deterministic ones.
+  // Keep what we measured; mark only the genuinely ungraded category as n/a.
+  const parts=acc.map(a=>a.c+": "+(a.n>0 ? numToGrade(a.sum/a.n) : "n/a"));
+  return acc.some(a=>a.n>0) ? ("CATEGORY SCORES: "+parts.join(" | ")) : "";
+}
+function applyDeterministicScores(body,results){
+  const overall=avgGrades(results.filter(r=>r&&r.grade&&r.grade!=="?").map(r=>r.grade));
+  let catLine=averageCategoryLine(results);
+  // UX depends on the rendered layout (visual hierarchy, on-screen order, the fold). This
+  // line used to force UX to n/a UNCONDITIONALLY, which was right when the audit was blind:
+  // grading what we had not looked at would have contradicted our own scope limits.
+  //
+  // The audit can now SEE the page (a real browser measures every element's box), so that
+  // blanket override became a bug: the model earned a UX grade from real measurements and
+  // the renderer stamped it out anyway. Now the rule follows the evidence, which is the whole
+  // principle of this codebase: grade UX when, and only when, we actually rendered the page.
+  const sawLayout=(results||[]).some(r=>r&&r.geo);
+  if(catLine && !sawLayout) catLine=catLine.replace(/UX:\s*[A-F][+-]?/i,"UX: n/a");
+  if(overall) body=body.replace(/OVERALL GRADE:\s*[A-F][+-]?/i,"OVERALL GRADE: "+overall);
+  if(catLine) body=body.replace(/CATEGORY SCORES?:[^\n]*/i,catLine);
+  return body;
+}
+function gradeClass(g){
+  const c=(g||"").charAt(0).toUpperCase();
+  if(c==="A"||c==="B") return "g-good";
+  if(c==="C") return "g-mid";
+  if(c==="D"||c==="F") return "g-bad";
+  return "g-mid";
+}
+// Plain-language label for the detected platform kind, shown as a chip on the report.
+function platKindLabel(k){return ({"link-in-bio":"link-in-bio page","site-builder":"website builder","ecommerce":"online store","cms":"CMS","custom":"custom site"})[k]||k||"";}
+function platChip(p){ if(!p||!p.name) return ""; const k=platKindLabel(p.kind); return `<div class="aud-plat">Built on <strong>${esc(p.name)}</strong>${k?` · ${esc(k)}`:""}</div>`; }
+function renderAudit(body,vals,mark,raw,pages){
+  const out=document.getElementById("outArea");
+  const url=(vals&&vals.url)||"";
+  const gm=body.match(/OVERALL GRADE:\s*([A-F][+-]?)/i);
+  const grade=gm?gm[1].toUpperCase():"";
+  const secs=parseSections(body,AUDIT_DEFS);
+  const platform=(vals&&vals.platform)||null;
+  // Remember the last audit so the Print / Save as PDF feature can rebuild it.
+  try{ window.__lastAudit={url:url,grade:grade,body:body,pages:pages||[],platform:platform}; }catch(e){}
+
+  // Fallback: if parsing found nothing, show the raw report so we never blank out.
+  if(!secs.length){
+    out.innerHTML=`<div class="output-wrap"><div class="card"><div class="email-card"><div class="body">${escMd(body)}</div><div class="watermark">${esc(mark)}</div></div></div></div>`;
+    return;
+  }
+
+  const badge=grade?`<span class="grade-badge ${gradeClass(grade)}">${esc(grade)}</span>`:"";
+  const host=cleanHost(url);
+  const scoreRow=scorecardHtml(body);
+
+  const sectionHtml=secs.map(s=>{
+    if(s.def.key==="overview"){
+      const txt=s.content.replace(/OVERALL GRADE:\s*[A-F][+-]?/i,"").replace(/CATEGORY SCORES?:.*/i,"").trim();
+      return `<div class="aud-sec aud-overview">
+        <div class="aud-sec-body">${escMd(txt).replace(/\n+/g,"<br/>")}</div>
+      </div>`;
+    }
+    const listHtml=s.def.key==="fixes"?fixBullets(s.content,platform,cleanHost(url)):bullets(s.content);
+    return `<div class="aud-sec ${s.def.cls}">
+      <h3 class="aud-h">${s.def.label}</h3>
+      <ul class="aud-list ${s.def.key==="fixes"?"fx-list":""}">${listHtml}</ul>
+    </div>`;
+  }).join("");
+
+  out.innerHTML=`<div class="output-wrap">
+    <div class="row-between" style="margin-bottom:14px">
+      <div class="out-title" style="margin:0">Marketing Audit</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-copy" id="btnPrint">Print / Save as PDF</button>
+        ${copyBtn("c1")}
+      </div>
+    </div>
+    <div class="card aud-card">
+      <div class="aud-head">
+        <div class="aud-head-l">
+          <div class="aud-head-label">AI Marketing Audit</div>
+          <a class="aud-url" href="${esc(url)}" target="_blank" rel="noopener">${esc(host)}</a>
+          ${platChip(platform)}
+        </div>
+        <div class="aud-head-r">
+          ${badge}
+          <div class="grade-cap">Overall grade</div>
+        </div>
+      </div>
+      ${scoreRow}
+      ${pagesStripHtml(pages)}
+      ${sectionHtml}
+      <div class="watermark">${esc(mark)}</div>
+    </div>
+  </div>`;
+  bindCopy("c1",raw);
+  const pb=document.getElementById("btnPrint"); if(pb) pb.addEventListener("click",printAuditReport);
+}
+
+/* Category sub-score chips parsed from a "CATEGORY SCORES: Conversion: B | ..." line. */
+function scorecardHtml(body){
+  const m=body.match(/CATEGORY SCORES?:\s*(.+)/i);
+  if(!m) return "";
+  const items=m[1].split(/[|,]/).map(x=>x.trim()).filter(Boolean).map(x=>{
+    // A dimension the audit could not observe (e.g. UX needs the rendered layout) shows
+    // as a muted "n/a" chip rather than a grade, matching the Not Verified appendix.
+    const na=x.match(/^(.+?):\s*(n\/a|not assessed|unassessed)\s*$/i);
+    if(na) return `<div class="sc-item"><span class="sc-cat">${escMd(na[1].trim())}</span><span class="sc-grade sc-na" title="Not assessed: requires the rendered page layout">n/a</span></div>`;
+    const mm=x.match(/^(.+?):\s*([A-F][+-]?)\s*$/i);
+    if(!mm) return "";
+    const g=mm[2].toUpperCase();
+    return `<div class="sc-item"><span class="sc-cat">${escMd(mm[1].trim())}</span><span class="sc-grade ${gradeClass(g)}">${esc(g)}</span></div>`;
+  }).filter(Boolean).join("");
+  return items?`<div class="scorecard">${items}</div>`:"";
+}
+
+/* Prioritized-fix bullets: pull a leading [Priority] tag into a colored chip and
+   bold the location (text up to the first ": "), so what/where/when jump out. */
+/* ============================ VISUAL EVIDENCE ============================
+   Show the reader the thing being changed, not just a description of it.
+
+   Two kinds of fix need two kinds of evidence, and conflating them is what makes most SEO
+   reports look amateur:
+
+     TITLE / META  are not visible on the page at all. They live in the browser tab and in
+                   Google. So we render a SERP PREVIEW: the search result as it looks today,
+                   and as it would look after the fix. That is the convention a professional
+                   would expect, and it needs no screenshot.
+
+     ON-PAGE       (an H1, a CTA, an image block) IS visible. We already measure every
+                   element's box in the browser, and we now hold a full-page screenshot, so we
+                   crop that screenshot to exactly the element in question and show it.
+
+   Fail-safe: no screenshot or no matching element and the fix renders exactly as it does
+   today. Evidence is an enhancement, never a dependency. */
+const SHOTS={};   // path -> { shot, w, h, elements }
+function registerShots(results){
+  (results||[]).forEach(r=>{
+    if(!r||!r.shotFull||!r.geo) return;
+    let path="/"; try{ path=new URL(r.url).pathname.replace(/\/+$/,"")||"/"; }catch(e){}
+    SHOTS[path]={ shot:r.shotFull, w:r.pageW||1280, h:r.pageH||0,
+      elements:(r.geo&&r.geo.elementsRaw)||[],
+      title:(r.signals&&r.signals.title)||"", meta:(r.signals&&r.signals.metaDesc)||"" };
+  });
+}
+// The fix location names its page ("Home page (/)", "Recruiting page (/recruiting-services-in-the-usa)").
+function shotForLocation(loc){
+  const m=String(loc||"").match(/\(([^)]*\/[^)]*)\)/);
+  let path=m?m[1].trim():"";
+  if(!path && /home/i.test(loc||"")) path="/";
+  path=path.replace(/\/+$/,"")||"/";
+  return SHOTS[path]||null;
+}
+// Find the measured element a fix is talking about, so we crop the RIGHT thing.
+function elementForFix(shot,loc,current){
+  if(!shot||!shot.elements||!shot.elements.length) return null;
+  const els=shot.elements;
+  const norm=t=>String(t||"").toLowerCase().replace(/\s+/g," ").trim();
+  const cur=norm(current).replace(/^\(|\)$/g,"");
+  // 1) Exact-ish text match against the quoted "Now" value: the most reliable signal.
+  if(cur && cur.length>3){
+    const hit=els.find(e=>{ const t=norm(e.text); return t && (t===cur || (cur.length>8 && t.includes(cur)) || (t.length>8 && cur.includes(t))); });
+    if(hit) return hit;
+  }
+  // 2) Otherwise infer from what the fix is about.
+  if(/\bh1\b|headline|heading/i.test(loc||"")) return els.find(e=>e.kind==="heading")||null;
+  if(/\b(cta|button|subscribe|sign ?up|form)\b/i.test(loc||"")) return els.find(e=>e.kind==="button")||null;
+  return null;
+}
+/* Crop the full-page screenshot to one element, with breathing room around it.
+
+   Deliberately an <img> inside a clipped box, NOT a CSS background-image. The PDF is the
+   deliverable, and a browser printing to PDF will happily drop CSS background images unless
+   print-color-adjust persuades it otherwise. That is a setting that works on screen and then
+   silently deletes every screenshot from the one artefact a client actually reads. An <img>
+   prints because it is content, not decoration. Do not "simplify" this back into a background. */
+function evidenceCrop(shot,el,caption){
+  if(!shot||!el||!shot.shot) return "";
+  const PAD=28, MAXW=560;
+  const x=Math.max(0,el.x-PAD), y=Math.max(0,el.y-PAD);
+  const w=Math.min(shot.w-x, el.w+PAD*2), h=Math.min((shot.h||el.y+el.h+PAD)-y, el.h+PAD*2);
+  if(w<=0||h<=0) return "";
+  const k=Math.min(1, MAXW/w);                       // scale the crop to fit the report column
+  const box=`width:${Math.round(w*k)}px;height:${Math.round(h*k)}px`;
+  const img=`width:${Math.round(shot.w*k)}px;left:-${Math.round(x*k)}px;top:-${Math.round(y*k)}px`;
+  return `<figure class="fx-ev"><div class="fx-shot" style="${box}">`+
+    `<img class="fx-img" src="data:image/jpeg;base64,${shot.shot}" style="${img}" alt="${esc(caption||"the element on the live page")}">`+
+    `</div>${caption?`<figcaption>${esc(caption)}</figcaption>`:""}</figure>`;
+}
+// Title/meta are invisible on the page: show the Google result instead, before and after.
+function serpPreview(host,path,curTitle,curMeta,newTitle,newMeta){
+  const url=(host||"")+(path&&path!=="/"?path:"");
+  const card=(t,m,cls,label)=>`<div class="serp ${cls}"><div class="serp-lbl">${esc(label)}</div>`+
+    `<div class="serp-url">${esc(url)}</div>`+
+    `<div class="serp-title">${esc(t||"(no title)")}</div>`+
+    `<div class="serp-desc">${esc(m||"(no meta description)")}</div></div>`;
+  return `<div class="fx-serp">${card(curTitle,curMeta,"serp-now","How Google shows it now")}${card(newTitle,newMeta,"serp-new","After the fix")}</div>`;
+}
+
+function fixBullets(txt,platform,siteHost){
+  if(!txt) return "";
+  const isBio=platform && /link-in-bio/i.test(platform.kind||"");
+  return txt.split(/\n/).map(l=>{
+    let s=l.replace(/^[\s>*#`]*[-•*]?\s*/,"").replace(/^\d+[.)]\s*/,"").replace(/[*_`]+/g,"").trim();
+    if(!s || !/[a-z0-9]/i.test(s)) return "";
+    // Hard filter: a fix list is only for changes. Drop any "leave it alone" note the
+    // model slips in (it sometimes ignores the prompt), covering every phrasing so no
+    // non-fix ever shows (needed/required/necessary, "already strong", "this is good").
+    if(/\b(no changes?\s+(needed|required|necessary)|keep (it |this )?as[- ]is|leave (it )?as[- ]is|already (working|good|strong|solid|fine|great|effective|optimized|perfect)|no action (needed|required)|nothing to (change|fix)|this (is|reads|looks)( already)? (strong|good|working|fine|solid|great|effective))\b/i.test(s)) return "";
+    let chip="";
+    // Accept the priority tag with brackets or with a trailing separator incl. a comma
+    // ("[Critical] ...", "Critical, ...", "High - ...") so the chip is always extracted
+    // and never leaks into the location text.
+    const pm=s.match(/^\[?\s*(critical|high|medium|med|low)\s*\]?[:.,\s-]+/i);
+    if(pm){
+      const p=pm[1].toLowerCase();
+      const lvl=p[0]==="c"?"crit":p[0]==="h"?"high":p[0]==="l"?"low":"med";
+      const lbl={crit:"Critical",high:"High",med:"Medium",low:"Low"}[lvl];
+      chip=`<span class="fx ${lvl}">${lbl}</span>`;
+      s=s.slice(pm[0].length);
+    }
+    // Strip any stray leading separator the model puts between priority and location
+    // (e.g. "[Critical] | Home bio text" -> "Home bio text").
+    s=s.replace(/^[\s|>·:.–—-]+/,"").trim();
+    // Pull the copy-ready before/after (Current: "..." Use: "...") and Effort out of
+    // the line so the exact replacement renders as a clean, paste-ready block. Each
+    // field runs up to the next marker, quoted or not, so slight wording drift is safe.
+    const NEXT="(?=\\s+(?:current(?:\\s+\\w+){0,3}|use\\s+this|use|replace\\s+with|replace|recommended|new|effort)\\s*:|$)";
+    // Trim whitespace and a trailing period, then remove wrapping quotes ONLY when they
+    // are balanced (both ends), so a value like: single H1 "Text" keeps its inner quotes
+    // instead of losing just the closing one and rendering a dangling open quote.
+    const strip=v=>{ v=String(v).replace(/^\s+/,"").replace(/[\s.]+$/,"").trim(); if(/^["“”'][\s\S]*["“”']$/.test(v)) v=v.slice(1,-1).trim(); return v; };
+    const seg=re=>{ const m=s.match(re); return m?strip(m[1]):""; };
+    const current=seg(new RegExp("\\bcurrent(?:\\s+\\w+){0,3}\\s*:\\s*([\\s\\S]+?)"+NEXT,"i"));
+    const replacement=seg(new RegExp("\\b(?:use\\s+this|use|replace\\s+with|replace|recommended|new)\\s*:\\s*([\\s\\S]+?)"+NEXT,"i"));
+    const effort=seg(new RegExp("\\beffort\\s*:\\s*([\\s\\S]+?)"+NEXT,"i"));
+    // Backstop: never render a fix whose "current" value is a fabrication placeholder
+    // (the model guessed instead of reading the page). If it couldn't quote the real
+    // text, the finding isn't trustworthy, so drop it entirely.
+    if(/\b(exact text (was |is )?not (provided|available|given)|not provided|no (exact )?text provided|platform.?default|generic (button )?labels?|unknown value|placeholder text|not specified)\b/i.test(current)) return "";
+    // reason = the sentence before the first marker; then split "Location: reason".
+    let reason=s;
+    const cut=s.search(/\b(current(?:\s+\w+){0,3}|use\s+this|use|replace\s+with|replace|recommended|new|effort)\s*:/i);
+    if(cut>=0) reason=s.slice(0,cut).trim();
+    let loc="";
+    const ci=reason.indexOf(": ");
+    if(ci>0 && ci<=120){ loc=reason.slice(0,ci).trim(); reason=reason.slice(ci+1).replace(/^[:\s]+/,"").trim(); }
+    if(/\beffort\b/i.test(loc)){ loc=""; }
+    // Never render a template echo as the reason (model occasionally copies the format
+    // hint verbatim, e.g. "one sentence on the fix"); drop it so only real reasons show.
+    if(/^\s*(one|a)\s+(plain\s+)?sentence\b|sentence on the fix|^\s*why it matters\.?\s*$|^\s*the real reason\b/i.test(reason)) reason="";
+    // Backstop against manufactured title/meta fixes: the model has a strong bias to always
+    // "optimize" a title even when it is already excellent, cycling through pretextual
+    // rationales (no pipe, mixes dash/pipe, lead with X). If the CURRENT title is objectively
+    // already strong (custom, has a | or : separator, good length, no placeholder/truncation)
+    // AND the rationale is purely stylistic, drop the fix. Real defects (placeholders like
+    // "Home Final", truncations, missing keywords) don't match "strong" and are kept.
+    if(/\btitle tag\b|\bmeta description\b|\btitle\b/i.test(loc) && current){
+      const t=current.trim();
+      const placeholderish=/\b(home final|untitled|new page|page \d|default title|draft|copy of|template|localhost|test page|wordpress|welcome to|final)\b/i.test(t) || /(\.{3}|…)\s*$/.test(t) || t.length<20 || t.length>72;
+      const strongTitle=!placeholderish && /[|:]/.test(t) && t.length>=25;
+      const stylisticOnly=/\b(lead|leads|leading|re-?order|reorder|front-?load|emphasi[sz]|mix(es|ing|ed)?|em dash|en dash|\bdash\b|\bpipe\b|consisten|tighten|prioriti[sz]e|swap|shorten|move .*(first|forward)|word order|separator)\b/i.test((reason||"")+" "+(replacement||"")) && !/placeholder|truncat|cut ?off|cut ?-?off|missing (a )?(primary )?keyword|duplicat|\berror\b|broken|generic and|misspell/i.test((reason||""));
+      if(strongTitle && stylisticOnly) return "";
+    }
+    // Backstop against unverifiable structural claims: we only have raw HTML, not the
+    // rendered layout, so we cannot know visual link order, funnel order, or whether an
+    // element is above/below the fold. Drop fixes that ASSERT those (reorder links,
+    // fragmented funnel, link hierarchy, "is buried", "appears below the fold"). Legit
+    // placement RECOMMENDATIONS ("promote X above the fold") do not match and are kept.
+    const badStructural=/\bfragment\w*\s+(the\s+)?funnel|funnel\s+(order|hierarchy|fragment)|re-?order\s+(the\s+)?(links?|streaming|nav(igation)?)|\blink\s+(order|hierarchy)\b|\b(is|are|was|were)\s+buried\b|buried\s+(in|below|deep|within)|(appears?|sits?|falls?|lands?)\s+(well\s+)?(below|above)\s+the\s+fold/i;
+    if(badStructural.test((loc||"")+" "+(reason||""))) return "";
+    // Pre-hydration false positive: raw HTML shows JS values (countdown timers, counters)
+    // as zeros, so a "timer is frozen/broken at 00:00:00:00" fix is fabricated. Drop it.
+    if(/\b(countdown|timer|counter|clock)\b/i.test((loc||"")+" "+(reason||"")+" "+(current||"")) && /\b0[0:\s]*0|frozen|stuck|broken|not (counting|working|updating)|00:00|:00:00\b/i.test((reason||"")+" "+(current||""))) return "";
+    // Link-in-bio H1 is the creator's DISPLAY NAME (large profile heading), not an SEO
+    // title. Drop a fix that rewrites it into a pipe/colon-delimited SEO/keyword string.
+    if(isBio && /\bh1\b|headline|display name|profile name/i.test(loc||"") && /[|]/.test(replacement||"") && !/[|]/.test(current||"")) return "";
+    /* PLATFORM-IMPOSSIBLE FIXES. A fix is only a fix if the owner can actually do it. On a
+       locked link-in-bio builder, per-image alt text, canonical tags and JSON-LD are not
+       exposed at all: the image menu is crop/replace/remove and there is no HTML to edit.
+       The platform brief tells the model this and the model still filed alt text as a HIGH
+       prioritised fix with a 60 to 90 minute estimate. Same lesson as every other guard in
+       this file: if it must never appear, enforce it in code. These belong in STRATEGIC
+       MOVES ("move to a full site"), which the synthesis writes separately. */
+    const platformImpossible=/\balt(?:-|\s)?text\b|\balt attributes?\b|\bcanonical\b|\bjson-?ld\b|\bschema markup\b|\bstructured data\b/i;
+    if(isBio && platformImpossible.test((loc||"")+" "+(reason||"")+" "+(replacement||""))) return "";
+
+    /* WRONG-PLATFORM TOOLING. The Effort role must name the platform the site is actually
+       on. Left alone the model defaults to WordPress and Yoast no matter what it was told,
+       which is how a Hopp page was once instructed to fix its alt text "in the WordPress
+       media library". The fix itself is usually fine, so repair the tooling rather than
+       drop the work. */
+    let effortFixed=effort;
+    if(effortFixed && platform && platform.name){
+      const wrongTool=/\b(wordpress|yoast|rank\s?math|shopify|squarespace|webflow|wix|drupal|joomla|ghost|hubspot)\b/gi;
+      effortFixed=effortFixed.replace(wrongTool,m=>
+        m.toLowerCase()===String(platform.name).toLowerCase() ? m : platform.name);
+      if(isBio) effortFixed=effortFixed.replace(/\b(cms|staging|media library|codebase|repository)\b/gi, platform.name+" editor");
+    }
+    const noCurrent=!current || /^\(?\s*(none|n\/a|new element|nothing|new\b)/i.test(current);
+    const head=(chip||loc)?`<div class="fx-row">${chip}${loc?`<span class="fx-loc">${escMd(loc)}</span>`:""}</div>`:"";
+    const reasonLine=reason?`<div class="fx-body">${escMd(reason)}</div>`:"";
+
+    /* THE EVIDENCE. Show the reader the actual thing, not a description of it. */
+    let evidence="";
+    try{
+      const shot=shotForLocation(loc);
+      const isTitle=/\btitle tag\b|\bpage title\b/i.test(loc||"");
+      const isMeta=/\bmeta description\b/i.test(loc||"");
+      if((isTitle||isMeta) && current && replacement){
+        // Title/meta live in Google, not on the page. Show the search result, before and after.
+        let path="/"; const pm=String(loc||"").match(/\(([^)]*\/[^)]*)\)/); if(pm) path=pm[1].trim();
+        const pageMeta=(shot&&shot.meta)||"";
+        const pageTitle=(shot&&shot.title)||"";
+        evidence=isTitle
+          ? serpPreview(siteHost,path,current,pageMeta,replacement,pageMeta)
+          : serpPreview(siteHost,path,pageTitle,current,pageTitle,replacement);
+      }else if(shot){
+        // Everything else is visible: crop the real screenshot to the element itself.
+        const el=elementForFix(shot,loc,current);
+        if(el) evidence=evidenceCrop(shot,el,"On the live page today");
+      }
+    }catch(e){ evidence=""; }   // evidence is an enhancement, never a dependency
+
+    let ba="";
+    if(replacement){
+      const curRow=noCurrent?"":`<div class="fx-cur"><span class="fx-tag">Now</span><span class="fx-txt">${esc(stripMd(current))}</span></div>`;
+      ba=`<div class="fx-ba">${curRow}<div class="fx-new"><span class="fx-tag">Use this</span><span class="fx-txt">${escMd(replacement)}</span></div></div>`;
+    }
+    const effLine=effortFixed?`<div class="fx-eff">Effort: ${escMd(effortFixed)}</div>`:"";
+    // Fallback: if none of the markers were found, render the whole line as one body.
+    if(!head && !reasonLine && !ba && !effLine) return `<li class="fx-li"><div class="fx-body">${escMd(s)}</div></li>`;
+    return `<li class="fx-li">${head}${reasonLine}${evidence}${ba}${effLine}</li>`;
+  }).filter(Boolean).join("");
+}
+
+/* Print / Save as PDF: rebuild the last audit as a clean, professional document,
+   then trigger the browser print dialog (which can save to PDF). */
+function printAuditReport(){
+  const a=window.__lastAudit; if(!a){return;}
+  const secs=parseSections(a.body,AUDIT_DEFS);
+  if(!secs.length){return;}
+  const host=cleanHost(a.url);
+  // Date AND time: two audits of the same site on the same day are otherwise indistinguishable
+  // on the page, which made it impossible to tell which version of a report you were reading.
+  let dateStr=""; try{ dateStr=new Date().toLocaleString(undefined,{year:"numeric",month:"long",day:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){}
+  const gcls=gradeClass(a.grade);
+  const scoreRow=scorecardHtml(a.body);
+  // Avoid printing the domain twice: only show the full URL when it adds a real path
+  // beyond the bare domain (a subpage), not for a homepage like https://www.host.com/.
+  let showUrl="";
+  try{ let uu=a.url; if(!/^https?:\/\//i.test(uu)) uu="https://"+uu; const u=new URL(uu); if((u.pathname+u.search).replace(/\/+$/,"")!=="") showUrl=a.url; }catch(e){}
+  const bodyHtml=secs.map(s=>{
+    if(s.def.key==="overview"){
+      const txt=s.content.replace(/OVERALL GRADE:\s*[A-F][+-]?/i,"").replace(/CATEGORY SCORES?:.*/i,"").trim();
+      return `<div class="pr-sec"><div class="pr-eyebrow">Executive summary</div><div class="pr-lead">${escMd(txt).replace(/\n+/g,"<br/><br/>")}</div></div>`;
+    }
+    const list=s.def.key==="fixes"?fixBullets(s.content,a.platform,cleanHost(a.url||"")):bullets(s.content);
+    return `<div class="pr-sec"><h2 class="pr-h">${s.def.label}</h2><ul class="pr-list ${s.def.key==="fixes"?"fx-list":""}">${list}</ul></div>`;
+  }).join("");
+  let mount=document.getElementById("printMount");
+  if(!mount){ mount=document.createElement("div"); mount.id="printMount"; document.body.appendChild(mount); }
+  mount.innerHTML=`<div class="pr-doc">
+    <div class="pr-top">
+      <div class="pr-brand">GRAYRENDER <span>AI Marketing Audit</span></div>
+      <div class="pr-gradebox ${gcls}"><b>${esc(a.grade||"—")}</b><span>overall</span></div>
+    </div>
+    <div class="pr-title">Website Marketing Audit</div>
+    <div class="pr-meta"><b>${esc(host)}</b>${showUrl?" &nbsp;·&nbsp; "+esc(showUrl):""}${dateStr?" &nbsp;·&nbsp; "+dateStr:""}${a.platform&&a.platform.name?" &nbsp;·&nbsp; Built on "+esc(a.platform.name)+(platKindLabel(a.platform.kind)?" ("+esc(platKindLabel(a.platform.kind))+")":""):""}</div>
+    ${scoreRow}
+    ${prPagesStrip(a.pages)}
+    <hr class="pr-rule"/>
+    ${bodyHtml}
+    <div class="pr-foot">Prepared by Grayrender &nbsp;·&nbsp; by Edmund Gray &nbsp;·&nbsp; Built on Anthropic Claude</div>
+  </div>`;
+  // The browser uses document.title as the default "Save as PDF" filename.
+  //
+  // This used to be just "<host> Marketing Audit", which is IDENTICAL on every run: every
+  // report ever exported for a site landed on the same filename. Re-running the audit and
+  // saving again silently overwrote the previous PDF, and anything that dedupes on filename
+  // (mail attachments, upload folders, Downloads) would quietly keep the FIRST file and
+  // discard the new one. That makes it look like the new report "didn't send" or "can't be
+  // read", when in fact it never arrived. It also makes two reports impossible to tell apart.
+  //
+  // So stamp the filename with the local date and time. Each export is now a distinct file,
+  // sorts chronologically, and is self-identifying when you send it to someone.
+  //   e.g. "zhaion.com Marketing Audit 2026-07-13 1447.pdf"
+  const prevTitle=document.title;
+  const two=n=>String(n).padStart(2,"0");
+  const d=new Date();
+  const stamp=`${d.getFullYear()}-${two(d.getMonth()+1)}-${two(d.getDate())} ${two(d.getHours())}${two(d.getMinutes())}`;
+  const safeHost=((host||"site").replace(/[\\/:*?"<>|]+/g,"").trim()||"site");
+  const fname=`${safeHost} Marketing Audit ${stamp}`;
+  const restoreTitle=()=>{ document.title=prevTitle; window.removeEventListener("afterprint",restoreTitle); };
+  window.addEventListener("afterprint",restoreTitle);
+  document.title=fname;
+  window.print();
+  setTimeout(restoreTitle,1500);
+}
+
+function splitAds(body){
+  // Line-based, keyword-tolerant header detection so slight wording drift
+  // ("LinkedIn Sponsored Content" vs "LINKEDIN AD") never drops a card.
+  const lines=body.split("\n");
+  const findHdr=re=>{
+    for(let i=0;i<lines.length;i++){
+      const bare=lines[i].replace(/[*#>_`\-–—:0-9.()]/g,"").trim();
+      if(re.test(lines[i]) && bare.length<=42) return i;
+    }
+    return -1;
+  };
+  const gi=findHdr(/google/i),li=findHdr(/linked ?in/i),pi=findHdr(/landing/i);
+  const cut=(start,...others)=>{
+    if(start<0)return "";
+    const ends=others.filter(e=>e>start).sort((a,b)=>a-b);
+    const end=ends.length?ends[0]:lines.length;
+    return lines.slice(start+1,end).join("\n").trim();
+  };
+  return {google:cut(gi,li,pi)||body,linkedin:cut(li,gi,pi),landing:cut(pi,gi,li)};
+}
+function splitBrief(body){
+  // Line-based: cut at the START of the next header line (not the keyword),
+  // so a header word can never bleed into the previous section. Tolerates markdown/case.
+  const lines=body.split("\n");
+  const findHdr=re=>{
+    for(let i=0;i<lines.length;i++){
+      const bare=lines[i].replace(/[*#>_`:]/g,"").trim();
+      if(re.test(lines[i]) && bare.length<=60) return i;
+    }
+    return -1;
+  };
+  // Tolerant of the model titling it "WHY WE WIN" or "WHY <COMPANY> WINS", which it does
+  // roughly one run in five whatever the prompt says.
+  const wi=findHdr(/WHY WE WIN|WHY [\w'&.\- ]{1,28} WINS/i),
+        xi=findHdr(/COMPETITOR WEAKNESS|WEAKNESS.*EXPLOIT/i),
+        ti=findHdr(/TALK TRACK/i);
+  const cut=(start,...others)=>{
+    if(start<0)return "";
+    const ends=others.filter(e=>e>start).sort((a,b)=>a-b);
+    const end=ends.length?ends[0]:lines.length;
+    return lines.slice(start+1,end).join("\n").trim();
+  };
+  return {wins:cut(wi,xi,ti),weak:cut(xi,wi,ti),talk:cut(ti,wi,xi)};
+}
+function bullets(txt){
+  if(!txt)return "";
+  const items=txt.split(/\n/)
+    .map(l=>l.replace(/^[\s>*#`]*[-•*]?\s*/,"").replace(/^\d+[.)]\s*/,"").replace(/[*_`]+/g,"").trim())
+    .filter(l=>l && /[a-z0-9]/i.test(l)); // drop blank / symbol-only lines (e.g. stray "**")
+  return items.length?items.map(l=>`<li>${escMd(l)}</li>`).join(""):"";
+}
+// Platform character limits for the fields that actually have hard limits.
+const AD_SPECS={
+  "Google Ad":[
+    {k:"H1",re:/headline\s*1\s*:?\s*(.+)/i,max:30},
+    {k:"H2",re:/headline\s*2\s*:?\s*(.+)/i,max:30},
+    {k:"Desc",re:/description\s*:?\s*(.+)/i,max:90}
+  ],
+  "LinkedIn Sponsored":[
+    {k:"Headline",re:/headline\s*:?\s*(.+)/i,max:70},
+    {k:"Intro",re:/intro(?:\s*text)?\s*:?\s*(.+)/i,max:150}
+  ]
+};
+// Count the CLEANED value (what the user actually sees/copies), so the meter is truthful.
+function adMeters(tag,block){
+  const specs=AD_SPECS[tag];
+  if(!specs)return "";
+  const chips=specs.map(s=>{
+    const m=(block||"").match(s.re);
+    if(!m)return "";
+    const n=deDash(stripMd(m[1])).trim().length;
+    return `<span class="cc ${n>s.max?'over':'ok'}">${s.k} ${n}/${s.max}</span>`;
+  }).filter(Boolean).join("");
+  return chips?`<div class="cc-row" title="Platform character limits">${chips}</div>`:"";
+}
+function adCard(tag,txt,id){
+  return `<div class="ad-card"><div class="ad-tag">${tag}</div><div class="ad-body">${escMd(txt||"")}</div>${adMeters(tag,txt||"")}<button class="btn-copy" id="btn_${id}">Copy</button></div>`;
+}
+function copyBtn(id){return `<button class="btn-copy" id="btn_${id}">Copy to Clipboard</button>`;}
+async function generateImage(seed){
+  const btn=document.getElementById("genImg"), area=document.getElementById("imgArea");
+  if(!btn||!area)return;
+  const pe=document.getElementById("imgPrompt");
+  const userPrompt=pe?pe.value.trim():"";
+  const orig=btn.textContent;
+  btn.disabled=true; btn.textContent="Creating image…";
+  area.innerHTML=`<div class="img-loading"><div class="dots"><span></span><span></span><span></span></div><div class="load-text">Generating a realistic image… (this can take 10-20 seconds)</div></div>`;
+  try{
+    const res=await fetch("/.netlify/functions/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:seed,userPrompt:userPrompt,passcode:getPasscode(),owner:isOwner()})});
+    const data=await res.json().catch(()=>({}));
+    if(data.image){
+      area.innerHTML=`<img class="li-photo" src="${data.image}" alt="AI-generated image for the post"/><a class="img-dl" href="${data.image}" download="grayrender-linkedin-image.png">Download image</a>`;
+      btn.textContent="Regenerate image";
+    }else if(data.locked){
+      area.innerHTML=`<div class="img-note">Enter your access code (full access) first, then generate the image.</div>`; btn.textContent=orig;
+    }else if(data.error==="no_key"){
+      area.innerHTML=`<div class="img-note">Image generation isn't set up yet. Add your OpenAI key as <b>OPENAI_API_KEY</b> in Netlify, then redeploy.</div>`; btn.textContent=orig;
+    }else{
+      area.innerHTML=`<div class="img-note">${esc(data.message||"Could not generate the image. Try again.")}</div>`; btn.textContent=orig;
+    }
+  }catch(e){
+    area.innerHTML=`<div class="img-note">Image request failed (it may have timed out). Try again.</div>`; btn.textContent=orig;
+  }finally{ btn.disabled=false; }
+}
+function bindCopy(id,text){
+  const b=document.getElementById("btn_"+id);
+  if(!b)return;
+  b.addEventListener("click",()=>{
+    navigator.clipboard.writeText(cleanCopy(text)).then(()=>{
+      const old=b.textContent;b.textContent="Copied";b.classList.add("done");
+      setTimeout(()=>{b.textContent=old;b.classList.remove("done");},1600);
+    });
+  });
+}
+
+reflectBrand();
+renderTool();
+if(!isUnlocked()) showLock();
+</script>
+</body>
+</html>
