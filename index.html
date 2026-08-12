@@ -1029,7 +1029,10 @@ const LOAD_MSGS=["Analyzing target...","Drafting content...","Applying brand pos
 const AUDIT_LOAD=["Fetching the live page...","Reading the content and structure...","Checking messaging, SEO, and trust signals...","Scoring conversion and lead capture...","Writing the strategic audit..."];
 const ARROW='<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const ICON_INFO='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin-top:1px;color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.6"/></svg>';
-let current="outreach";
+/* First thing a visitor lands on. It is the audit on purpose: it is the flagship, and it is
+   the one tool that needs NO setup, so someone who just unlocked the site can paste a URL and
+   have a graded report without configuring anything first. */
+let current="audit";
 const main=document.getElementById("main");
 const MODKEY=/Mac|iPhone|iPad/.test(navigator.platform)?"⌘":"Ctrl";
 
@@ -1163,10 +1166,16 @@ function handleLocked(d){
   return false;
 }
 
+/* Only the tools that WRITE for your business need to know whose business it is: they
+   interpolate __CO__ into their prompt, which is what `system` is. The audit reads somebody
+   else's website and never touches BRAND at all, so making people do setup before they could
+   run one was pure friction in front of the best thing here. An employer will not do extra
+   steps to see a demo. Paste a website, get the report. */
+function needsBrand(t){ return !!(t && t.system); }
 function renderTool(){
   try{window.scrollTo(0,0);}catch(e){}
-  if(!BRAND) return renderBrandSetup();
   const t=TOOLS[current];
+  if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
     if(f.type==="select"){
