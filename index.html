@@ -966,6 +966,17 @@
   .mt-ctx-foot{padding:14px 24px;border-top:1px solid var(--border);font-size:12px;
     color:var(--ink-2);line-height:1.55}
 
+  .cn-list{list-style:none;margin:0;padding:8px 0}
+  .cn-list li{padding:11px 24px;border-bottom:1px solid var(--border);font-size:13.5px}
+  .cn-list li:last-child{border-bottom:none}
+  .cn-list li::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+    background:var(--accent);margin-right:11px;vertical-align:middle}
+  .cn-foot{padding:16px 24px;border-top:1px solid var(--border)}
+  .cn-note{font-size:12px;color:var(--ink-2);line-height:1.55;margin-bottom:12px}
+  .fn-body{padding:18px 24px}
+  .fn-body p{margin:0 0 14px;font-size:13.4px;line-height:1.65;color:var(--ink-2);max-width:62ch}
+  .fn-note{margin-top:12px;font-size:12px;color:var(--ink-2);line-height:1.55}
+
   /* the screen everyone else gets */
   .soon{text-align:left;max-width:640px}
   .soon-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:1.1px;
@@ -1907,6 +1918,10 @@ function onboardSteps(active){
 }
 /* Nobody has set anything up yet: start at the beginning rather than mid product. */
 function bootScreen(){
+  /* A handoff window is not the product, it is a question being asked of it, so it takes
+     precedence over the normal landing. It still sits behind the passcode. */
+  if(/[?&]connect=/.test(location.search)) return renderConnect();
+  if(/[?&]import=/.test(location.search)) return renderImport();
   if(!BRANDS.length) return renderOnboard();   // first run: the 3 step setup, unchanged
   current="home";                              // coming back: what is open, not a blank form
   renderTool();
@@ -2932,6 +2947,167 @@ You are given the business, the work completed recently, and the open work with 
 Write a plain email body: one line of context, a short "what we did" list, a short "what is next" list with the dates you were given, and one closing line naming anything you need a decision on. Between 120 and 220 words.
 HARD RULES: use only the facts given to you. Never invent a metric, a percentage, a result, a person's name, a company name or a date that was not supplied. Do not write a subject line, a greeting with an invented name, or a signature block. No markdown, no bullets with asterisks, use plain hyphens.`;
 
+/* ---------------- THE HANDOFF TO FINESSE ----------------
+   Finesse is the live copilot Edmund built before this one. It runs from file:// in an
+   Electron shell, and this data lives in a browser profile it cannot reach: a different
+   origin cannot read this storage, a third-party frame gets a partitioned empty copy of it,
+   and Electron is a different browser from Chrome entirely. There is no clever way around
+   that, so the handoff is explicit.
+
+   The mechanism is a consent window. Finesse opens this app; this app shows what is about to
+   be shared and who asked for it; a human presses send. Because the approval happens HERE, in
+   the app that owns the data, and names the requester, posting the result back to whoever
+   opened us is a decision the user actually made rather than one a whitelist made for them.
+   Nothing is sent without that click, and the same handshake runs in reverse when Finesse
+   wants to put meeting actions into the plan. */
+const HANDOFF_V=1;
+function buildHandoff(){
+  const b=B(), a=LAST_OUT.audit;
+  const brief=k=>{ const p=LAST_OUT[k]; return p?splitBriefing(splitWatermark(p.raw||"").body).asset.replace(/\s+/g," ").trim().slice(0,1200):""; };
+  return {
+    app:"grayrender", v:HANDOFF_V, at:Date.now(),
+    brand:{name:b.name||"",what:b.what||"",industry:b.industry||"",url:b.url||"",tone:b.tone||"",
+      offerings:(b.offerings||[]).slice(0,8),audiences:(b.audiences||[]).slice(0,8),
+      goals:(b.goals||[]).slice(0,6),proof:(b.proof||[]).slice(0,6),profile:b.profile||""},
+    audit:a?{grade:a.mark||"",url:(a.vals&&a.vals.url)||"",
+      costing:auditSectionOf(a.body||"","WHAT IS COSTING YOU LEADS").replace(/\s+/g," ").trim().slice(0,900),
+      working:auditSectionOf(a.body||"","WHAT IS WORKING").replace(/\s+/g," ").trim().slice(0,600)}:null,
+    positioning:brief("brand"),
+    competition:brief("intel"),
+    program:programState().map(s=>({n:s.n,label:s.label,status:s.status})),
+    open:openItems().slice(0,15).map(x=>({title:x.title,due:x.due||"",priority:x.priority||"",source:x.source})),
+    focus:(PLAN.strategy&&PLAN.strategy.text)?String(PLAN.strategy.text).replace(/\s+/g," ").replace(/\[\d+\]/g,"").trim().slice(0,400):""
+  };
+}
+/* The same payload as prose, for the copy-and-paste path. A popup can be blocked, and a
+   desktop app may not keep the opener relationship, so there is always a way through that
+   depends on nothing but the clipboard. */
+function handoffText(){ return JSON.stringify(buildHandoff(),null,1); }
+function handoffSummary(h){
+  const n=[];
+  if(h.brand&&h.brand.name) n.push("who "+h.brand.name+" is and what it sells");
+  if(h.audit) n.push("the site audit, graded "+(h.audit.grade||"ungraded")+", and what it found costing leads");
+  if(h.positioning) n.push("the agreed positioning and voice");
+  if(h.competition) n.push("the competitive read");
+  /* Only when it says something. Six untouched steps is not knowledge about a business,
+     and listing it made the "there is nothing worth sending" case impossible to reach. */
+  if(h.program&&h.program.some(p=>p.status==="done")) n.push("how far through the marketing program you are");
+  if(h.open&&h.open.length) n.push(h.open.length+" open piece"+(h.open.length===1?"":"s")+" of work with dates");
+  if(h.focus) n.push("the current focus");
+  return n;
+}
+/* Worth sending at all? A payload with no business, no audit, no positioning and no work is
+   an empty envelope, and offering to send it invites the question of what was in it. */
+function handoffWorth(h){
+  return !!(h && ((h.brand&&h.brand.name) || h.audit || h.positioning || h.competition ||
+    (h.open&&h.open.length) || h.focus));
+}
+function requesterName(){
+  try{
+    const r=new URLSearchParams(location.search).get("connect")||new URLSearchParams(location.search).get("import")||"";
+    return /^[a-z0-9 .-]{1,24}$/i.test(r)?r:"another app";
+  }catch(e){ return "another app"; }
+}
+/* Screen one: something wants the context. Show exactly what it would get. */
+function renderConnect(){
+  try{window.scrollTo(0,0);}catch(e){}
+  const h=buildHandoff(), items=handoffSummary(h), worth=handoffWorth(h);
+  const who=esc(requesterName());
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>${who} wants your <span class="hl">business context</span>.</h1>
+      <p>Nothing leaves this app unless you press send. Here is exactly what would go.</p>
+    </div>
+    <div class="card wk-card">
+      <div class="wk-head"><h2>${esc(h.brand.name||"No business saved yet")}</h2></div>
+      ${worth?`<ul class="cn-list">${items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`
+        : `<p class="wk-empty">There is nothing saved for a business yet, so there is nothing useful to send. Set one up in Grayrender first, then try again.</p>`}
+      <div class="cn-foot">
+        <div class="cn-note">It goes only to the window that opened this one. No audio, no screenshots, no passcode, and nothing about any other business you have saved.</div>
+        <div class="wm-row">
+          ${worth?`<button type="button" class="btn-mini solid" id="cnSend">Send it to ${who}</button>`:""}
+          <button type="button" class="btn-mini" id="cnCopy">Copy it instead</button>
+          <button type="button" class="btn-mini" id="cnNo">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="cnOut" aria-live="polite"></div>`;
+  const done=m=>{ const o=document.getElementById("cnOut"); if(o) o.innerHTML=`<div class="wk-note">${escMd(m)}</div>`; };
+  const send=document.getElementById("cnSend");
+  if(send) send.addEventListener("click",()=>{
+    let ok=false;
+    try{
+      if(window.opener&&!window.opener.closed){
+        // The user approved this here, having been shown the requester and the contents.
+        window.opener.postMessage({type:"grayrender:context",payload:h},"*");
+        ok=true;
+      }
+    }catch(e){ ok=false; }
+    logEvent("shared","Sent the business context to "+requesterName());
+    if(ok){ done("Sent. You can close this window."); setTimeout(()=>{ try{window.close();}catch(e){} },900); }
+    else done("The window that asked is not there any more. Use copy instead and paste it into "+requesterName()+".");
+  });
+  const cp=document.getElementById("cnCopy");
+  if(cp) cp.addEventListener("click",()=>{
+    navigator.clipboard.writeText(handoffText()).then(()=>{ cp.textContent="Copied"; done("Copied. Paste it into "+requesterName()+"."); })
+      .catch(()=>done("Copying was blocked. Download it instead."));
+  });
+  const no=document.getElementById("cnNo");
+  if(no) no.addEventListener("click",()=>{ try{window.close();}catch(e){} goTool("home"); });
+}
+/* Screen two: something wants to PUT work in. Same rule, opposite direction. */
+function renderImport(){
+  try{window.scrollTo(0,0);}catch(e){}
+  const who=esc(requesterName());
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>${who} wants to add <span class="hl">work</span>.</h1>
+      <p>Nothing is added until you have seen it and pressed the button.</p>
+    </div>
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Waiting for ${who}</h2></div>
+      <div id="imOut"><p class="wk-empty">Nothing has arrived yet. If ${who} cannot reach this window, paste what it gave you below.</p></div>
+      <div class="wk-add">
+        <label class="sr-only" for="imPaste">Paste from ${who}</label>
+        <input id="imPaste" type="text" placeholder="Paste here" autocomplete="off"/>
+        <button type="button" class="btn-mini" id="imLoad">Load it</button>
+      </div>
+    </div>`;
+  const load=t=>{
+    let d=null; try{ d=JSON.parse(t); }catch(e){ return showIncoming(null,"That was not something this app could read."); }
+    showIncoming(d,"");
+  };
+  document.getElementById("imLoad").addEventListener("click",()=>load(document.getElementById("imPaste").value||""));
+  try{ if(window.opener&&!window.opener.closed) window.opener.postMessage({type:"grayrender:ready"},"*"); }catch(e){}
+}
+function showIncoming(d,err){
+  const el=document.getElementById("imOut"); if(!el) return;
+  if(err||!d||!Array.isArray(d.actions)||!d.actions.length){
+    el.innerHTML=`<div class="wk-note">${escMd(err||"There was nothing in that to add.")}</div>`; return;
+  }
+  const acts=d.actions.filter(a=>a&&a.title).slice(0,25);
+  el.innerHTML=`<ul class="wk-items">${acts.map((a,i)=>
+    `<li class="wi"><div class="wi-main"><div class="wi-t"><span class="wi-title">${escMd(a.title)}</span></div>
+      <div class="wi-meta"><span class="wi-src">${esc(a.due?"Due "+a.due:"No date given")}</span></div></div></li>`).join("")}</ul>
+    <div class="cn-foot"><div class="wm-row">
+      <button type="button" class="btn-mini solid" id="imAdd">Add ${acts.length} to ${esc(brandName())}</button>
+      <button type="button" class="btn-mini" id="imNo">No thanks</button></div></div>`;
+  document.getElementById("imAdd").addEventListener("click",()=>{
+    acts.forEach(a=>addItem({source:"meeting",title:String(a.title).slice(0,180),
+      detail:(a.detail?String(a.detail).slice(0,500):"")||("Came from "+requesterName()+(a.due?"":". No date was given.")),
+      due:/^\d{4}-\d{2}-\d{2}$/.test(a.due||"")?a.due:""}));
+    persistPlan(); logEvent("meeting",acts.length+" action"+(acts.length===1?"":"s")+" added from "+requesterName());
+    try{ if(window.opener&&!window.opener.closed) window.opener.postMessage({type:"grayrender:added",count:acts.length},"*"); }catch(e){}
+    el.innerHTML=`<div class="wk-note"><b>Added.</b> They are on Today for ${esc(brandName())} now, and in the next calendar export. You can close this window.</div>`;
+  });
+  document.getElementById("imNo").addEventListener("click",()=>{ try{window.close();}catch(e){} goTool("home"); });
+}
+window.addEventListener("message",e=>{
+  const d=e&&e.data;
+  if(!d||typeof d!=="object") return;
+  if(d.type==="finesse:actions" && /[?&]import=/.test(location.search)) showIncoming(d,"");
+});
+
 /* ---------------- MEETING MODE ----------------
    Ported in spirit from Finesse, the live copilot Edmund already built, and deliberately NOT
    ported in mechanism. Finesse streams to Deepgram with a key the user pastes into the
@@ -3292,6 +3468,20 @@ function renderMeeting(){
       <div id="mtOut" aria-live="polite"></div>
     </div>
     <div class="card wk-card">
+      <div class="wk-head"><h2>Finesse</h2><span class="wk-count">the live copilot</span></div>
+      <div class="fn-body">
+        <p>Finesse hears both sides of a remote call, sees the screen, and stays out of a
+           screen share. This one hears your microphone and nothing else, so it is the fallback
+           for when you are not at your desk. Send Finesse what this suite knows and it answers
+           live with your real business behind it.</p>
+        <div class="wm-row">
+          <button type="button" class="btn-mini solid" id="fnSend">Send my context to Finesse</button>
+          <button type="button" class="btn-mini" id="fnCopy">Copy it instead</button>
+        </div>
+        <div class="fn-note" id="fnNote">Finesse opens this app in a window and asks. You will see exactly what is being shared before anything is sent.</div>
+      </div>
+    </div>
+    <div class="card wk-card">
       <div class="wk-head"><h2>What it answers from</h2></div>
       <ul class="mt-ctx">
         ${[["The business",BRAND?brandName():"nothing saved yet"],
@@ -3308,6 +3498,20 @@ function renderMeeting(){
   document.getElementById("mtAnswer").addEventListener("click",meetingAnswer);
   document.getElementById("mtMake").addEventListener("click",meetingMake);
   paintMeetControls(); paintTranscript();
+  const fs=document.getElementById("fnSend");
+  if(fs) fs.addEventListener("click",()=>{
+    /* Sending FROM here opens Finesse's side of the handshake. In practice Finesse starts
+       it, so this is the "I am already in Grayrender" path: put it on the clipboard and say
+       where it goes, rather than pretending we can reach an app that is not open. */
+    navigator.clipboard.writeText(handoffText()).then(()=>{
+      const n=document.getElementById("fnNote");
+      if(n) n.innerHTML="<b>Copied.</b> Open Finesse, go to the GRAYRENDER tab and press paste. Or press Connect in Finesse and it will open this app and ask.";
+      fs.textContent="Copied";
+      logEvent("shared","Copied the business context for Finesse");
+    }).catch(()=>{ const n=document.getElementById("fnNote"); if(n) n.textContent="Copying was blocked by the browser. Use Connect from inside Finesse instead."; });
+  });
+  const fc=document.getElementById("fnCopy");
+  if(fc) fc.addEventListener("click",()=>downloadText("grayrender-context.json",handoffText(),"application/json"));
   if(MEET.artifact) paintArtifact(MEET.artifact);
 }
 function renderMeetingSoon(){

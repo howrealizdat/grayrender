@@ -590,6 +590,83 @@ win.eval("MEET.on=true;");
 win.goTool('home');
 check('leaving the screen stops it', win.eval('MEET.on') === false);
 
+console.log('\nTHE HANDOFF TO FINESSE');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', industry: 'Home Services',
+  url: 'https://northwind.example', offerings: ['Boiler install'], audiences: ['Homeowner'],
+  goals: ['Leads'], proof: ['Gas Safe registered'], profile: 'A local firm.' });
+win.eval("PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.rememberOutput('audit', { kind: 'audit',
+  body: 'WHAT IS COSTING YOU LEADS\n- No accreditation proof above the fold.\n\nPRIORITIZED FIXES\n- [Critical] Home page (/), title tag: placeholder. Current: "Home Final". Use: "Boiler Install | Northwind". Effort: 10 min (SEO specialist).\n',
+  vals: { url: 'https://northwind.example', platform: { name: 'WordPress', kind: 'cms' } }, mark: 'B-', raw: 'x', pages: [] });
+const h = win.buildHandoff();
+check('the payload names itself and its version', h.app === 'grayrender' && h.v === 1);
+check('the business goes', h.brand.name === 'Northwind HVAC' && h.brand.url === 'https://northwind.example');
+check('the audit grade goes', h.audit && h.audit.grade === 'B-');
+check('and what it found costing leads', /accreditation proof/.test(h.audit.costing));
+check('the program goes', Array.isArray(h.program) && h.program.length === 6);
+check('the open work goes, with dates', h.open.length > 0 && h.open.every(x => 'due' in x));
+/* Set a KNOWN FAKE passcode and prove it is absent. Asserting against the real one would
+   have put the real one in a public repo, which is the whole failure this checks for. */
+win.localStorage.setItem('gr_pass', 'NOT-THE-REAL-PASSCODE');
+const flat = JSON.stringify(win.buildHandoff());
+check('the passcode NEVER goes', flat.indexOf('NOT-THE-REAL-PASSCODE') === -1 && !/passcode/i.test(flat));
+check('nor anything from another business', !/Fresh Co|Tick Co|Second Business/.test(flat));
+check('it is valid JSON on the clipboard path', (() => { try { JSON.parse(win.handoffText()); return true; } catch (e) { return false; } })());
+
+console.log('\nCONSENT IS SHOWN BEFORE ANYTHING MOVES');
+const summary = win.handoffSummary(h);
+check('the screen can list what would be shared, in plain words',
+  summary.some(x => /Northwind HVAC/.test(x)) && summary.some(x => /open piece/.test(x)),
+  JSON.stringify(summary));
+check('and it names the audit grade in plain words', summary.some(x => /graded B-/.test(x)), JSON.stringify(summary));
+win.renderConnect();
+check('the send button exists once there is something to send', !!win.document.getElementById('cnSend'));
+check('so does a cancel', !!win.document.getElementById('cnNo'));
+check('and a copy fallback for when a window cannot be reached', !!win.document.getElementById('cnCopy'));
+check('the contents are listed on screen, not just described',
+  win.document.querySelectorAll('.cn-list li').length === summary.length);
+check('it promises no audio, no screenshots and no passcode',
+  /No audio, no screenshots, no passcode/.test(win.document.querySelector('.cn-note').textContent));
+
+win.eval("clearBrand(); PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.renderConnect();
+check('with nothing saved it offers nothing to send rather than an empty payload',
+  !win.document.getElementById('cnSend'), 'send button should be absent');
+check('and says why, instead of an empty list',
+  /nothing useful to send/.test(win.document.querySelector('.wk-empty').textContent));
+check('an untouched program alone is not treated as knowledge worth sharing',
+  win.handoffWorth({ program: [{ n: 1, status: 'now' }] }) === false);
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling', url: 'https://northwind.example', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] });
+
+console.log('\nWORK COMING BACK IN IS CONFIRMED, NOT ACCEPTED');
+win.eval("PLAN = blankPlan();");
+win.renderImport();
+check('the import screen waits rather than acting', !!win.document.getElementById('imPaste'));
+check('and nothing has been added yet', win.openItems().length === 0);
+win.showIncoming({ actions: [
+  { title: 'Fix the phone number', due: '2026-08-20' },
+  { title: 'Gather the reviews', due: '' },
+  { title: 'Photograph the vans', due: 'next week' }
+] }, '');
+check('the incoming work is shown first', win.document.querySelectorAll('.wi').length === 3);
+check('still nothing added until the button', win.openItems().length === 0);
+win.document.getElementById('imAdd').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+check('pressing it files them', win.openItems().length === 3);
+check('a real date survives', win.openItems().some(x => x.due === '2026-08-20'));
+check('and "next week" is NOT turned into a date',
+  win.openItems().filter(x => /vans/.test(x.title))[0].due === '',
+  JSON.stringify(win.openItems().map(x => x.title + '=' + x.due)));
+check('they are labelled as having come from outside',
+  win.openItems().some(x => x.source === 'meeting'));
+
+win.eval("PLAN = blankPlan();");
+win.showIncoming({ actions: [] }, '');
+check('an empty payload adds nothing and says so', win.openItems().length === 0);
+win.showIncoming(null, 'That was not something this app could read.');
+check('and junk is refused rather than parsed hopefully',
+  /could not read|not something/i.test(win.document.getElementById('imOut').textContent));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }
