@@ -1216,7 +1216,7 @@ Be concrete and credible, named advantages and numbers, no vague claims or theor
     blurb:"Build a four-week, multi-channel organic content calendar with a hook, caption, CTA and required asset for every single post.",
     btn:"Build the Calendar",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>brandBlurb(b)||"Your brand, and one line on what it is",prefill:b=>brandBlurb(b)},
       {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
       {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
       {id:"channels",label:"Channels",type:"select",options:["LinkedIn + YouTube + Instagram","LinkedIn only","LinkedIn + Instagram","LinkedIn + YouTube","All channels + X/Threads"]},
@@ -1246,7 +1246,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"One brief in, native content out for LinkedIn, Instagram, YouTube and short-form video. Same message, genuinely rewritten for each platform.",
     btn:"Create the Content Set",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>brandBlurb(b)||"Your brand, and one line on what it is",prefill:b=>brandBlurb(b)},
       {id:"topic",label:"Topic or Announcement",type:"text",placeholder:"e.g. new one-click parts reordering for dealers"},
       {id:"audience",label:"Audience",type:"select",options:b=>b.audiences},
       {id:"tone",label:"Tone",type:"select",options:["Confident and plain-spoken","Consultative","Bold and contrarian","Warm and community-led"]}
@@ -1277,7 +1277,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"Press releases, newsletters, one-pagers, case studies and webinar abstracts, written to publish and consistent with your brand voice.",
     btn:"Write the Asset",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>brandBlurb(b)||"Your brand, and one line on what it is",prefill:b=>brandBlurb(b)},
       {id:"asset",label:"Asset Type",type:"select",options:["Press release","Customer newsletter","One-pager / sell sheet","Case study","Webinar abstract & promo","White paper outline","Internal announcement"]},
       {id:"subject",label:"Subject",type:"text",placeholder:"e.g. platform launch, 500th dealer enrolled, Q3 feature release"},
       {id:"audience",label:"Audience",type:"select",options:b=>["Customers & Prospects"].concat(b.audiences.slice(0,3),["Trade press","Internal team","Partners & vendors"])}
@@ -1304,7 +1304,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"A messaging framework and a usable voice guide: positioning, pillars, proof, the words you use, the words you never use.",
     btn:"Build the Framework",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>brandBlurb(b)||"Your brand, and one line on what it is",prefill:b=>brandBlurb(b)},
       {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
       {id:"stage",label:"Brand Stage",type:"select",options:["New brand launch","Brand refresh","Early-stage / startup","Established, needs consistency"]},
       {id:"principles",label:"Core Principles (comma separated)",type:"text",placeholder:"e.g. Dealers First, Excellence, Transparency"}
@@ -1339,7 +1339,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"Paste last month's numbers. Get the read a stakeholder actually needs: what moved, why, and the three things to change next month.",
     btn:"Analyze Performance",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>brandBlurb(b)||"Your brand, and one line on what it is",prefill:b=>brandBlurb(b)},
       {id:"period",label:"Reporting Period",type:"select",options:["Last 30 days","Last quarter","Month over month","Since launch"]},
       {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
       {id:"data",label:"Paste Your Metrics",type:"textarea",placeholder:"Paste anything: followers, impressions, engagement rate, clicks, top posts, per-channel numbers. Rough notes are fine."}
@@ -1698,6 +1698,15 @@ function phOf(f){
    every text box still started empty, so the audit asked you to type the address of the
    business it had just been configured for. A prefill is a default and nothing more: it is
    editable, it is absent when no profile is loaded, and no tool requires it. */
+/* "Eleventy, Simpler static site generator..." reads as a typo: the profile's description
+   is a sentence and this is the middle of one. Lowercase an ordinary sentence start, and
+   leave an acronym or a product name (AI, SaaS, iPhone) exactly as it was written. */
+function brandBlurb(b){
+  if(!b||!b.name) return "";
+  let w=String(b.what||"").trim().replace(/\.$/,"");
+  if(/^[A-Z][a-z]/.test(w)) w=w[0].toLowerCase()+w.slice(1);
+  return b.name+(w?", "+w:"");
+}
 function preOf(f){
   if(!BRAND) return "";
   const v = (typeof f.prefill==="function") ? f.prefill(B()) : f.prefill;

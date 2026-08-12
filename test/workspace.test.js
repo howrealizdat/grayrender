@@ -349,6 +349,16 @@ check('and Today asks for it instead of silently doing nothing',
   win.nextMoves().some(m => /Tell Grayrender your website/.test(m.t)),
   JSON.stringify(win.nextMoves().map(m => m.t)));
 
+console.log('\nTHE PREFILLED DESCRIPTION READS AS ONE SENTENCE');
+check('a capitalised description is lowercased into the middle of the sentence',
+  win.brandBlurb({ name: 'Eleventy', what: 'Simpler static site generator.' }) === 'Eleventy, simpler static site generator',
+  win.brandBlurb({ name: 'Eleventy', what: 'Simpler static site generator.' }));
+check('an acronym is left exactly as written',
+  win.brandBlurb({ name: 'Acme', what: 'AI tooling for finance teams' }) === 'Acme, AI tooling for finance teams');
+check('a name with no description is just the name',
+  win.brandBlurb({ name: 'Acme' }) === 'Acme');
+check('and nothing at all yields nothing', win.brandBlurb({}) === '');
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }
