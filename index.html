@@ -293,6 +293,53 @@
   .btn-gen.loading .arrow{display:none}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
+  /* ---- Refine dock -------------------------------------------------------
+     Ask for a change instead of regenerating from scratch and losing the draft.
+     It is a third flex child of .shell, so opening it narrows main by itself
+     rather than overlaying the output the user is trying to read. */
+  .refine-dock{flex:0 0 0;width:0;overflow:hidden;border-left:1px solid var(--border);
+    background:var(--surface-2);display:flex;flex-direction:column;
+    transition:flex-basis .3s var(--ease),width .3s var(--ease)}
+  .refine-dock.open{flex:0 0 340px;width:340px}
+  .rf-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:16px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .rf-title{font-family:var(--display);font-size:19px;letter-spacing:.2px}
+  .rf-title em{font-style:italic;color:var(--accent)}
+  .rf-x{background:none;border:0;cursor:pointer;color:var(--ink-2);font-size:19px;line-height:1;padding:4px 6px;border-radius:8px}
+  .rf-x:hover{background:var(--surface);color:var(--ink)}
+  .rf-log{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:0}
+  .rf-empty{color:var(--ink-2);font-size:13px;line-height:1.6}
+  .rf-empty b{color:var(--ink);font-weight:600}
+  .rf-eg{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .rf-eg button{text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:8px 10px;font:inherit;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .rf-eg button:hover{border-color:var(--accent);color:var(--ink)}
+  .rf-turn{font-size:13px;line-height:1.55}
+  .rf-you{background:var(--ink);color:var(--bg);border-radius:12px 12px 4px 12px;padding:9px 12px;align-self:flex-end;max-width:92%}
+  .rf-done{color:var(--ink-2);font-size:12px;display:flex;align-items:center;gap:7px}
+  .rf-done .dot{width:6px;height:6px;border-radius:50%;background:#2e7d52;flex-shrink:0}
+  .rf-done.fail .dot{background:#b3261e}
+  .rf-foot{border-top:1px solid var(--border);padding:14px 16px;flex-shrink:0;display:flex;flex-direction:column;gap:9px}
+  .rf-foot textarea{width:100%;resize:none;border:1px solid var(--border);border-radius:11px;padding:10px 12px;
+    font:inherit;font-size:13.5px;background:var(--surface);color:var(--ink);min-height:64px}
+  .rf-foot textarea:focus{outline:none;border-color:var(--accent)}
+  .rf-actions{display:flex;align-items:center;gap:8px}
+  .rf-send{flex:1;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:9px 14px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .rf-send:hover{background:var(--accent)}
+  .rf-send:disabled{opacity:.5;cursor:default}
+  .rf-undo{background:none;border:1px solid var(--border);border-radius:999px;padding:9px 12px;
+    font:inherit;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .rf-undo:hover:not(:disabled){border-color:var(--accent);color:var(--ink)}
+  .rf-undo:disabled{opacity:.4;cursor:default}
+  .btn-refine{background:none;border:1px solid var(--border);border-radius:999px;padding:10px 16px;
+    font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+  .btn-refine:hover{border-color:var(--accent)}
+  .btn-refine[hidden]{display:none}
+  @media (max-width:900px){
+    .refine-dock.open{position:fixed;inset:auto 0 0 0;width:100%;flex-basis:auto;height:70vh;z-index:60;
+      border-left:0;border-top:1px solid var(--border);border-radius:18px 18px 0 0}
+  }
   .gen-hint{color:var(--ink-2);font-size:12px;font-weight:500}
   .gen-hint kbd{font-family:inherit;font-size:11px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:2px 6px}
 
@@ -690,6 +737,20 @@
   </aside>
 
   <main id="main"><!-- rendered by JS --></main>
+  <aside class="refine-dock" id="refineDock" aria-label="Refine this output">
+    <div class="rf-head">
+      <div class="rf-title">Change <em>this</em></div>
+      <button class="rf-x" id="rfClose" title="Close" aria-label="Close">&times;</button>
+    </div>
+    <div class="rf-log" id="rfLog"></div>
+    <div class="rf-foot">
+      <textarea id="rfInput" placeholder="What should I change?" autocomplete="off"></textarea>
+      <div class="rf-actions">
+        <button class="rf-send" id="rfSend">Rewrite it</button>
+        <button class="rf-undo" id="rfUndo" title="Go back to the previous version">Undo</button>
+      </div>
+    </div>
+  </aside>
 </div>
 
 <footer>Grayrender &nbsp;·&nbsp; by Edmund Gray &nbsp;·&nbsp; Built on Anthropic Claude &nbsp;·&nbsp; Demo build</footer>
@@ -1211,12 +1272,16 @@ function renderTool(){
       ${dl}
       <div class="gen-row">
         <button class="btn-gen" id="genBtn">${t.btn}${ARROW}</button>
+        <button class="btn-refine" id="refineBtn" hidden>Change this</button>
         <span class="gen-hint"><kbd>${MODKEY}</kbd> + <kbd>Enter</kbd></span>
       </div>
     </div>
     <div id="outArea"></div>
   `;
   document.getElementById("genBtn").addEventListener("click",generate);
+  // Switching tools abandons the draft, so the dock must not offer to edit a stale one.
+  REFINE=null; refineOpen(false);
+  document.getElementById("refineBtn").addEventListener("click",()=>refineOpen(true));
   // Custom-dropdown: reveal a text box when "Custom (type your own)" is selected
   t.fields.forEach(f=>{
     if(f.type!=="select")return;
@@ -1491,6 +1556,7 @@ async function generate(){
     }
     if(!res.ok && !data.result){throw new Error("Server returned "+res.status);}
     renderOutput((data.result||"").trim(),vals);
+    refineArm((data.result||"").trim(),vals);   // the draft is now something you can talk to
   }catch(err){
     clearInterval(timer);
     out.innerHTML=`<div class="output-wrap"><div class="error-box">Could not complete the request: ${esc(err.message)}.<br/><span>Check that the Netlify function is deployed and ANTHROPIC_API_KEY is set.</span></div></div>`;
@@ -1663,6 +1729,105 @@ function renderChannels(body,mark){
     <div class="chan-grid">${cards}</div>
     <div class="watermark">${esc(mark)}</div>
   </div>`;
+}
+
+/* ---------------- Refine: change an output by asking for the change --------------------
+   Regenerating from scratch throws away a draft that was mostly right, which is the actual
+   complaint: you want one thing different, not a fresh roll of the dice. So a refine sends
+   the SAME tool prompt plus the current draft plus the instruction, and the reply is rendered
+   back through renderOutput, which means every guard the first draft passed through (deDash,
+   escMd, the RSA filter, the calendar parser) applies to the revision too. The format contract
+   is restated hard, because a revision that drops the section headers would render as raw text.
+   Writing tools only: the audit is a multi-call site crawl, not something to chat with. */
+let REFINE=null;   // {tool, vals, versions:[raw,...], busy}
+
+function refineArm(raw,vals){
+  const btn=document.getElementById("refineBtn");
+  if(!TOOLS[current]||!TOOLS[current].system){ REFINE=null; if(btn) btn.hidden=true; return; }
+  REFINE={tool:current, vals:vals, versions:[raw], busy:false};
+  if(btn) btn.hidden=false;
+  paintRefine();
+}
+function refineOpen(on){
+  const d=document.getElementById("refineDock");
+  if(!d) return;
+  d.classList.toggle("open", on!==false ? true : false);
+  if(on!==false){ const i=document.getElementById("rfInput"); if(i) i.focus(); }
+}
+function paintRefine(){
+  const log=document.getElementById("rfLog"); if(!log) return;
+  const undo=document.getElementById("rfUndo");
+  if(undo) undo.disabled=!REFINE||REFINE.versions.length<2;
+  if(!REFINE||!REFINE.turns||!REFINE.turns.length){
+    const egs=REFINE&&REFINE.tool==="outreach"
+      ? ["Make it shorter and blunter","Swap the ask to a 15 minute call","Lead with the proof point instead"]
+      : ["Make it shorter","Warmer, less corporate","Give me a different angle"];
+    log.innerHTML=`<div class="rf-empty"><b>Tell me what to change and I will rewrite it.</b>
+      The rest stays as it is, and Undo puts the previous version back.
+      <div class="rf-eg">${egs.map(e=>`<button type="button" data-eg="${esc(e)}">${esc(e)}</button>`).join("")}</div></div>`;
+    log.querySelectorAll("[data-eg]").forEach(b=>b.addEventListener("click",()=>{
+      const i=document.getElementById("rfInput"); i.value=b.getAttribute("data-eg"); i.focus();
+    }));
+    return;
+  }
+  log.innerHTML=REFINE.turns.map(t=>t.ok===undefined
+    ? `<div class="rf-turn rf-you">${escMd(t.you)}</div>`
+    : `<div class="rf-done${t.ok?"":" fail"}"><span class="dot"></span>${esc(t.note)}</div>`).join("");
+  log.scrollTop=log.scrollHeight;
+}
+async function runRefine(){
+  if(!REFINE||REFINE.busy) return;
+  const input=document.getElementById("rfInput");
+  const ask=(input.value||"").trim();
+  if(!ask) return;
+  const t=TOOLS[REFINE.tool];
+  REFINE.turns=REFINE.turns||[];
+  REFINE.turns.push({you:ask});
+  REFINE.busy=true; input.value="";
+  const send=document.getElementById("rfSend"); send.disabled=true; send.textContent="Rewriting…";
+  paintRefine();
+
+  const draft=REFINE.versions[REFINE.versions.length-1];
+  const system=withBrand(t.system)+
+    "\n\nYOU ARE REVISING AN EXISTING DRAFT, NOT WRITING A NEW ONE. Apply ONLY the change asked for and leave "+
+    "everything else as close to the draft as possible. Return the COMPLETE revised asset in EXACTLY the same "+
+    "format, with the same section headers, labels and field structure as the draft, because it is parsed and "+
+    "rendered by the same code. Never reply with commentary, an explanation, a preamble, or a list of what you "+
+    "changed: output the revised asset and nothing else.";
+  const userMessage="ORIGINAL BRIEF:\n"+t.user(REFINE.vals)+
+    "\n\nCURRENT DRAFT:\n"+draft+
+    "\n\nCHANGE REQUESTED:\n"+ask+
+    "\n\nReturn the full revised asset now, same format as the draft.";
+
+  let d={};
+  try{
+    const r=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({systemPrompt:system,userMessage:userMessage,tool:REFINE.tool+"-refine",
+        inputs:Object.assign({},REFINE.vals,{refine:ask}),maxTokens:t.maxTokens||1500,
+        passcode:getPasscode(),owner:isOwner()})});
+    d=await r.json().catch(()=>({}));
+  }catch(e){ d={error:"network"}; }
+
+  REFINE.busy=false; send.disabled=false; send.textContent="Rewrite it";
+  if(handleLocked(d)) return;
+  const next=((d&&d.result)||"").trim();
+  if(!next){
+    REFINE.turns.push({ok:false,note:(d&&d.message)||"That did not come back. Try again."});
+    paintRefine(); return;
+  }
+  REFINE.versions.push(next);
+  REFINE.turns.push({ok:true,note:"Rewritten. Version "+REFINE.versions.length+"."});
+  renderOutput(next,REFINE.vals);
+  paintRefine();
+}
+function undoRefine(){
+  if(!REFINE||REFINE.versions.length<2) return;
+  REFINE.versions.pop();
+  const back=REFINE.versions[REFINE.versions.length-1];
+  REFINE.turns=REFINE.turns||[];
+  REFINE.turns.push({ok:true,note:"Went back to version "+REFINE.versions.length+"."});
+  renderOutput(back,REFINE.vals);
+  paintRefine();
 }
 
 function renderOutput(raw,vals){
@@ -2702,6 +2867,15 @@ function bindCopy(id,text){
     });
   });
 }
+
+/* Refine dock wiring. Bound once against the static markup, since the dock lives outside
+   main and therefore survives every tool re-render. */
+document.getElementById("rfClose").addEventListener("click",()=>refineOpen(false));
+document.getElementById("rfSend").addEventListener("click",runRefine);
+document.getElementById("rfUndo").addEventListener("click",undoRefine);
+document.getElementById("rfInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){ e.preventDefault(); runRefine(); }
+});
 
 reflectBrand();
 renderTool();

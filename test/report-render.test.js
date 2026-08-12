@@ -517,6 +517,53 @@ check('an unrecognised block is passed through untouched',
   win.tightenRsa('GOOGLE AD\nsomething unexpected') === 'GOOGLE AD\nsomething unexpected');
 check('empty input does not throw', win.tightenRsa('') === '');
 
+/* ---------------------------------------------------------------------------
+   REFINE: change a draft instead of rerolling it.
+
+   Regenerating throws away a draft that was mostly right. The dock sends the
+   same tool prompt plus the draft plus the instruction, and renders the reply
+   back through renderOutput so every guard applies to the revision too.
+   Writing tools only: the audit is a multi-call site crawl, not a chat.
+--------------------------------------------------------------------------- */
+console.log('\nREFINE DOCK  (edit the draft, do not reroll it)');
+win.eval("saveBrand(DEFAULT_BRAND); current='outreach';");
+win.renderTool();
+win.refineArm('Subject: first draft\n\nBody of the first draft.', { company: 'Northwind' });
+check('it arms on a writing tool', win.eval('!!REFINE'));
+check('the Change this button is revealed', !win.document.getElementById('refineBtn').hidden);
+check('the first draft is version 1', win.eval('REFINE.versions.length') === 1);
+check('undo is disabled with only one version', win.document.getElementById('rfUndo').disabled);
+
+win.refineOpen(true);
+check('the dock opens', win.document.getElementById('refineDock').classList.contains('open'));
+check('it suggests example edits before you type', /rf-eg/.test(win.document.getElementById('rfLog').innerHTML));
+
+/* A second version, then Undo must put the first one back on screen. */
+win.eval("REFINE.versions.push('Subject: second draft\\n\\nRewritten body.');");
+win.undoRefine();
+check('undo restores the previous version',
+  win.eval("REFINE.versions[REFINE.versions.length-1]").indexOf('first draft') > -1);
+check('and the restored draft is what renders',
+  /first draft/.test(win.document.getElementById('outArea').textContent),
+  win.document.getElementById('outArea').textContent.slice(0, 80));
+check('undo is disabled again at version 1', win.document.getElementById('rfUndo').disabled);
+
+/* The audit must never arm it: refining that means re-crawling a site. */
+win.eval("current='audit';");
+win.renderTool();
+win.refineArm('some report body', {});
+check('the audit does NOT arm the refine dock', win.eval('REFINE === null'));
+check('and its button stays hidden', win.document.getElementById('refineBtn').hidden);
+
+/* Switching tools must not leave a stale draft attached to the wrong tool. */
+win.eval("current='outreach';");
+win.renderTool();
+win.refineArm('draft A', { company: 'A' });
+win.eval("current='linkedin';");
+win.renderTool();
+check('switching tools clears the previous draft', win.eval('REFINE === null'));
+check('and closes the dock', !win.document.getElementById('refineDock').classList.contains('open'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
