@@ -281,9 +281,6 @@ const MAIN_HALF = [
   'WHAT IS COSTING YOU LEADS',
   '- Every page carries two H1 tags.',
   '',
-  'WHERE AI CREATES LEVERAGE',
-  '- Continuous auditing would catch these before they ship.',
-  '',
   'NOT VERIFIED IN THIS AUDIT',
   '- Mobile viewports were not measured.'
 ].join('\n');
@@ -292,7 +289,10 @@ const FIX_HALF = [
   '- [Critical] Home page (/), title tag: a placeholder wastes the best SEO slot. Current: "Home Final - Northwind". Use: "Tech Staffing & Recruiting | Northwind". Effort: 10 min (SEO specialist).',
   '',
   'STRATEGIC MOVES',
-  '- Standardize the H1 structure across all five pages.'
+  '- Standardize the H1 structure across all five pages.',
+  '',
+  'WHERE AI CREATES LEVERAGE',
+  '- Continuous auditing would catch these before they ship.'
 ].join('\n');
 
 const stitched = win.stitchReport(MAIN_HALF, FIX_HALF);
@@ -302,13 +302,14 @@ const order = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'PRIO
 
 check('every section survives the stitch', order.every(i => i >= 0), JSON.stringify(order));
 check('sections land in report order', order.every((v, i) => i === 0 || v > order[i - 1]), JSON.stringify(order));
-check('the fix list sits before WHERE AI CREATES LEVERAGE',
-  stitched.indexOf('PRIORITIZED FIXES') < stitched.indexOf('WHERE AI CREATES LEVERAGE'));
+check('the fix list sits before the honesty appendix',
+  stitched.indexOf('PRIORITIZED FIXES') < stitched.indexOf('NOT VERIFIED IN THIS AUDIT'));
 check('the fix list sits after WHAT IS COSTING YOU LEADS',
   stitched.indexOf('PRIORITIZED FIXES') > stitched.indexOf('WHAT IS COSTING YOU LEADS'));
-check('the strategic moves ride with the fixes, still in order',
+check('the moved sections ride with the fixes, still in order',
   stitched.indexOf('STRATEGIC MOVES') > stitched.indexOf('PRIORITIZED FIXES')
-  && stitched.indexOf('STRATEGIC MOVES') < stitched.indexOf('WHERE AI CREATES LEVERAGE'));
+  && stitched.indexOf('WHERE AI CREATES LEVERAGE') > stitched.indexOf('STRATEGIC MOVES')
+  && stitched.indexOf('WHERE AI CREATES LEVERAGE') < stitched.indexOf('NOT VERIFIED IN THIS AUDIT'));
 check('the fix survives intact', /Home Final - Northwind/.test(stitched) && /Effort: 10 min/.test(stitched));
 check('nothing is duplicated', stitched.split('STRATEGIC MOVES').length - 1 === 1
   && stitched.split('OVERVIEW').length - 1 === 1);
@@ -365,16 +366,18 @@ const LEAKY_MAIN = [
 const cleanedMain = A.keepSections(LEAKY_MAIN, A.MAIN_SECTIONS);
 check('the leaked fix list is dropped from the main half', !/PRIORITIZED FIXES/.test(cleanedMain), cleanedMain);
 check('the leaked strategic moves are dropped too', !/STRATEGIC MOVES/.test(cleanedMain));
+check('the leaked AI leverage section is dropped too', !/WHERE AI CREATES LEVERAGE/.test(cleanedMain));
 check('the main half keeps everything it owns',
-  ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT']
+  ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'NOT VERIFIED IN THIS AUDIT']
     .every(s => cleanedMain.includes(s)), cleanedMain);
 check('the grade line survives the cut', /OVERALL GRADE: B/.test(cleanedMain));
 check('the main half still ends at the honesty appendix',
   cleanedMain.trim().endsWith('- Mobile viewports were not measured.'));
 
 const cleanedFix = A.keepSections(LEAKY_MAIN, A.FIX_SECTIONS);
-check('the fix half keeps only its two sections',
+check('the fix half keeps only its three sections',
   /PRIORITIZED FIXES/.test(cleanedFix) && /STRATEGIC MOVES/.test(cleanedFix)
+  && /WHERE AI CREATES LEVERAGE/.test(cleanedFix)
   && !/OVERVIEW/.test(cleanedFix) && !/NOT VERIFIED/.test(cleanedFix), cleanedFix);
 check('the fix half starts at the fix list', cleanedFix.trim().startsWith('PRIORITIZED FIXES'));
 
@@ -385,7 +388,8 @@ check('a repeated section keeps only the first copy',
 
 /* A clean half must pass through untouched, or the guard is doing harm. */
 const already = ['PRIORITIZED FIXES', '- [High] Home page (/), meta: reason. Current: "a". Use: "b". Effort: 5 min (SEO specialist).',
-                 '', 'STRATEGIC MOVES', '- Standardize headings.'].join('\n');
+                 '', 'STRATEGIC MOVES', '- Standardize headings.',
+                 '', 'WHERE AI CREATES LEVERAGE', '- Continuous auditing.'].join('\n');
 check('a well-behaved half is left alone', A.keepSections(already, A.FIX_SECTIONS).trim() === already.trim());
 
 /* Something unrecognisable is never silently emptied. */

@@ -646,8 +646,8 @@ function synthClosing(lastSection, budget) {
 const REPORT_SECTIONS = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS',
   'PRIORITIZED FIXES', 'STRATEGIC MOVES', 'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT'];
 const MAIN_SECTIONS = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS',
-  'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT'];
-const FIX_SECTIONS = ['PRIORITIZED FIXES', 'STRATEGIC MOVES'];
+  'NOT VERIFIED IN THIS AUDIT'];
+const FIX_SECTIONS = ['PRIORITIZED FIXES', 'STRATEGIC MOVES', 'WHERE AI CREATES LEVERAGE'];
 
 function keepSections(text, allowed) {
   if (!text || !allowed) return text;
@@ -669,28 +669,31 @@ function keepSections(text, allowed) {
   return kept.trim() || text;
 }
 
-/* WHERE THE CUT GOES. The first attempt put only the fix list in the second call, which
-   measured 5,375 chars / 27.7s against 2,367 chars / 9.7s: the split was real but the halves
-   were nowhere near even, so the slow half still sat on the ceiling. Moving STRATEGIC MOVES
-   across evens them (roughly 3,100 against 3,050) and, because the sections either side of
-   the cut stay contiguous in report order, the seam is still a single splice. */
+/* WHERE THE CUT GOES, arrived at by measuring rather than guessing.
+   Attempt 1 put only the fix list in the second call: 5,375 chars / 27.7s against 2,367 /
+   9.7s. A real split, but wildly uneven, so the slow half still sat on the ceiling.
+   Attempt 2 moved STRATEGIC MOVES across: 4,434 / 23.2s against 2,665 / 11.1s. Better, and
+   not enough, because the wall clock is the SLOWER half and margin was still thin.
+   Attempt 3 moves WHERE AI CREATES LEVERAGE across too, which puts the bulk near even.
+   The three moved sections are contiguous in report order, so the seam is still one splice,
+   now before NOT VERIFIED IN THIS AUDIT, which stays with the diagnosis where it belongs. */
 const SYNTH_SYSTEM_MAIN =
-  SYNTH_RULES + SEC_OVERVIEW + SEC_WORKING + SEC_COSTING + SEC_AI + SEC_UNVERIFIED +
-  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 3000) +
-  '\n\nYOU ARE NOT WRITING THE FIX LIST. A second pass is writing PRIORITIZED FIXES and STRATEGIC MOVES at the ' +
-  'same time, so do NOT output a PRIORITIZED FIXES header, a STRATEGIC MOVES header, or any numbered or bracketed ' +
-  'fix lines, even though the rules above describe how fixes are written. Write only the sections listed above.';
+  SYNTH_RULES + SEC_OVERVIEW + SEC_WORKING + SEC_COSTING + SEC_UNVERIFIED +
+  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 2600) +
+  '\n\nYOU ARE NOT WRITING THE FIX LIST. A second pass is writing PRIORITIZED FIXES, STRATEGIC MOVES and WHERE AI ' +
+  'CREATES LEVERAGE at the same time, so do NOT output any of those three headers and no numbered or bracketed fix ' +
+  'lines, even though the rules above describe how fixes are written. Write only the sections listed above.';
 
-/* The fix list and the strategic moves. This runs beside the call above and cannot see that
-   call's output, so the no-contradiction rule is re-pointed at the per page WINS in the
-   scans, which is the same evidence the strengths section is derived from anyway. */
+/* The fix list and the two forward-looking sections. This runs beside the call above and
+   cannot see that call's output, so the no-contradiction rule is re-pointed at the per page
+   WINS in the scans, which is the same evidence the strengths section is derived from. */
 const SYNTH_SYSTEM_FIXES =
-  SYNTH_RULES + SEC_FIXES + SEC_STRATEGIC + SYNTH_BREVITY + synthClosing('STRATEGIC MOVES', 3000) +
-  '\n\nYOU ARE WRITING TWO SECTIONS ONLY, PRIORITIZED FIXES THEN STRATEGIC MOVES. Another pass is writing the ' +
-  'rest of the report at the same time, so output those two headers and their lines and NOTHING else: no overview, ' +
-  'no grade, no strengths, no AI leverage section, no honesty appendix, no closing commentary. NO CONTRADICTION: ' +
-  'the per page WINS you were given are this site\'s strengths, so never file a fix that removes, shortens, or ' +
-  'reverses one of them.';
+  SYNTH_RULES + SEC_FIXES + SEC_STRATEGIC + SEC_AI + SYNTH_BREVITY + synthClosing('WHERE AI CREATES LEVERAGE', 3400) +
+  '\n\nYOU ARE WRITING THREE SECTIONS ONLY, PRIORITIZED FIXES THEN STRATEGIC MOVES THEN WHERE AI CREATES LEVERAGE. ' +
+  'Another pass is writing the rest of the report at the same time, so output those three headers and their lines ' +
+  'and NOTHING else: no overview, no grade, no strengths, no costing section, no honesty appendix, no closing ' +
+  'commentary. NO CONTRADICTION: the per page WINS you were given are this site\'s strengths, so never file a fix ' +
+  'that removes, shortens, or reverses one of them.';
 
 /* The whole report in one call: the original behaviour. Nothing in the current client asks
    for this any more, but a caller that does not send a part still gets a complete report
