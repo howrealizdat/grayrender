@@ -198,7 +198,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       logUsage({ time: new Date().toISOString(), tool: 'audit-site', inputs: { url: url, pages: scans.length },
         ip: clientIp, country: h['x-country'] || 'unknown', userAgent: h['user-agent'] || 'unknown', referer: h['referer'] || 'direct'
       }, msg, { unlocked: true, owner: owner === true }).catch(function () {});
-      return json(200, { result: out, locked: false, url: url, grade: extractGrade(out) });
+      return json(200, { result: out, locked: false, url: url, grade: extractGrade(out), usage: body.debug ? msg.usage : undefined });
     }
 
     // ===== MODE: requirements (the closing "what it takes" section; its own fast call) =====
@@ -211,7 +211,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       let out = textOf(msg);
       if (!out) return json(502, { error: 'Model returned no text content.' });
       out = applyGuards(out, body.platform, body.facts, body.rendered === true, String(body.context || ''));
-      return json(200, { result: out });
+      return json(200, { result: out, usage: body.debug ? msg.usage : undefined });
     }
 
     // ===== MODE: impact (expert summary of WHY the fixes matter; its own fast call) =====
@@ -228,7 +228,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       // bullet that talks about an element the finalized fix list never mentions.
       out = applyGuards(out, body.platform, body.facts, body.rendered === true, String(body.context || ''));
       out = tetherToFixes(out, sectionOf(body.context, /PRIORITI[SZ]ED FIXES/i));
-      return json(200, { result: out });
+      return json(200, { result: out, usage: body.debug ? msg.usage : undefined });
     }
 
     /* ===== MODE: shot =====
@@ -326,6 +326,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       // 1,000-char slice the synthesis used to receive is precisely what made it report an
       // FAQ, a bio and an email form as "missing" on a page that had all three further down.
       return json(200, { url: target, label: body.label || '', grade: extractGrade(out), scores: extractScores(out), summary: out, platform: sig.platform,
+        usage: body.debug ? msg.usage : undefined,
         signals: compactSignals(sig), excerpt: content.slice(0, 4000),
         outline: digest.outline, complete: digest.complete,
         // Geometry travels to the synthesis as TEXT (never the image: five screenshots would
