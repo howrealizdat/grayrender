@@ -92,12 +92,22 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       });
       const btxt = ((bm.content || []).find(function (b) { return b.type === 'text'; }) || {}).text || '';
       const bh = event.headers || {};
+      /* Passcode-gated diagnostics. Brand setup is one model call whose input is
+         assembled from several extractors; when it comes back empty there is otherwise
+         no way to tell whether the page was unreadable, the excerpt was empty, or the
+         model answered in a shape the parser cannot read. */
+      const brandDebug = body.debug === true ? {
+        excerptChars: String((buildDigest(html, sig, 8000) || {}).text || '').length,
+        htmlChars: html.length,
+        title: sig.title || '',
+        rawModelText: String(btxt || '').slice(0, 900)
+      } : undefined;
       logUsage({ time: new Date().toISOString(), tool: 'brand-setup', inputs: { url: t0 },
         ip: bh['x-nf-client-connection-ip'] || bh['x-forwarded-for'] || 'unknown',
         country: bh['x-country'] || 'unknown', userAgent: bh['user-agent'] || 'unknown',
         referer: bh['referer'] || 'direct'
       }, bm, { unlocked: true, owner: owner === true }).catch(function () {});
-      return json(200, { profile: parseBrand(btxt), platform: plat, url: t0 });
+      return json(200, { profile: parseBrand(btxt), platform: plat, url: t0, debug: brandDebug });
     }
 
 
