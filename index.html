@@ -1730,6 +1730,18 @@ async function postAudit(payload){
   const r=await fetch("/.netlify/functions/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   return r.json().catch(()=>({}));
 }
+/* Put the separately written fix list back where a reader expects it: after WHAT IS COSTING
+   YOU LEADS and before STRATEGIC MOVES. Everything downstream (the impact tethering, the
+   requirements splice before the honesty appendix, the deterministic scores, the PDF) reads
+   the finished body and needs no knowledge that it arrived in two pieces.
+   If the fix pass failed, the report still renders without it. Half a report beats none. */
+function stitchReport(main, fixes){
+  if(!fixes) return main;
+  const m=/(^|\n)[ \t]*STRATEGIC MOVES\b/i.exec(main);
+  if(!m) return main.replace(/\s+$/,"")+"\n\n"+fixes;
+  const cut=m.index+(m[1]?m[1].length:0);   // start of the STRATEGIC MOVES line itself
+  return main.slice(0,cut).replace(/\s+$/,"")+"\n\n"+fixes.replace(/\s+$/,"")+"\n\n"+main.slice(cut);
+}
 // Run fn over items with at most n in flight at once.
 async function runPool(items,n,fn){
   let i=0;
@@ -1857,29 +1869,41 @@ async function runSiteAudit(vals){
       outline:r.outline, complete:r.complete, rendered:r.rendered,
       geo:r.geo?Object.assign({},r.geo,{elementsRaw:undefined}):null   // boxes are for cropping, not for reasoning
     }));
-    // 3) synthesize the site-level report from the per-page scans
+    /* 3) synthesize the site-level report from the per-page scans, in TWO PARALLEL CALLS.
+
+       One call writing every section was MEASURED at 28.1 / 28.1 / 29.9 seconds against a
+       function ceiling in the same range, so it 504'd intermittently and the run died on
+       "the analysis step returned no result". It is output bound, so the only real lever is
+       writing less per call. The fix list is the longest and most rule heavy section, so it
+       gets its own call and everything else gets the other. Each is about half the output,
+       and because they overlap the wall clock is unchanged. */
     setSiteStatus("Synthesizing the site-level audit…");
-    let s=await postAudit(Object.assign({mode:"synthesize", url, pages:leanPages, platform:sitePlatform}, base));
-    // Retry once if synthesis came back without a usable report (transient API blip), so a
-    // one-off failure self-heals instead of surfacing during a demo.
-    if(!(s && s.feature) && !(s && s.result && /OVERVIEW/i.test(s.result))){
+    const synthPart=(part)=>postAudit(Object.assign({mode:"synthesize", part, url, pages:leanPages, platform:sitePlatform}, base));
+    const partOk=(r,head)=>!!(r && r.result && new RegExp("(^|\\n)\\s*"+head+"\\b","i").test(r.result));
+    let [mainRes,fixRes]=await Promise.all([synthPart("main").catch(()=>null), synthPart("fixes").catch(()=>null)]);
+    // Retry ONLY the half that failed. A blip now costs one short call, not the whole report.
+    if(!partOk(mainRes,"OVERVIEW")||!partOk(fixRes,"PRIORITIZED FIXES")){
       setSiteStatus("Finalizing the site-level audit…");
-      s=await postAudit(Object.assign({mode:"synthesize", url, pages:leanPages, platform:sitePlatform}, base));
+      [mainRes,fixRes]=await Promise.all([
+        partOk(mainRes,"OVERVIEW")          ? mainRes : synthPart("main").catch(()=>null),
+        partOk(fixRes,"PRIORITIZED FIXES")  ? fixRes  : synthPart("fixes").catch(()=>null)
+      ]);
     }
-    if(handleLocked(s)) return;
-    if(s.error && !s.result){ out.innerHTML=auditErrBox(s.message||s.error); return; }
-    let reportBody=(s.result||"").trim();
-    // Robustness: the synthesis must be a real report (starts at OVERVIEW). If it came back
-    // empty or malformed (a transient API blip), STOP with a clean error. Never proceed to
-    // the impact/requirements calls with empty context, whose "please provide the audit"
-    // meta-commentary would otherwise be inserted and rendered as the report.
-    if(!reportBody || !/(^|\n)\s*OVERVIEW\b/i.test(reportBody)){
+    if(handleLocked(mainRes)||handleLocked(fixRes)) return;
+    const synthErr=[mainRes,fixRes].find(r=>r&&r.error&&!r.result);
+    if(synthErr){ out.innerHTML=auditErrBox(synthErr.message||synthErr.error); return; }
+    // The diagnosis half IS the report. Without it there is nothing to render, so stop with a
+    // clean error rather than proceeding to the impact and requirements calls with empty
+    // context, whose "please provide the audit" meta-commentary would render as the report.
+    if(!partOk(mainRes,"OVERVIEW")){
       out.innerHTML=auditErrBox("The audit did not complete (the analysis step returned no result). Please run it again.");
       return;
     }
+    let reportBody=stitchReport((mainRes.result||"").trim(),
+                                partOk(fixRes,"PRIORITIZED FIXES")?(fixRes.result||"").trim():"");
     // 3b) append the closing "what it takes to fix this" section as its own fast call
     // (keeps each call well under the timeout; skipped in preview, where output is truncated).
-    if(!s.locked){
+    if(!mainRes.locked){
       setSiteStatus("Scoping the plan and the expert impact…");
       const ctx=reportBody;
       // Two bounded, independent calls run in parallel off the synthesis: the expert

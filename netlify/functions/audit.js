@@ -150,6 +150,18 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       });
       if (dropped) console.warn('[audit] synthesize: dropped ' + dropped + ' screenshot(s) from the payload; they belong in the browser, not here');
 
+      /* WHICH HALF OF THE REPORT THIS CALL WRITES. The browser fires 'main' and 'fixes' in
+         parallel and stitches them, because one call writing everything measured 28 to 30
+         seconds, which is the function ceiling, and 504'd intermittently. A caller that
+         sends no part still gets the whole report, so an old client is not broken by this. */
+      var part = body.part === 'fixes' ? 'fixes' : (body.part === 'main' ? 'main' : 'all');
+      var synthSys = part === 'fixes' ? SYNTH_SYSTEM_FIXES
+                   : part === 'main'  ? SYNTH_SYSTEM_MAIN
+                   : SYNTH_SYSTEM;
+      // The report half must START at its own first header, whichever half this is.
+      var anchor = part === 'fixes' ? 'PRIORITIZED FIXES' : 'OVERVIEW';
+      var anchorRe = new RegExp(anchor, 'i');
+
       /* The synthesis is the tightest budget in the system: five pages, one call, one hard
          function timeout. If the full payload does not come back, retry COMPACT rather than
          hand the user "the analysis step returned no result" and ask them to run it again.
@@ -158,7 +170,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       var runSynth = async function (compact) {
         var m = await client.messages.create({
           model: 'claude-haiku-4-5-20251001', max_tokens: 4096, temperature: 0,
-          system: SYNTH_SYSTEM,
+          system: synthSys,
           messages: [{ role: 'user', content: buildSynthMessage(url, scans, body.platform, compact) }]
         });
         return m;
@@ -169,8 +181,8 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       } catch (e) {
         console.warn('[audit] synthesis failed on the full payload (' + (e && e.message) + '); retrying compact');
       }
-      if (!out || !/OVERVIEW/i.test(out)) {
-        console.warn('[audit] synthesis returned no usable report; retrying with a compact payload');
+      if (!out || !anchorRe.test(out)) {
+        console.warn('[audit] synthesis (' + part + ') returned no usable report; retrying with a compact payload');
         try {
           msg = await runSynth(true);
           out = textOf(msg);
@@ -179,9 +191,10 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
         }
       }
       if (!out) return json(502, { error: 'Model returned no text content.' });
-      // Safety net: the report must begin at OVERVIEW. Drop any preamble the model may
-      // emit before it (e.g. a restated PLATFORM FAIRNESS block) so it never renders.
-      out = out.replace(/^[\s\S]*?(?=OVERVIEW\b)/i, '').trim() || out;
+      // Safety net: this half must begin at its own first header. Drop any preamble the
+      // model may emit before it (e.g. a restated PLATFORM FAIRNESS block, or the fix pass
+      // warming up with a sentence of its own) so it never renders.
+      out = out.replace(new RegExp('^[\\s\\S]*?(?=' + anchor + '\\b)', 'i'), '').trim() || out;
       // ENFORCE, do not merely ask: drop absence claims the facts contradict, invented
       // percentages/timeframes, and platform limitations masquerading as owner fixes.
       // Layout claims are allowed only if at least one page was actually rendered and measured.
@@ -193,8 +206,9 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       }).join(' ');
       out = applyGuards(out, body.platform, mergeFacts(scans), sawLayout, corpus);
       // And make sure the BIGGEST quantified defect actually got filed, rather than the
-      // model filing the tidy small one on the page it found most interesting.
-      out = ensureTopDefectFiled(out, defectLedger(scans));
+      // model filing the tidy small one on the page it found most interesting. Only the
+      // half that carries the fix list can be missing a fix.
+      if (part !== 'main') out = ensureTopDefectFiled(out, defectLedger(scans));
       logUsage({ time: new Date().toISOString(), tool: 'audit-site', inputs: { url: url, pages: scans.length },
         ip: clientIp, country: h['x-country'] || 'unknown', userAgent: h['user-agent'] || 'unknown', referer: h['referer'] || 'direct'
       }, msg, { unlocked: true, owner: owner === true }).catch(function () {});
@@ -534,7 +548,7 @@ function buildScanMessage(target, sig, content) {
 }
 
 /* ---------- SITE-LEVEL synthesis (same 6-section shape as the deep audit) ---------- */
-const SYNTH_SYSTEM =
+const SYNTH_RULES =
 'You are a world-class website marketing strategist delivering a SITE-LEVEL audit, the kind a top growth consultancy gives a client. You are given per-page scans (grade, category scores, wins, issues) for the most important pages of ONE site. Synthesize them: find PATTERNS across pages, judge the site as a whole, and make CROSS-PAGE recommendations (what to promote, relocate, or standardize across pages). Reason through proven frameworks (LIFT, Fogg B=MAP, Cialdini, April Dunford positioning, StoryBrand, the 5-second clarity test, E-E-A-T). Reference specific pages by name. Plain confident voice, NEVER em dashes or en dashes, no markdown.\n\n' +
 'Output EXACTLY these sections, each header on its own line in ALL CAPS, in this order:\n\n' +
 'NEVER COMPUTE A NUMBER, ONLY QUOTE ONE: do not derive, calculate or infer any figure (years in business, percentages, counts, totals, ages). A recent audit wrote \"establishes 27 years of credibility\" for a firm founded in 1997 when the page itself says 29 years: it did arithmetic instead of reading. Another wrote \"four named client testimonials\" where there were three: it COUNTED instead of reading. This applies to numbers spelled as WORDS too (two, three, four, five). Do not count items on the page and do not compute an age, a percentage or a total. Every number you write must appear VERBATIM in the OBSERVED FACTS or in the page content. If a number you want is not there, do not state it.\n\n' +
@@ -550,28 +564,91 @@ const SYNTH_SYSTEM =
 'PRE-HYDRATION HTML (applies ONLY to a page whose RENDERED LAYOUT block says NOT AVAILABLE; a page that WAS rendered gave you the post-JavaScript DOM, so this paragraph does not apply to it and you must not describe its values as pre-hydration): what you are given for an UNRENDERED page is the HTML BEFORE JavaScript runs, so any value populated by JavaScript (countdown timers, live counters, stream/view counts, carousels, lazy-loaded sections) may appear as zeros, empty, or a placeholder here but is LIVE for real visitors. NEVER report a countdown, timer, counter, or dynamic value as frozen, broken, stuck at zero, or missing; you did not observe its live value, so you may not file any finding about it. CAPABILITY BEFORE MIGRATION: before recommending a platform migration to GET a capability (email capture, a signup form, a store), check the observed BUTTON and LINK labels and the content; if it is already present (for example an email signup or "get early access" button is in the list), the platform HAS it, so NEVER recommend migrating to obtain a feature you can see is already working. ELEMENT IDENTITY: identify what an element renders as to a human before rewriting it. On a link-in-bio the H1 is the artist or creator DISPLAY NAME shown in large type on the profile card, NOT an SEO title, so NEVER rewrite it into a keyword string or a pipe-delimited title (that would look broken to every visitor); leave the display-name H1 alone. Never treat title punctuation style (an em dash vs a pipe) as a defect, and never recommend swapping one for the other.\n\n' +
 'CAPABILITY, NO HEDGING: use the platform\'s real capabilities and never write "if the platform exposes X". If the platform cannot do something (a link-in-bio builder cannot add per-image alt text, a canonical tag, or JSON-LD schema), that is a PLATFORM LIMITATION: mention it once under WHAT IS COSTING YOU LEADS or as a STRATEGIC MOVE (migrate to a full site), and NEVER file it as a PRIORITIZED FIX and NEVER mark it CRITICAL, because the owner cannot fix it on this platform.\n\n' +
 'SEVERITY RUBRIC: CRITICAL is only for an issue that is (a) actually observed in the provided data, (b) fixable by the owner on THIS platform, and (c) materially costly. A platform limitation the owner cannot fix is never CRITICAL. NO CONTRADICTION (applies to EVERY fix, including Medium and Low): never recommend removing, deleting, shortening, rewording, or replacing anything you named as a strength in WHAT IS WORKING; before finishing, check EVERY fix against your strengths and drop any that conflict. DISCLOSURE PROTECTION: never recommend changing, weakening, or removing a transparency or disclosure statement (for example an AI-authorship disclosure like "human-authored, plainly disclosed", a sponsorship disclosure, or legal wording); and never propose wording that implies third-party verification or certification ("verified", "certified", "authenticated") unless such verification is actually evidenced in the provided content. A truthful disclosure is always a strength, never a copy defect.\n\n' +
-'PLATFORM FAIRNESS (internal guidance only, NEVER output this as a section, a heading, or a restated instruction): you are told the platform the site runs on and what its owner can and cannot change. Judge the site and write every fix ONLY within that reality. Never lower the grade for limits the platform imposes, and never recommend edits it forbids. If it is a locked no-code or link-in-bio builder, grade it as that kind of site, keep fixes to what the platform allows, and put any "move to a real website" idea in STRATEGIC MOVES, never in PRIORITIZED FIXES. Weave the platform naturally into the OVERVIEW prose in one clause; do NOT create a separate platform or fairness heading. The report begins with the OVERVIEW header and nothing before it.\n\n' +
+'PLATFORM FAIRNESS (internal guidance only, NEVER output this as a section, a heading, or a restated instruction): you are told the platform the site runs on and what its owner can and cannot change. Judge the site and write every fix ONLY within that reality. Never lower the grade for limits the platform imposes, and never recommend edits it forbids. If it is a locked no-code or link-in-bio builder, grade it as that kind of site, keep fixes to what the platform allows, and put any "move to a real website" idea in STRATEGIC MOVES, never in PRIORITIZED FIXES. Weave the platform naturally into the OVERVIEW prose in one clause; do NOT create a separate platform or fairness heading. The report begins with the OVERVIEW header and nothing before it.\n\n';
+
+/* ---------- The report sections, one constant each ------------------------------------
+   These used to be a single string written by ONE model call. That call was MEASURED at
+   28.1 / 28.1 / 29.9 seconds on a five page site, which is the platform's function
+   ceiling, so it 504'd intermittently and the run died with "the analysis step returned
+   no result". It is OUTPUT bound, not input bound: the payload splits evenly across
+   excerpt, signals, summary and geometry, so trimming the input buys two or three seconds
+   while the output costs twenty plus.
+
+   So the sections are composed into TWO system prompts that run in PARALLEL: the fix
+   list, which is the longest and most rule heavy section, and everything else. Each is
+   roughly half the output, so each lands near half the time and the wall clock is
+   unchanged. Asking the model to simply write less was never an option: this file
+   documents repeatedly that Haiku ignores length caps. Enforce in code, not in the prompt.
+------------------------------------------------------------------------------------- */
+const SEC_OVERVIEW =
 'OVERVIEW\n' +
 'Two or three sentences: what this site is, the platform it runs on, who it targets, and your honest site-wide read in business terms. Then two lines exactly:\n' +
 'OVERALL GRADE: <A to F with optional + or ->\n' +
 'CATEGORY SCORES: Conversion: <g> | Messaging: <g> | Copy: <g> | SEO: <g> | Trust: <g> | UX: <g>\n' +
-'(site-wide letter grades weighing all pages.) Do not state a letter grade anywhere in the prose or bullets; grades appear only on these two lines.\n\n' +
+'(site-wide letter grades weighing all pages.) Do not state a letter grade anywhere in the prose or bullets; grades appear only on these two lines.\n\n';
+
+const SEC_WORKING =
 'WHAT IS WORKING\n' +
-'3 bullets, each "- ". Site-wide strengths and assets worth amplifying; name the page where relevant.\n\n' +
+'3 bullets, each "- ". Site-wide strengths and assets worth amplifying; name the page where relevant.\n\n';
+
+const SEC_COSTING =
 'WHAT IS COSTING YOU LEADS\n' +
-'3 to 4 bullets, each "- ". The highest-impact SITE-WIDE problems and PATTERNS that repeat across pages (for example a template artifact on several pages, or positioning that shifts page to page). Name the pages, quote the evidence, and state the business cost.\n\n' +
+'3 to 4 bullets, each "- ". The highest-impact SITE-WIDE problems and PATTERNS that repeat across pages (for example a template artifact on several pages, or positioning that shifts page to page). Name the pages, quote the evidence, and state the business cost.\n\n';
+
+const SEC_FIXES =
 'PRIORITIZED FIXES\n' +
 '5 to 6 fixes, ranked most important first, each on ONE line in EXACTLY this shape:\n' +
 '- [Priority] Page and element: state the real reason this matters in one sentence (never copy this instruction). Current: "exact text there now". Use: "exact copy-ready replacement". Effort: est (role).\n' +
-'Priority is Critical, High, Medium, or Low. Location comes first (never a verb) and must pinpoint BOTH the exact page, named with its URL path, AND the precise on-page spot described the way a visitor sees it, so a non-technical owner finds it in seconds without guessing. Separate the page from the spot with a comma or the word "at", and use NO colon inside the location itself. Good locations: "Home page (/), the hero headline at the very top"; "Pricing page (/pricing), directly above the pricing table"; "About page (/about), the founder paragraph"; "Footer on every page, the statistics row". Too vague, never do this: "the hero", "homepage", "a testimonial". EVERY fix MUST include all three fields in this exact order: Current, then Use, then Effort, each labeled. "Current:" is REQUIRED on every fix and is the exact text on the page now, in quotes (or "(none, new element)" only for a genuine addition). Do NOT describe or quote the current text inside the reason sentence instead of the Current field; the reason gives ONLY why it matters, and the Current field shows the exact text now, so every fix renders a clean before and after. "Use:" is the EXACT, finished, copy-and-paste-ready replacement in the site\'s voice, written to a professional standard, the literal words to paste and never a vague instruction; for a title or meta separate parts with a pipe | or a colon, NEVER a dash, at realistic lengths. SOCIAL PROOF YOU CANNOT INVENT: for testimonials, quotes, named reviews, ratings, or statistics, NEVER fabricate a name, a quote, or a number; do not write a fake testimonial or a made-up stat as the replacement. Instead give a clearly labeled template with bracketed placeholders (for example [Client name, title, company]: "[one-sentence result-focused quote]") and tell the owner to insert a REAL, sourced one; for a statistic use a bracketed placeholder like "[verified metric, sourced]". Give exact finished words ONLY for the site\'s own marketing copy (titles, meta, headlines, subheadings, CTAs, value-prop and body copy). "Effort:" must give a REALISTIC time AND the RIGHT role for the actual task, and must VARY across the list, never the same estimate on every fix. Choose the role by what the task really is: title tags, meta descriptions, headlines, body copy, link labels and CTA text are content edits an SEO specialist or copywriter makes in the CMS or SEO plugin (on WordPress that is Yoast or RankMath, NOT code) so do NOT call these developer work; H1 and heading-structure fixes, schema and structured-data markup, redirects, and template or code changes need a developer; visual hierarchy, spacing, imagery, color and contrast, and mobile layout need a designer. Right-size the time: a single title or meta edit in a plugin is 5 to 15 minutes, rewriting copy across several pages is 1 to 2 hours, adding schema markup is 2 to 4 hours (developer), a site-wide heading cleanup is a half to a full day. If the platform brief says the owner does everything in a locked editor, the role is (owner) and estimates stay in minutes. ONE ELEMENT PER FIX: each fix changes exactly one element and has exactly one Current and one Use; never bundle two elements (for example a title AND a meta description, or an H1 AND a meta) into a single fix, and never write a second Current or Use or sub-labels like "Current H1:" or "Current meta:". If a page needs its title, meta, and H1 all fixed, that is three separate fixes; keep the whole list to the 5 or 6 highest-impact atomic fixes. Write every fix at the level of a senior conversion strategist and copywriter, specific and sophisticated. Include only real changes.\n\n' +
+'Priority is Critical, High, Medium, or Low. Location comes first (never a verb) and must pinpoint BOTH the exact page, named with its URL path, AND the precise on-page spot described the way a visitor sees it, so a non-technical owner finds it in seconds without guessing. Separate the page from the spot with a comma or the word "at", and use NO colon inside the location itself. Good locations: "Home page (/), the hero headline at the very top"; "Pricing page (/pricing), directly above the pricing table"; "About page (/about), the founder paragraph"; "Footer on every page, the statistics row". Too vague, never do this: "the hero", "homepage", "a testimonial". EVERY fix MUST include all three fields in this exact order: Current, then Use, then Effort, each labeled. "Current:" is REQUIRED on every fix and is the exact text on the page now, in quotes (or "(none, new element)" only for a genuine addition). Do NOT describe or quote the current text inside the reason sentence instead of the Current field; the reason gives ONLY why it matters, and the Current field shows the exact text now, so every fix renders a clean before and after. "Use:" is the EXACT, finished, copy-and-paste-ready replacement in the site\'s voice, written to a professional standard, the literal words to paste and never a vague instruction; for a title or meta separate parts with a pipe | or a colon, NEVER a dash, at realistic lengths. SOCIAL PROOF YOU CANNOT INVENT: for testimonials, quotes, named reviews, ratings, or statistics, NEVER fabricate a name, a quote, or a number; do not write a fake testimonial or a made-up stat as the replacement. Instead give a clearly labeled template with bracketed placeholders (for example [Client name, title, company]: "[one-sentence result-focused quote]") and tell the owner to insert a REAL, sourced one; for a statistic use a bracketed placeholder like "[verified metric, sourced]". Give exact finished words ONLY for the site\'s own marketing copy (titles, meta, headlines, subheadings, CTAs, value-prop and body copy). "Effort:" must give a REALISTIC time AND the RIGHT role for the actual task, and must VARY across the list, never the same estimate on every fix. Choose the role by what the task really is: title tags, meta descriptions, headlines, body copy, link labels and CTA text are content edits an SEO specialist or copywriter makes in the CMS or SEO plugin (on WordPress that is Yoast or RankMath, NOT code) so do NOT call these developer work; H1 and heading-structure fixes, schema and structured-data markup, redirects, and template or code changes need a developer; visual hierarchy, spacing, imagery, color and contrast, and mobile layout need a designer. Right-size the time: a single title or meta edit in a plugin is 5 to 15 minutes, rewriting copy across several pages is 1 to 2 hours, adding schema markup is 2 to 4 hours (developer), a site-wide heading cleanup is a half to a full day. If the platform brief says the owner does everything in a locked editor, the role is (owner) and estimates stay in minutes. ONE ELEMENT PER FIX: each fix changes exactly one element and has exactly one Current and one Use; never bundle two elements (for example a title AND a meta description, or an H1 AND a meta) into a single fix, and never write a second Current or Use or sub-labels like "Current H1:" or "Current meta:". If a page needs its title, meta, and H1 all fixed, that is three separate fixes; keep the whole list to the 5 or 6 highest-impact atomic fixes. Write every fix at the level of a senior conversion strategist and copywriter, specific and sophisticated. Include only real changes.\n\n';
+
+const SEC_STRATEGIC =
 'STRATEGIC MOVES\n' +
-'3 bullets, each "- ". Higher-leverage CROSS-PAGE plays: what to promote, relocate, or standardize across the site (for example, pull the strongest page voice onto the homepage), plus positioning, funnel, or measurement.\n\n' +
+'3 bullets, each "- ". Higher-leverage CROSS-PAGE plays: what to promote, relocate, or standardize across the site (for example, pull the strongest page voice onto the homepage), plus positioning, funnel, or measurement.\n\n';
+
+const SEC_AI =
 'WHERE AI CREATES LEVERAGE\n' +
-'3 bullets, each "- ". How an AI-powered marketing function and continuous site-wide auditing would catch and fix these at scale.\n\n' +
+'3 bullets, each "- ". How an AI-powered marketing function and continuous site-wide auditing would catch and fix these at scale.\n\n';
+
+const SEC_UNVERIFIED =
 'NOT VERIFIED IN THIS AUDIT\n' +
-'2 to 3 bullets, each "- ", each ONE short factual sentence. This is the honesty appendix: state plainly what this audit could NOT observe and therefore did not judge, so the reader knows the scope. Only list what was GENUINELY not observed for THIS site. If a page carries a RENDERED LAYOUT block then its JavaScript-rendered content AND its visual layout WERE observed, so you must NOT list either as unverified for that page: saying so is a false statement about your own scope, and the honesty appendix of all places must be honest. Entries that stay true even after a render: content revealed only by interaction (behind \"Show More\", accordions, tabs) was not expanded; mobile and smaller viewports were not measured (the render is desktop 1280x900 only); a live value that changes second by second is a snapshot. For a page that was NOT rendered, the old limits still apply: JavaScript-rendered values were not read, and the visual layout and fold were not seen. Include ONLY genuine observation limits that apply to THIS site; never put an actual finding, recommendation, or criticism here, and never speculate about what the unobserved values might be.\n\n' +
-'BREVITY IS MANDATORY. Each bullet is ONE plain sentence of at most 30 words. Do NOT chain clauses with semicolons or trailing "this/which means" explanations, and do not pile up examples inside one bullet. State the finding and its business cost, nothing more. A PRIORITIZED FIXES line may add the exact change but stays on one line.\n\n' +
-'RULES: every section exactly once, in the order above; no repetition; total report under 6000 characters. Stop immediately after the last NOT VERIFIED IN THIS AUDIT bullet. Proofread before finishing: put a single space between every word (never fuse two words together, e.g. write "subdomain if", not "subdomainif"), and fix any typos or dropped spaces.';
+'2 to 3 bullets, each "- ", each ONE short factual sentence. This is the honesty appendix: state plainly what this audit could NOT observe and therefore did not judge, so the reader knows the scope. Only list what was GENUINELY not observed for THIS site. If a page carries a RENDERED LAYOUT block then its JavaScript-rendered content AND its visual layout WERE observed, so you must NOT list either as unverified for that page: saying so is a false statement about your own scope, and the honesty appendix of all places must be honest. Entries that stay true even after a render: content revealed only by interaction (behind \"Show More\", accordions, tabs) was not expanded; mobile and smaller viewports were not measured (the render is desktop 1280x900 only); a live value that changes second by second is a snapshot. For a page that was NOT rendered, the old limits still apply: JavaScript-rendered values were not read, and the visual layout and fold were not seen. Include ONLY genuine observation limits that apply to THIS site; never put an actual finding, recommendation, or criticism here, and never speculate about what the unobserved values might be.\n\n';
+
+const SYNTH_BREVITY =
+'BREVITY IS MANDATORY. Each bullet is ONE plain sentence of at most 30 words. Do NOT chain clauses with semicolons or trailing "this/which means" explanations, and do not pile up examples inside one bullet. State the finding and its business cost, nothing more. A PRIORITIZED FIXES line may add the exact change but stays on one line.\n\n';
+
+/* The closing rules are per prompt now, because each half owns a different last section
+   and a different budget. The budgets sum to less than the old 6000 on purpose: two
+   calls each writing half is the whole point of the split. */
+function synthClosing(lastSection, budget) {
+  return 'RULES: every section exactly once, in the order above; no repetition; total output under ' + budget +
+    ' characters. Stop immediately after the last ' + lastSection + ' bullet. Write ONLY the sections listed above: ' +
+    'do not write, restate, or reference any other section of the report. Proofread before finishing: put a single ' +
+    'space between every word (never fuse two words together, e.g. write "subdomain if", not "subdomainif"), ' +
+    'and fix any typos or dropped spaces.';
+}
+
+/* Everything except the fix list. */
+const SYNTH_SYSTEM_MAIN =
+  SYNTH_RULES + SEC_OVERVIEW + SEC_WORKING + SEC_COSTING + SEC_STRATEGIC + SEC_AI + SEC_UNVERIFIED +
+  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 3800);
+
+/* The fix list alone. It runs beside the call above and cannot see that call's output, so
+   the no-contradiction rule is re-pointed at the per page WINS in the scans, which is the
+   same evidence the strengths section is derived from anyway. */
+const SYNTH_SYSTEM_FIXES =
+  SYNTH_RULES + SEC_FIXES + SYNTH_BREVITY + synthClosing('PRIORITIZED FIXES', 2800) +
+  '\n\nYOU ARE WRITING THE FIX LIST ONLY. Another pass is writing the rest of the report at the same time, so ' +
+  'output the PRIORITIZED FIXES header and its lines and NOTHING else: no overview, no grade, no strengths, no ' +
+  'strategic moves, no closing commentary. NO CONTRADICTION: the per page WINS you were given are this site\'s ' +
+  'strengths, so never file a fix that removes, shortens, or reverses one of them.';
+
+/* The whole report in one call: the original behaviour. Nothing in the current client asks
+   for this any more, but a caller that does not send a part still gets a complete report
+   rather than half of one. */
+const SYNTH_SYSTEM =
+  SYNTH_RULES + SEC_OVERVIEW + SEC_WORKING + SEC_COSTING + SEC_FIXES + SEC_STRATEGIC + SEC_AI + SEC_UNVERIFIED +
+  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 6000);
+
 
 /* ---------- REQUIREMENTS: the closing "what it takes" section (its own fast call) ---------- */
 const REQ_SYSTEM =

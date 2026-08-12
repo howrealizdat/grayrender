@@ -259,6 +259,72 @@ win.localStorage.removeItem('gr_pass');
 win.postAudit({ mode: 'discover', url: 'https://northwind.example' });
 check('a locked visitor sends an empty passcode, not undefined', sent && sent.passcode === '', JSON.stringify(sent));
 
+/* ---------------------------------------------------------------------------
+   THE REPORT ARRIVES IN TWO PIECES AND MUST READ AS ONE.
+
+   The synthesis was one call writing every section, measured at 28 to 30 seconds
+   against a function ceiling in the same range, so it 504'd intermittently. It is
+   now two parallel calls, and stitchReport puts the fix list back between WHAT IS
+   COSTING YOU LEADS and STRATEGIC MOVES. Everything downstream reads the finished
+   body, so if the seam is wrong the whole report is wrong.
+--------------------------------------------------------------------------- */
+console.log('\nSTITCHING THE TWO HALVES  (the fix list is written by its own call)');
+const MAIN_HALF = [
+  'OVERVIEW',
+  'Northwind is a tech staffing firm on WordPress.',
+  'OVERALL GRADE: B',
+  'CATEGORY SCORES: Conversion: B- | Messaging: B | Copy: B | SEO: B- | Trust: B | UX: B',
+  '',
+  'WHAT IS WORKING',
+  '- Transparent pricing positioning on the Pricing page.',
+  '',
+  'WHAT IS COSTING YOU LEADS',
+  '- Every page carries two H1 tags.',
+  '',
+  'STRATEGIC MOVES',
+  '- Standardize the H1 structure across all five pages.',
+  '',
+  'WHERE AI CREATES LEVERAGE',
+  '- Continuous auditing would catch these before they ship.',
+  '',
+  'NOT VERIFIED IN THIS AUDIT',
+  '- Mobile viewports were not measured.'
+].join('\n');
+const FIX_HALF = [
+  'PRIORITIZED FIXES',
+  '- [Critical] Home page (/), title tag: a placeholder wastes the best SEO slot. Current: "Home Final - Northwind". Use: "Tech Staffing & Recruiting | Northwind". Effort: 10 min (SEO specialist).'
+].join('\n');
+
+const stitched = win.stitchReport(MAIN_HALF, FIX_HALF);
+const order = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'PRIORITIZED FIXES',
+               'STRATEGIC MOVES', 'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT']
+  .map(h => stitched.indexOf('\n' + h) === -1 ? stitched.indexOf(h) : stitched.indexOf('\n' + h));
+
+check('every section survives the stitch', order.every(i => i >= 0), JSON.stringify(order));
+check('sections land in report order', order.every((v, i) => i === 0 || v > order[i - 1]), JSON.stringify(order));
+check('the fix list sits before STRATEGIC MOVES',
+  stitched.indexOf('PRIORITIZED FIXES') < stitched.indexOf('STRATEGIC MOVES'));
+check('the fix list sits after WHAT IS COSTING YOU LEADS',
+  stitched.indexOf('PRIORITIZED FIXES') > stitched.indexOf('WHAT IS COSTING YOU LEADS'));
+check('the fix survives intact', /Home Final - Northwind/.test(stitched) && /Effort: 10 min/.test(stitched));
+check('nothing is duplicated', stitched.split('STRATEGIC MOVES').length - 1 === 1
+  && stitched.split('OVERVIEW').length - 1 === 1);
+
+/* The fix pass can fail on its own. Half a report beats none. */
+const noFixes = win.stitchReport(MAIN_HALF, '');
+check('a failed fix pass still returns a readable report', noFixes === MAIN_HALF);
+check('a failed fix pass files no empty fix header', !/PRIORITIZED FIXES/.test(noFixes));
+
+/* A main half that somehow lacks STRATEGIC MOVES must not silently lose the fixes. */
+const odd = win.stitchReport('OVERVIEW\nJust the overview.', FIX_HALF);
+check('fixes are appended when the anchor is missing', /PRIORITIZED FIXES/.test(odd) && /Home Final/.test(odd));
+
+/* The stitched body must still feed the downstream steps that read it. */
+check('fixesSectionOf still finds the fix list after stitching',
+  /Home Final - Northwind/.test(win.fixesSectionOf(stitched)));
+check('the honesty appendix is still last',
+  stitched.lastIndexOf('NOT VERIFIED IN THIS AUDIT') > stitched.lastIndexOf('WHERE AI CREATES LEVERAGE'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
