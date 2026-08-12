@@ -291,6 +291,23 @@
   .btn-gen{will-change:transform}
   .btn-gen:disabled{cursor:default;background:var(--accent);opacity:.92}
   .btn-gen.loading .arrow{display:none}
+  /* ---- Strategist's briefing ------------------------------------------
+     The asset obeys its own length rules (a cold email that runs long stops
+     working). The depth goes here instead, so every section hands over a
+     deliverable rather than a draft. */
+  .brief-panel{margin-top:22px;border:1px solid var(--border);border-radius:var(--radius);
+    background:var(--surface);overflow:hidden}
+  .brief-head{display:flex;align-items:baseline;gap:10px;padding:15px 20px;border-bottom:1px solid var(--border)}
+  .brief-head h3{font-family:var(--display);font-size:20px;margin:0;letter-spacing:.2px}
+  .brief-head span{font-size:11.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2)}
+  .brief-sec{padding:16px 20px;border-bottom:1px solid var(--border)}
+  .brief-sec:last-child{border-bottom:0}
+  .brief-sec h4{margin:0 0 9px;font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;
+    color:var(--accent);font-weight:700}
+  .brief-sec ul{margin:0;padding-left:18px}
+  .brief-sec li{font-size:14px;line-height:1.65;color:var(--ink);margin-bottom:7px}
+  .brief-sec li:last-child{margin-bottom:0}
+  .brief-sec p{margin:0;font-size:14px;line-height:1.65;white-space:pre-wrap}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
   /* ---- Refine dock -------------------------------------------------------
@@ -802,6 +819,7 @@ function brandContext(){
 /* ---------------- tool definitions (demo client business) ---------------- */
 const TOOLS = {
   outreach:{
+    maxTokens:2400,
     title:"Client Outreach Generator",
     hl:"Outreach",
     blurb:"Generate a personalized cold outreach email for your team to send to a company that needs the service you sell.",
@@ -823,10 +841,11 @@ const TOOLS = {
 - VOICE: peer-to-peer, plain-spoken, confident, not salesy. 1-3 sentences per paragraph with white space.
 - AVOID entirely: buzzwords and spam-trigger words (free, guaranteed, act now, limited time, urgent, 100%, opportunity), exclamation stacks, feature lists, multiple CTAs, and jargon.
 Make it specific to the industry and hiring need provided. Match the requested tone.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Target Company: ${v.company||"[unnamed company]"}\nIndustry: ${v.industry}\nHiring Need: ${v.need}\nTone: ${v.tone}`
   },
   linkedin:{
+    maxTokens:2400,
     title:"LinkedIn Content Engine",
     hl:"Content",
     blurb:"Generate a LinkedIn post positioning your company as a thought leader in its field.",
@@ -844,7 +863,7 @@ End with this exact line on a new line: ${WATERMARK}`,
 - FORMAT: one idea per line, 1-2 sentence paragraphs, generous line breaks for mobile skimming. Do NOT use markdown bold or asterisks (they render as odd glyphs on LinkedIn).
 - END with 3-5 relevant hashtags. Do NOT put any external link in the body. No engagement-bait ("comment YES below").
 Make it sound like a sharp human, not a corporate memo. Match the requested post style.
-End with this exact line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line: ${WATERMARK}`,
     user:v=>`Topic: ${v.topic}\nPost Style: ${v.style}\nTarget Audience: ${v.audience}`
   },
   ads:{
@@ -852,7 +871,7 @@ End with this exact line: ${WATERMARK}`,
     hl:"Ad Studio",
     blurb:"Generate three ad variations (Google Ad, LinkedIn Ad, and a landing page hero) for one of your services.",
     btn:"Generate Ad Campaign",
-    maxTokens:2600,
+    maxTokens:3400,
     fields:[
       {id:"service",label:"What You Are Promoting",type:"select",options:b=>b.offerings},
       {id:"buyer",label:"Target Buyer",type:"select",options:b=>b.buyers},
@@ -872,10 +891,11 @@ LINKEDIN AD (Sponsored Content): Headline (aim under 60 chars, 70 max), Intro te
 
 LANDING PAGE (hero): H1 (5-10 words, a clear outcome, not clever wordplay), Subheadline (1-2 sentences on how it works / who it's for, plus a reassurance), and a benefit-led CTA button label in first person (e.g., "Get My Shortlist").
 
-Lead with benefits over features and use credible numbers. End with this exact line: ${WATERMARK}`,
+Lead with benefits over features and use credible numbers. \n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line: ${WATERMARK}`,
     user:v=>`Service: ${v.service}\nTarget Buyer: ${v.buyer}\nCampaign Goal: ${v.goal}`
   },
   intel:{
+    maxTokens:2400,
     title:"Competitive Intelligence",
     hl:"Intelligence",
     blurb:"Generate a competitive positioning brief showing how you win against a named competitor for a specific engagement.",
@@ -893,7 +913,7 @@ COMPETITOR WEAKNESSES TO EXPLOIT: exactly 3 bullets, each starting with "- ". Fr
 
 SUGGESTED TALK TRACK: 2-3 verbatim, speakable sentences the rep can say almost word-for-word, tailored to the engagement type and size.
 
-Be concrete and credible, named advantages and numbers, no vague claims or theory. End with this exact line: ${WATERMARK}`,
+Be concrete and credible, named advantages and numbers, no vague claims or theory. \n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line: ${WATERMARK}`,
     user:v=>`Competitor: ${v.competitor||"[unnamed competitor]"}\nEngagement Type: ${v.usecase}\nEngagement Size: ${v.deal}`
   },
 
@@ -928,11 +948,11 @@ RULES:
 ARC: week 1 establishes the category problem and the brand's point of view, week 2 proves it with evidence and product truth, week 3 activates community and social proof, week 4 converts toward the goal. Vary format deliberately: no more than two of the same format in a week.
 Ground every post in the brand and audience given. Invent no statistics, customer names, or testimonials; where proof is needed, write a bracketed placeholder like [verified metric, sourced].
 After the four weeks, add a final line "POSTING NOTES" followed by 3 bullets on best posting times, what to boost, and what to repurpose.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAudience: ${v.audience}\nGoal: ${v.goal}\nChannels: ${v.channels}\nCadence: ${v.cadence}`
   },
   social:{
-    maxTokens:2400,
+    maxTokens:3200,
     title:"Multi-Channel Content Studio",
     hl:"Multi-Channel",
     blurb:"One brief in, native content out for LinkedIn, Instagram, YouTube and short-form video. Same message, genuinely rewritten for each platform.",
@@ -959,11 +979,11 @@ RULES PER SECTION:
 - SHORT-FORM SCRIPT: a 30 second script for a Reel or Short as spoken lines with bracketed visual directions, e.g. [dashboard close-up]. Hook must land in the first 3 seconds.
 - HASHTAGS: one line, 5 to 8 tags, mixed reach, genuinely relevant, no hashtag stuffing.
 The SAME core message must run through all six, rewritten for each platform's actual reading behaviour, never copy-pasted. Invent no statistics or customer quotes; use bracketed placeholders where proof is needed.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nTopic: ${v.topic||"[no topic given]"}\nAudience: ${v.audience}\nTone: ${v.tone}`
   },
   comms:{
-    maxTokens:3000,
+    maxTokens:3800,
     title:"Comms & PR Kit",
     hl:"Comms",
     blurb:"Press releases, newsletters, one-pagers, case studies and webinar abstracts, written to publish and consistent with your brand voice.",
@@ -986,11 +1006,11 @@ Write the requested asset COMPLETE and ready to publish, in the correct professi
 Use ALL-CAPS section headers on their own lines so the structure is unmistakable.
 NEVER invent a statistic, customer name, executive name, or quote. Use clearly bracketed placeholders like [Executive name, title] and [verified metric, sourced], and say plainly what must be filled in.
 Match a professional trade-press standard. No hype, no superlatives without evidence.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAsset type: ${v.asset}\nSubject: ${v.subject||"[no subject given]"}\nAudience: ${v.audience}`
   },
   brand:{
-    maxTokens:3200,
+    maxTokens:4000,
     title:"Brand Voice & Messaging",
     hl:"Brand Voice",
     blurb:"A messaging framework and a usable voice guide: positioning, pillars, proof, the words you use, the words you never use.",
@@ -1021,11 +1041,11 @@ RULES:
 - PROOF WE NEED TO EARN: the specific evidence this positioning requires but the brand may not yet have, as an honest to-do list.
 If core principles are provided, thread them through the framework rather than restating them.
 Invent no statistics or customer names.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nAudience: ${v.audience}\nStage: ${v.stage}\nCore principles: ${v.principles||"[none given]"}`
   },
   report:{
-    maxTokens:2400,
+    maxTokens:3200,
     title:"Social Performance Report",
     hl:"Performance",
     blurb:"Paste last month's numbers. Get the read a stakeholder actually needs: what moved, why, and the three things to change next month.",
@@ -1051,11 +1071,11 @@ RULES:
 - DO THESE THREE THINGS NEXT: exactly 3 recommendations. Each states the action, the metric it should move, and how you will know within 30 days whether it worked. Be specific enough to assign to a person.
 - WHAT WE STILL CANNOT SEE: the honest gaps. Which metrics were missing, which conclusions therefore cannot be drawn, and what to start tracking. This section is mandatory and must never be empty.
 Never invent a benchmark, a competitor figure, or a percentage that was not derivable from the pasted data. If the data is thin, say so plainly and report only what it supports.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Brand: ${v.brand||"[unnamed brand]"}\nPeriod: ${v.period}\nPrimary goal: ${v.goal}\n\nPASTED METRICS:\n${v.data||"[no data provided]"}`
   },
   editor:{
-    maxTokens:2600,
+    maxTokens:3400,
     title:"Copy Editor",
     hl:"Editor",
     blurb:"Paste any draft. Get a clean edit, a plain-language reason for every change, and a flag on anything that reads as a claim you cannot back.",
@@ -1077,7 +1097,7 @@ RULES:
 - CLAIMS TO VERIFY: every statistic, superlative, or factual assertion in the draft that would need a source before publishing. If there are none, say "None, nothing in this draft asserts a fact that needs sourcing."
 - READABILITY: word count before and after, roughly what reading level it lands at, and one sentence on whether the length suits the format.
 Fix grammar, cut hedging and filler, kill passive voice where it weakens the line, and tighten. Never add a statistic or claim that was not in the draft.
-End with this exact line on a new line: ${WATERMARK}`,
+\n\nTHEN ADD THE STRATEGIST'S BRIEFING, which is what turns an asset into a deliverable. Put this exact delimiter alone on its own line: ---BRIEFING---\nBelow it output these four headers, each alone on its own line, in this order and wording:\nWHY THIS WORKS\nALTERNATIVES\nWHAT TO TEST\nWATCH-OUTS\nWHY THIS WORKS: 3 bullets. Each names the specific principle or framework you applied AND quotes the words from the asset above where it shows up, so the reader can see the craft instead of taking it on faith. ALTERNATIVES: 2 to 3 complete, paste-ready swap-ins for the highest-leverage element, a different subject line, hook, headline or angle, written out in full and never merely described. WHAT TO TEST: 2 to 3 bullets, each naming ONE variable to change, the metric it should move, and the result that would justify keeping it. WATCH-OUTS: 1 to 2 bullets on what would make this fail, or any claim in the asset that must be verified before it ships. Every bullet starts with "- ". CRITICAL: do NOT pad or lengthen the asset itself to seem thorough. The asset obeys its own length rules exactly as written above, because a cold email that runs long stops working. The briefing is where the depth goes.\nEnd with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Type: ${v.kind}\nTarget voice: ${v.voice}\n\nDRAFT:\n${v.draft||"[no draft provided]"}`
   },
   audit:{
@@ -1874,7 +1894,47 @@ function undoRefine(){
   paintRefine();
 }
 
+/* The model returns ASSET, then a ---BRIEFING--- delimiter, then the four briefing
+   sections, then the watermark. The asset goes through the existing per-tool renderer
+   untouched, so every parser and guard behaves exactly as before; the briefing is appended
+   underneath as its own panel. Splitting here rather than in ten renderers means a tool that
+   returns no briefing simply renders as it always did. */
+const BRIEF_HEADS=["WHY THIS WORKS","ALTERNATIVES","WHAT TO TEST","WATCH-OUTS"];
+function splitBriefing(raw){
+  const m=String(raw||"").split(/\n?\s*-{3,}\s*BRIEFING\s*-{3,}\s*\n?/i);
+  if(m.length<2) return {asset:raw, brief:""};
+  return {asset:m[0].replace(/\s+$/,""), brief:m.slice(1).join("\n").trim()};
+}
+function briefingHtml(brief){
+  if(!brief) return "";
+  const idx=BRIEF_HEADS.map(h=>({h,at:brief.search(new RegExp("(^|\\n)\\s*"+h+"\\s*(\\n|$)","i"))}))
+                       .filter(x=>x.at>=0).sort((a,b)=>a.at-b.at);
+  if(!idx.length) return "";
+  const secs=idx.map((x,i)=>{
+    const end=i+1<idx.length?idx[i+1].at:brief.length;
+    const body=brief.slice(x.at,end).replace(new RegExp("^\\s*"+x.h+"\\s*","i"),"").trim();
+    // Bullet-shaped content is a list even when there is only ONE bullet. Deciding by item
+    // count made a single-bullet section render as a paragraph, so WATCH-OUTS looked like a
+    // different kind of content from WHY THIS WORKS purely because it had one line.
+    const lines=body.split("\n").map(l=>l.trim()).filter(Boolean);
+    const bulleted=lines.filter(l=>/^[-•*]\s+/.test(l));
+    const inner=bulleted.length
+      ? `<ul>${bulleted.map(l=>`<li>${escMd(l.replace(/^[-•*]\s+/,""))}</li>`).join("")}</ul>`
+      : `<p>${escMd(body)}</p>`;
+    return `<div class="brief-sec"><h4>${esc(x.h)}</h4>${inner}</div>`;
+  }).join("");
+  return `<div class="brief-panel"><div class="brief-head"><h3>The briefing</h3><span>Why it works, what to try, what to watch</span></div>${secs}</div>`;
+}
 function renderOutput(raw,vals){
+  const {mark}=splitWatermark(raw);
+  const {asset,brief}=splitBriefing(splitWatermark(raw).body);
+  renderAsset(mark?asset+"\n\n"+mark:asset, vals);
+  if(brief){
+    const wrap=document.querySelector("#outArea .output-wrap")||document.getElementById("outArea");
+    if(wrap) wrap.insertAdjacentHTML("beforeend", briefingHtml(brief));
+  }
+}
+function renderAsset(raw,vals){
   const out=document.getElementById("outArea");
   const {body,mark}=splitWatermark(raw);
 
