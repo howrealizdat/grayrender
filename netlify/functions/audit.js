@@ -74,6 +74,18 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
 
       const sig = extractSignals(html, t0);
       const plat = detectPlatform(html, t0, sig);
+
+      /* Refuse BEFORE spending. Bot-walled sites (patagonia.com returned 161 bytes of
+         HTML) leave nothing to read, and asking the model to describe a company from an
+         empty excerpt costs money to receive "please paste the content". Better to say
+         plainly that the page could not be read and offer the manual path. */
+      const brandText = String((buildDigest(html, sig, 8000) || {}).text || '');
+      if (brandText.length < 250 && !sig.title) {
+        console.warn('[brand] unreadable: ' + html.length + ' bytes of HTML, ' + brandText.length + ' chars of text for ' + t0);
+        return json(200, { error: 'unreadable',
+          message: 'That site would not let me read it. Some sites block automated visits. Try another URL, or enter your details by hand.' });
+      }
+
       const brandMsg =
         'WEBSITE: ' + t0 + '\n' +
         'TITLE: ' + (sig.title || '(none)') + '\n' +
@@ -81,7 +93,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
         'HEADINGS: ' + [].concat(sig.h1s || [], sig.h2s || []).slice(0, 14).join(' | ') + '\n' +
         'BUTTON LABELS: ' + (sig.buttons || []).slice(0, 12).join(' | ') + '\n' +
         'LINK LABELS: ' + ((sig.links || []).map(function (l) { return l.text || l; })).slice(0, 18).join(' | ') + '\n' +
-        'PAGE TEXT (excerpt): ' + String((buildDigest(html, sig, 8000) || {}).text || '').slice(0, 2600);
+        'PAGE TEXT (excerpt): ' + brandText.slice(0, 2600);
 
       const bm = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
@@ -97,7 +109,7 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
          no way to tell whether the page was unreadable, the excerpt was empty, or the
          model answered in a shape the parser cannot read. */
       const brandDebug = body.debug === true ? {
-        excerptChars: String((buildDigest(html, sig, 8000) || {}).text || '').length,
+        excerptChars: brandText.length,
         htmlChars: html.length,
         title: sig.title || '',
         rawModelText: String(btxt || '').slice(0, 900)
