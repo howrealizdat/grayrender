@@ -2,7 +2,7 @@
 
 **An AI marketing audit that renders the page before it judges it.**
 
-Built by Edmund Gray. Twelve tools and a workspace, one flagship: a full-site marketing audit
+Built by Edmund Gray. Twelve tools, a workspace and a live meeting copilot, one flagship: a full-site marketing audit
 that drives a real headless browser over every key page, measures the layout, looks at a
 screenshot, and only then writes the report. Everything runs behind Netlify serverless
 functions, so API keys never reach the browser.
@@ -135,7 +135,11 @@ caller can never reach a paid API), `audit-guards.test.js` (every known false cl
 every real finding survives), `report-render.test.js` (the report renders, the print document
 builds, the evidence is in both, and every guard holds on the thing a human actually receives)
 and `workspace.test.js` (findings become tracked work and only the ones the report actually
-showed, dates are local rather than UTC, and the calendar file parses in somebody else's app).
+showed, dates are local rather than UTC, the calendar file parses in somebody else's app, and the
+Finesse handoff never carries the passcode).
+
+Full technical reference, including the workspace, the program, Meeting Mode and the handoff, is
+in [DOCUMENTATION.md](DOCUMENTATION.md).
 
 The frontend is a single `index.html` with no build step. Serve the folder and open it; the
 audit backend needs Netlify Functions, so audits only run against a deployment.
