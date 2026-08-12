@@ -364,6 +364,7 @@
     .rf-x{min-width:44px;min-height:44px}
     .rf-undo{min-height:44px}
     .btn-refine{min-height:44px}
+    .brand-src-a{display:inline-block;min-height:44px;line-height:44px}
     .refine-dock.open{position:fixed;inset:auto 0 0 0;width:100%;flex-basis:auto;height:70vh;z-index:60;
       border-left:0;border-top:1px solid var(--border);border-radius:18px 18px 0 0}
   }
@@ -1310,7 +1311,7 @@ function renderTool(){
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
     if(f.type==="select"){
-      return `<div class="field"><label for="f_${f.id}">${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
+      return `<div class="field"><label for="f_${f.id}">${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" aria-label="Custom ${f.label}" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
     }
     if(f.type==="textarea"){
       return `<div class="field span2"><label for="f_${f.id}">${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}"></textarea></div>`;
