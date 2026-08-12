@@ -454,6 +454,7 @@
   .pg-strip-label{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-2);margin-bottom:9px}
   .pg-strip{display:flex;flex-wrap:wrap;gap:8px}
   .pg-item{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 11px}
+  .pg-thin{margin-top:11px;font-size:12.5px;line-height:1.55;color:var(--ink-2);border-left:2px solid var(--amber);padding-left:11px}
   .pg-grade{font-family:var(--mono);font-size:12px;font-weight:700;padding:1px 7px;border-radius:5px}
   .pg-grade.g-good{color:#0a7d4f;background:rgba(0,201,126,.12);border:1px solid rgba(0,201,126,.35)}
   .pg-grade.g-mid{color:#9a6a00;background:rgba(247,147,30,.14);border:1px solid rgba(247,147,30,.4)}
@@ -1009,7 +1010,7 @@ End with this exact line on a new line: ${WATERMARK}`,
   audit:{
     title:"AI Marketing Audit",
     hl:"Audit",
-    blurb:"Enter a website. Grayrender finds the site's key pages, audits each one live, and delivers a director-level site-wide teardown: what's working, what's costing you leads across pages, a prioritized fix list, and cross-page moves. Takes about a minute.",
+    blurb:"Enter a website. Grayrender finds the site's key pages, audits each one live, and delivers a director-level site-wide teardown: what's working, what's costing you leads across pages, a prioritized fix list, and cross-page moves. Takes a minute or two.",
     btn:"Run Full-Site Audit",
     endpoint:"audit",
     fields:[
@@ -1732,7 +1733,7 @@ async function runPool(items,n,fn){
 function auditErrBox(msg){ return `<div class="output-wrap"><div class="error-box">${esc(msg)}</div></div>`; }
 function pathOf(u){ try{ const x=new URL(u); return (x.pathname+x.search)||"/"; }catch(e){ return u; } }
 
-let SITE_PAGES=[], SITE_RESULTS=[];
+let SITE_PAGES=[], SITE_RESULTS=[], SITE_THIN=false;
 function siteProgressShell(url){
   let host=url; try{ host=new URL(/^https?:/i.test(url)?url:"https://"+url).hostname.replace(/^www\./,""); }catch(e){}
   return `<div class="output-wrap"><div class="card site-prog">
@@ -1802,6 +1803,7 @@ async function runSiteAudit(vals){
     if(handleLocked(d)) return;
     if(!(d.pages&&d.pages.length)){ out.innerHTML=auditErrBox(d.message||d.error||"Could not find pages to audit on that site."); return; }
     SITE_PAGES=d.pages.slice(0,5); SITE_RESULTS=new Array(SITE_PAGES.length).fill(null);
+    SITE_THIN = d.thin === true;   // few or no commercial pages on this site
     setSiteStatus(`Auditing ${SITE_PAGES.length} key pages…`);
     renderSitePageList();
     // 2) scan each page, up to 3 at a time, updating the progress list live
@@ -1884,7 +1886,7 @@ async function runSiteAudit(vals){
       ]);
       // Require the section header at the START (not merely present), so a model that
       // replies with meta-commentary mentioning the header in prose is not inserted.
-      if(imp && imp.result && /^\s*WHY THESE CHANGES MATTER/i.test(imp.result.trim())) reportBody=insertAfterFixes(reportBody, imp.result.trim());
+      if(imp && imp.result && /^\s*WHY THESE CHANGES MATTER/i.test(imp.result.trim())) reportBody=insertAfterFixes(reportBody, tetherImpact(imp.result.trim(), fixesSectionOf(reportBody)));
       if(req && req.result && /^\s*WHAT IT TAKES/i.test(req.result.trim())){
         // Keep the "Not Verified" honesty appendix as the report's LAST section: splice
         // the implementation plan in before it when present, else append at the end.
@@ -1936,7 +1938,13 @@ function pagesStripHtml(pages){
   const ok=pages.filter(p=>p&&p.grade&&p.grade!=="?");
   if(!ok.length) return "";
   const items=ok.map(p=>`<div class="pg-item"><span class="pg-grade ${gradeClass(p.grade)}">${esc(p.grade)}</span><span class="pg-name">${esc(p.label||"Page")}</span></div>`).join("");
-  return `<div class="aud-sec pg-sec"><div class="pg-strip-label">Pages audited (${ok.length})</div><div class="pg-strip">${items}</div></div>`;
+  /* Say when there was little to grade. An open-source docs site has no pricing, no
+     product page and no about; the audit still fills five slots, and a reader is entitled
+     to know it graded a styleguide rather than a marketing site. */
+  const thin = SITE_THIN
+    ? `<div class="pg-thin">This site has few conventional marketing pages (no pricing, product or about page was found). The audit graded the most substantial pages available, so treat the commercial findings as indicative.</div>`
+    : "";
+  return `<div class="aud-sec pg-sec"><div class="pg-strip-label">Pages audited (${ok.length})</div><div class="pg-strip">${items}</div>${thin}</div>`;
 }
 // Print-styled per-page strip for the PDF.
 function prPagesStrip(pages){
@@ -1985,6 +1993,40 @@ function parseSections(body,defs){
 // Insert a section block into the report body right after the PRIORITIZED FIXES
 // section (before the next section header), so it renders immediately below the fix
 // list. Falls back to appending if the fixes or a following header can't be found.
+/* The impact section drifts. On a real zhaion run it credited "a clearer H1 and tagline"
+   and "the reordered title" when neither fix had been filed - only a button move, a meta
+   edit and alt text were. The prompt already scopes it to the fix list; prompts leak, so
+   drop any bullet whose element references are all absent from PRIORITIZED FIXES. A bullet
+   that names no element at all (compounding effects, timelines) is left alone. */
+const IMPACT_ELEMENTS=[["title","title tag"],["meta","meta description"],["h1","h1"],
+  ["alt text","alt attribute","alt-text"],["headline"],["cta","call to action","button"],
+  ["canonical"],["schema","structured data","json-ld"],["link label","anchor text"],
+  ["bio"],["image"]];
+/* Pull the PRIORITIZED FIXES body out of the report, stopping at the next ALL-CAPS header. */
+function fixesSectionOf(body){
+  const lines=String(body||"").split("\n");
+  const i=lines.findIndex(l=>/^\s*PRIORITIZED FIXES/i.test(l));
+  if(i<0) return "";
+  const out=[];
+  for(let j=i+1;j<lines.length;j++){
+    const t=lines[j].trim();
+    if(t.length>2 && t.length<64 && /[A-Z]/.test(t) && !/[a-z]/.test(t) && !/^[-\u2022*\d]/.test(t)) break;
+    out.push(lines[j]);
+  }
+  return out.join("\n");
+}
+function tetherImpact(impact, fixes){
+  const fx=String(fixes||"").toLowerCase();
+  const present=g=>g.some(w=>fx.includes(w));
+  return String(impact||"").split("\n").filter(line=>{
+    const t=line.trim(); if(!t) return true;
+    if(t.length<3 || !/^[-•*]/.test(t)) return true;      // headers and prose stay
+    const lower=t.toLowerCase();
+    const named=IMPACT_ELEMENTS.filter(g=>g.some(w=>lower.includes(w)));
+    if(!named.length) return true;                         // names no element: keep
+    return named.some(present);                            // keep if ANY named element was filed
+  }).join("\n");
+}
 function insertAfterFixes(body,block){
   if(!block) return body;
   const lines=body.split("\n");

@@ -130,8 +130,8 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
     if (mode === 'discover') {
       const t0 = normalizeUrl(url);
       if (!t0) return json(400, { error: 'Please enter a valid website URL (e.g. https://www.example.com).' });
-      const pages = await discoverPages(t0);
-      return json(200, { pages: pages });
+      const found = await discoverPages(t0);
+      return json(200, { pages: found.pages, commercial: found.commercial, thin: found.thin });
     }
 
     // ===== MODE: synthesize the site-level report from the per-page scans =====
@@ -314,7 +314,12 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
 
       const msg = await client.messages.create({
         model: 'claude-haiku-4-5-20251001', max_tokens: 1200, temperature: 0,
-        system: SCAN_SYSTEM,
+        /* Every page in a run sends this same prompt. A measured 5-page audit reported
+           cache_read_input_tokens: 0 on all five scans, paying full price each time.
+           Haiku 4.5's minimum cacheable prefix is 4096 tokens and this sits near it, so
+           the win is real but not guaranteed: check cache_read_input_tokens with
+           debug:true rather than assuming. */
+        system: [{ type: 'text', text: SCAN_SYSTEM, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: userContent }]
       });
       const out = textOf(msg);
@@ -370,6 +375,7 @@ const AUDIT_SYSTEM =
 'EVIDENCE: you will be given real signals extracted from the LIVE page (title tag, meta description, headings, structure, counts) plus the visible content. Base every observation on THAT evidence and quote the actual text you are critiquing. Never invent facts you were not given.\n\n' +
 
 'NEVER COMPUTE A NUMBER, ONLY QUOTE ONE: do not derive, calculate or infer any figure (years in business, percentages, counts, totals, ages). A recent audit wrote \"establishes 27 years of credibility\" for a firm founded in 1997 when the page itself says 29 years: it did arithmetic instead of reading. Another wrote \"four named client testimonials\" where there were three: it COUNTED instead of reading. This applies to numbers spelled as WORDS too (two, three, four, five). Do not count items on the page and do not compute an age, a percentage or a total. Every number you write must appear VERBATIM in the OBSERVED FACTS or in the page content. If a number you want is not there, do not state it.\n\n' +
+'META LENGTH: a meta description between roughly 120 and 165 characters is a NORMAL, healthy length. Never describe one in that range as truncated, cut off, or too long, and never file a fix whose only justification is its character count. Only call a meta truncated when it genuinely ends mid-sentence or mid-word.\n\n' +
 'GROUNDING AND NO FABRICATION (absolute): base every claim and every Current value only on the SIGNALS and CONTENT you are given, quoted verbatim. NEVER invent, guess, infer, or paraphrase a value; if you do not have the exact current text for an element, do not file a fix or claim about it, and NEVER write "exact text not provided", "platform-default", or a placeholder. Read the real title, meta, and H1s before judging them; they are often already custom and good, and you must verify any title/meta claim against the exact string and the bracketed FACTS (do not say the title lacks a pipe or colon it already has, or that a term is buried when it is already first; if the title/meta already does what you would recommend, do not file that fix; a title that is already custom, keyword-rich, and leads with the primary term is a STRENGTH, not a fix, so only file a title/meta fix for a concrete verifiable defect like a placeholder, a truncation, or a genuinely missing keyword, never merely to re-order or tighten a good one). Quote real link and button labels, but do NOT infer visual funnel order or file "buried/duplicate/fragmented funnel" findings from raw document-order links. ONLY IF the RENDERED LAYOUT block says NOT AVAILABLE: you have not seen the page, so never claim an element is above/below the fold or in a particular on-screen position. IF a RENDERED LAYOUT block IS present, a real browser measured this page: its fold position and element positions are FACTS, you SHOULD use them, and you MUST grade UX rather than marking it n/a. This HTML is PRE-hydration: JavaScript-populated values (countdown timers, live counters, stream counts) may look like zeros or placeholders but are LIVE for visitors, so NEVER report a timer/counter/dynamic value as frozen, broken, or stuck at zero. Before saying the platform lacks a capability or recommending migration to get one, check the observed buttons/links: if an email signup or "get early access" button is present, the platform already has it. On a link-in-bio the H1 is the creator DISPLAY NAME, not an SEO title, so never rewrite it into a keyword or pipe-delimited string, and never treat a title dash-vs-pipe punctuation style as a defect. NEVER predict a percentage, multiple, or timeframe for results unless tied to a cited benchmark or the site\'s own data. If told the raw HTML duplicated blocks (SSR/hydration), do not report duplicate headings or repeated copy unless the texts genuinely differ. A capability the platform lacks (alt text, canonical, schema on a locked builder) is a limitation for STRATEGIC MOVES, never a CRITICAL fix, and never hedge "if the platform exposes". Do not recommend removing or rewording anything you praised as a strength (check EVERY fix, including Low). Never change, weaken, or remove a transparency or disclosure statement (e.g. an AI-authorship disclosure), and never propose "verified"/"certified" wording unless such verification is evidenced.\n\n' +
 'PLATFORM FAIRNESS (internal guidance only, NEVER output this as a section, a heading, or a restated instruction): you will be told the platform the site is built on and exactly what its owner can and cannot change. Judge and prescribe ONLY within that reality. Never recommend an edit the platform forbids, and never lower a grade for a limitation the platform imposes rather than a choice the owner made. On a locked no-code or link-in-bio builder, grade against what that kind of page can realistically achieve, treat structural limits as constraints (not failures), and put any "move to another platform" idea in STRATEGIC MOVES, never in PRIORITIZED FIXES. Weave the platform naturally into your OVERVIEW prose in one clause (no separate platform heading) and frame each fix as an action the owner can actually take on it.\n\n' +
 
@@ -706,17 +712,30 @@ async function discoverPages(startUrl) {
   }
   var arr = Object.keys(map).map(function (k) { return map[k]; });
   arr.sort(function (a, b) { return b.score - a.score; });
-  // Pick up to 5, capping near-duplicate service-detail pages at 2 so the set stays
-  // diverse (home + pricing + about + AI + one service, not four staffing variants).
-  var out = [], svc = 0;
-  var isSvc = function (u) { return /staffing|recruit|placement|augmentation|temp|contract|offshore|managed|project-based/i.test(u || ''); };
+  /* Pick up to 5, deduping by LAST PATH SEGMENT. This used to cap "near-duplicates"
+     with a staffing regex (staffing|recruit|placement|offshore...), which only ever
+     recognised one industry's pages: stripe.com returned BOTH /professional-services
+     and /industries/professional-services because neither matched it. Comparing the
+     final segment is industry-neutral and catches the nested-duplicate case. Sorted by
+     score descending, so the survivor is the better-ranked (usually shallower) one. */
+  var out = [], seenLeaf = {};
+  var leafOf = function (u) {
+    try { return new URL(u).pathname.toLowerCase().replace(/^\/|\/$/g, '').split('/').pop(); }
+    catch (e) { return u; }
+  };
   for (var i = 0; i < arr.length && out.length < 5; i++) {
-    var p = arr[i];
-    if (isSvc(p.url) && svc >= 1) continue; // one representative service page; keep the rest strategic
-    if (isSvc(p.url)) svc++;
-    out.push({ url: p.url, label: p.label || labelFromUrl(p.url) });
+    var p = arr[i], leaf = leafOf(p.url);
+    if (leaf && seenLeaf[leaf]) continue;
+    if (leaf) seenLeaf[leaf] = 1;
+    out.push({ url: p.url, label: p.label || labelFromUrl(p.url), score: p.score });
   }
-  return out;
+  /* How many of these are actually commercial pages? An open-source docs site
+     (11ty.dev) has none, and the audit filled its five slots with a styleguide and a
+     leaderboard. Better to grade what's there AND say so than to imply a marketing
+     site was assessed. */
+  var commercial = out.filter(function (x) { return x.score > 20; }).length;
+  return { pages: out.map(function (x) { return { url: x.url, label: x.label }; }),
+           commercial: commercial, thin: commercial < 2 };
 }
 function toAbs(href, origin) {
   if (!href) return '';

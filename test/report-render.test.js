@@ -190,6 +190,38 @@ check('the CSV export carries no em dashes', !/[—–]/.test(csvOut),
   (csvOut.match(/.{0,30}[—–].{0,30}/) || [''])[0]);
 check('the CSV has one line per real row', csvOut.split('\r\n').length === calRows.length + 1);
 
+/* ------------------------------------------------------------------
+   IMPACT TETHERING  (observed on a real zhaion.com run)
+
+   "Why These Changes Matter" credited "a clearer H1 and tagline" and "the
+   reordered title" when neither fix had been filed — only a button move, a meta
+   edit and alt text were. The prompt already scopes the section to the fix list;
+   prompts leak, so the code drops bullets whose element references are all absent.
+------------------------------------------------------------------ */
+console.log('\nIMPACT TETHERING  (the section may only credit fixes that were filed)');
+const FILED = [
+  'PRIORITIZED FIXES',
+  '- [High] Home page (/), the early access button: buried. Current: "y=900". Use: "move up". Effort: 5 min (owner).',
+  '- [High] Home page (/), meta description: front-load the date. Current: "old meta". Use: "new meta". Effort: 10 min (owner).',
+].join('\n');
+const IMPACT = [
+  'WHY THESE CHANGES MATTER',
+  '- Moving the early access button above the fold lifts signup rate.',
+  '- A clearer H1 and tagline reduce bounce.',
+  '- The reordered title improves click-through from search.',
+  '- Tightening the meta description front-loads the date in the snippet.',
+  '- Together these compound into faster routing and higher conversion velocity.',
+].join('\n');
+const tethered = win.tetherImpact(IMPACT, FILED);
+check('keeps a bullet about a filed fix (the button)', /early access button/.test(tethered));
+check('keeps a bullet about a filed fix (the meta)', /meta description/.test(tethered));
+check('DROPS the unfiled H1 claim', !/clearer H1/.test(tethered), tethered);
+check('DROPS the unfiled title claim', !/reordered title/.test(tethered), tethered);
+check('keeps the element-free compounding bullet', /compound/.test(tethered));
+check('keeps the section header', /^WHY THESE CHANGES MATTER/m.test(tethered));
+check('fixesSectionOf stops at the next header',
+  !/WHY THESE/.test(win.fixesSectionOf(FILED + '\n\nWHY THESE CHANGES MATTER\n- x')));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
