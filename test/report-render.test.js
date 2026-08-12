@@ -281,9 +281,6 @@ const MAIN_HALF = [
   'WHAT IS COSTING YOU LEADS',
   '- Every page carries two H1 tags.',
   '',
-  'STRATEGIC MOVES',
-  '- Standardize the H1 structure across all five pages.',
-  '',
   'WHERE AI CREATES LEVERAGE',
   '- Continuous auditing would catch these before they ship.',
   '',
@@ -292,7 +289,10 @@ const MAIN_HALF = [
 ].join('\n');
 const FIX_HALF = [
   'PRIORITIZED FIXES',
-  '- [Critical] Home page (/), title tag: a placeholder wastes the best SEO slot. Current: "Home Final - Northwind". Use: "Tech Staffing & Recruiting | Northwind". Effort: 10 min (SEO specialist).'
+  '- [Critical] Home page (/), title tag: a placeholder wastes the best SEO slot. Current: "Home Final - Northwind". Use: "Tech Staffing & Recruiting | Northwind". Effort: 10 min (SEO specialist).',
+  '',
+  'STRATEGIC MOVES',
+  '- Standardize the H1 structure across all five pages.'
 ].join('\n');
 
 const stitched = win.stitchReport(MAIN_HALF, FIX_HALF);
@@ -302,10 +302,13 @@ const order = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'PRIO
 
 check('every section survives the stitch', order.every(i => i >= 0), JSON.stringify(order));
 check('sections land in report order', order.every((v, i) => i === 0 || v > order[i - 1]), JSON.stringify(order));
-check('the fix list sits before STRATEGIC MOVES',
-  stitched.indexOf('PRIORITIZED FIXES') < stitched.indexOf('STRATEGIC MOVES'));
+check('the fix list sits before WHERE AI CREATES LEVERAGE',
+  stitched.indexOf('PRIORITIZED FIXES') < stitched.indexOf('WHERE AI CREATES LEVERAGE'));
 check('the fix list sits after WHAT IS COSTING YOU LEADS',
   stitched.indexOf('PRIORITIZED FIXES') > stitched.indexOf('WHAT IS COSTING YOU LEADS'));
+check('the strategic moves ride with the fixes, still in order',
+  stitched.indexOf('STRATEGIC MOVES') > stitched.indexOf('PRIORITIZED FIXES')
+  && stitched.indexOf('STRATEGIC MOVES') < stitched.indexOf('WHERE AI CREATES LEVERAGE'));
 check('the fix survives intact', /Home Final - Northwind/.test(stitched) && /Effort: 10 min/.test(stitched));
 check('nothing is duplicated', stitched.split('STRATEGIC MOVES').length - 1 === 1
   && stitched.split('OVERVIEW').length - 1 === 1);

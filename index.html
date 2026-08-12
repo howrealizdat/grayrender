@@ -1730,16 +1730,18 @@ async function postAudit(payload){
   const r=await fetch("/.netlify/functions/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   return r.json().catch(()=>({}));
 }
-/* Put the separately written fix list back where a reader expects it: after WHAT IS COSTING
-   YOU LEADS and before STRATEGIC MOVES. Everything downstream (the impact tethering, the
-   requirements splice before the honesty appendix, the deterministic scores, the PDF) reads
-   the finished body and needs no knowledge that it arrived in two pieces.
+/* Put the separately written half (PRIORITIZED FIXES then STRATEGIC MOVES) back where a
+   reader expects it: after WHAT IS COSTING YOU LEADS and before WHERE AI CREATES LEVERAGE.
+   The two halves are cut so that each is a contiguous run of the report, which is why one
+   splice is enough. Everything downstream (the impact tethering, the requirements splice
+   before the honesty appendix, the deterministic scores, the PDF) reads the finished body
+   and needs no knowledge that it arrived in two pieces.
    If the fix pass failed, the report still renders without it. Half a report beats none. */
 function stitchReport(main, fixes){
   if(!fixes) return main;
-  const m=/(^|\n)[ \t]*STRATEGIC MOVES\b/i.exec(main);
+  const m=/(^|\n)[ \t]*WHERE AI CREATES LEVERAGE\b/i.exec(main);
   if(!m) return main.replace(/\s+$/,"")+"\n\n"+fixes;
-  const cut=m.index+(m[1]?m[1].length:0);   // start of the STRATEGIC MOVES line itself
+  const cut=m.index+(m[1]?m[1].length:0);   // start of the WHERE AI CREATES LEVERAGE line
   return main.slice(0,cut).replace(/\s+$/,"")+"\n\n"+fixes.replace(/\s+$/,"")+"\n\n"+main.slice(cut);
 }
 // Run fn over items with at most n in flight at once.
