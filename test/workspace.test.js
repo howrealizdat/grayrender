@@ -267,6 +267,20 @@ check('a plan older than a week stops being asserted as current',
 check('workDigest carries it even when no tool has produced anything yet',
   /Fix the title tag/.test(win.workDigest('audit')));
 
+console.log('\nCOMING BACK ANOTHER DAY');
+win.eval("PLAN = blankPlan();");
+win.eval("Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.addItem({ source: 'manual', title: 'Something open' });
+win.eval("PLAN.lastSeen = Date.now() - 3*86400000;");
+win.eval("current='home';"); win.renderHome();
+check('the header notices the gap', /in 3 days/.test(win.document.querySelector('.tool-head p').textContent),
+  win.document.querySelector('.tool-head p').textContent.trim());
+win.eval("LAST_OUT.audit={kind:'audit',body:'x',vals:{},at:Date.now()};");
+win.renderHome();
+const head = win.document.querySelector('.tool-head p').textContent;
+check('but a fresh piece of work overrides a stale lastSeen, so the two lines cannot contradict',
+  !/in 3 days/.test(head), head.trim());
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }

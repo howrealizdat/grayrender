@@ -114,7 +114,7 @@ npm install
 npm test
 ```
 
-`npm test` runs 438 assertions across four suites: `passcode.test.js` (an unauthenticated
+`npm test` runs 440 assertions across four suites: `passcode.test.js` (an unauthenticated
 caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
 every real finding survives), `report-render.test.js` (the report renders, the print document
 builds, the evidence is in both, and every guard holds on the thing a human actually receives)

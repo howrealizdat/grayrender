@@ -2783,7 +2783,12 @@ function renderHome(){
   const a=LAST_OUT.audit;
   const touched=Object.keys(LAST_OUT).filter(k=>TOOLS[k]&&LAST_OUT[k]).sort((x,y)=>(LAST_OUT[y].at||0)-(LAST_OUT[x].at||0));
   const last=touched.length?LAST_OUT[touched[0]]:null;
-  const gap=PLAN.lastSeen?daysSince(PLAN.lastSeen):0;
+  /* Measured from the newest of "last thing logged" and "last thing produced", because
+     those two can disagree and a header that says three days on one line and one minute on
+     the next reads as broken. Says what it actually measures, too: this counts days since
+     anything MOVED, not days since you last opened the page. */
+  const lastAt=Math.max(PLAN.lastSeen||0,(last&&last.at)||0);
+  const gap=lastAt?daysSince(lastAt):0;
 
   const tiles=[
     {n:open.length,l:open.length===1?"open item":"open items"},
@@ -2810,7 +2815,7 @@ function renderHome(){
   main.innerHTML=`
     <div class="tool-head">
       <h1>${esc(greeting())}<span class="hl">.</span></h1>
-      <p>${gap>=1?`It has been ${gap===1?"a day":gap+" days"} since you were last in here for <b>${esc(brandName())}</b>. `:`Everything ${esc(brandName())} has in flight, in one place. `}
+      <p>${gap>=1?`Nothing has moved for <b>${esc(brandName())}</b> in ${gap===1?"a day":gap+" days"}. `:`Everything ${esc(brandName())} has in flight, in one place. `}
         ${last?`You last worked on ${esc(TOOLS[touched[0]].title)}, ${esc(agoWords(last.at))}.`:``}</p>
     </div>
 
