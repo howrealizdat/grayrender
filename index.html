@@ -1156,7 +1156,7 @@ function handleLocked(d){
 }
 
 function renderTool(){
-  window.scrollTo(0,0);
+  try{window.scrollTo(0,0);}catch(e){}
   if(!BRAND) return renderBrandSetup();
   const t=TOOLS[current];
   let dl="";
@@ -1218,7 +1218,7 @@ function optsOf(f){
    on. There is a manual path because a first-run experience that can dead-end on a
    network error is not a first-run experience. */
 function renderBrandSetup(msg){
-  window.scrollTo(0,0);
+  try{window.scrollTo(0,0);}catch(e){}
   main.innerHTML=`
     <div class="tool-head">
       <h1>Who are we <span class="hl">writing</span> for?</h1>
@@ -1245,7 +1245,7 @@ function renderBrandSetup(msg){
   document.getElementById("bwManual").addEventListener("click",()=>renderBrandManual());
 }
 function renderBrandManual(prefill){
-  window.scrollTo(0,0);
+  try{window.scrollTo(0,0);}catch(e){}
   const b=Object.assign({},DEFAULT_BRAND,prefill||{});
   main.innerHTML=`
     <div class="tool-head">
@@ -1299,7 +1299,7 @@ async function runBrandSetup(){
   renderBrandConfirm(d.profile,url);
 }
 function renderBrandConfirm(prof,url){
-  window.scrollTo(0,0);
+  try{window.scrollTo(0,0);}catch(e){}
   const rows=[["What you do",prof.what],["Industry",prof.industry],["How you sound",prof.tone],
               ["Who buys",(prof.audiences||[]).slice(0,4).join(", ")],
               ["What you offer",(prof.offerings||[]).slice(0,4).join(", ")],
@@ -1526,16 +1526,23 @@ function parseCalendar(body){
     if(/^WEEK\s+\d+/i.test(t)){ cur={title:t,rows:[]}; inNotes=false; weeks.push(cur); return; }
     if(/^POSTING NOTES/i.test(t)){ cur=null; inNotes=true; return; }
     if(inNotes){ if(t) notes.push(t); return; }
-    if(!cur || !/^[-•*]\s/.test(t)) return;
+    // The bullet is optional. Asked for "- Monday | LinkedIn | ...", the live model
+    // returns "Monday | LinkedIn | ..." most of the time, and a parser that insisted on
+    // the dash found zero rows and silently fell back to prose. What identifies a row is
+    // the seven pipe-separated fields, so key off that and treat the bullet as decoration.
+    if(!cur) return;
     const parts=t.replace(/^[-•*]\s*/,"").split("|").map(x=>x.trim());
-    if(parts.length<7) return;
+    if(parts.length<7 || !parts[0]) return;
+    if(/^(day|date)$/i.test(parts[0])) return;   // a header row, not a post
     const [day,channel,format,hook,caption,cta,asset]=parts;
     cur.rows.push({day,channel,format,hook,caption,cta,asset});
   });
   return {weeks, notes:notes.join("\n").trim()};
 }
 function calendarCsv(rows){
-  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  // Same cleaning the screen gets. The renderer strips dashes and markdown via escMd, so a
+  // CSV built from the raw values was the one place an em dash could still reach the user.
+  const q=v=>'"'+cleanCopy(String(v==null?"":v)).replace(/"/g,'""')+'"';
   const head=["Week","Day","Channel","Format","Hook","Caption","CTA","Asset needed"];
   return [head.map(q).join(",")].concat(rows.map(r=>[r.week,r.day,r.channel,r.format,r.hook,r.caption,r.cta,r.asset].map(q).join(","))).join("\r\n");
 }

@@ -157,6 +157,39 @@ const wpFix = '- [High] Home page (/), title tag: a placeholder wastes the best 
 check('LEAVES the Effort alone when the platform named is the real one',
   /WordPress/.test(fx(wpFix, { kind: 'cms', name: 'WordPress' })));
 
+/* ------------------------------------------------------------------
+   THE CALENDAR CONTRACT, as the live model actually honours it.
+
+   Asked for "- Monday | LinkedIn | ...", Haiku returned "Monday | LinkedIn | ..."
+   on every row of a real run. The parser required the bullet, matched nothing, and
+   the flagship calendar silently degraded to prose. Seven pipe-separated fields is
+   what identifies a row; the bullet is decoration.
+------------------------------------------------------------------ */
+console.log('\nCALENDAR PARSING  (real model output, not the shape we asked for)');
+const LIVE_CAL = [
+  'WEEK 1', '',
+  "Monday | LinkedIn | Text post | Most teams waste 3 hours a week. | You're not disorganized—your tools are. | See how | Screenshot",
+  'Wednesday | Instagram | Reel | Three taps. | Quick walkthrough. | Watch it | 30s capture',
+  'Day | Channel | Format | Hook | Caption | CTA | Asset',
+  '- Friday | YouTube | Short | The problem nobody measures. | A short. | Subscribe | Vertical video',
+  'WEEK 2',
+  'Tuesday | LinkedIn | Poll | What eats your week? | Four options. | Vote | Poll copy',
+  'Broken | row | with | too | few',
+  'POSTING NOTES', '- Post 8-10am Tuesday to Thursday.', '- Boost the poll.'
+].join('\n');
+const parsedCal = win.parseCalendar(LIVE_CAL);
+const calRows = parsedCal.weeks.flatMap(w => w.rows);
+check('rows without a leading bullet still parse', calRows.some(r => r.day === 'Monday'));
+check('rows with a bullet still parse', calRows.some(r => r.day === 'Friday'));
+check('a repeated header row is not treated as a post', !calRows.some(r => /^day$/i.test(r.day)));
+check('a malformed row is dropped, not half-rendered', !calRows.some(r => r.day === 'Broken'));
+check('both weeks captured', parsedCal.weeks.length === 2, parsedCal.weeks.length + ' weeks');
+check('all posting notes captured', parsedCal.notes.split('\n').length === 2, JSON.stringify(parsedCal.notes));
+const csvOut = win.calendarCsv(calRows.map(r => Object.assign({ week: 'WEEK 1' }, r)));
+check('the CSV export carries no em dashes', !/[—–]/.test(csvOut),
+  (csvOut.match(/.{0,30}[—–].{0,30}/) || [''])[0]);
+check('the CSV has one line per real row', csvOut.split('\r\n').length === calRows.length + 1);
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
