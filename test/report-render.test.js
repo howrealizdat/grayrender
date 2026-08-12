@@ -417,6 +417,13 @@ win.renderTool();
 check('the audit renders with NO brand saved', /Run Full-Site Audit/i.test(win.document.body.textContent));
 check('and it does not divert to brand setup', !win.document.querySelector('.bw-gate'));
 check('and it shows the website field straight away', !!win.document.getElementById('f_url'));
+/* The sidebar must agree with the pane. On first load it did not: the audit rendered while
+   the nav still highlighted the tool whose active class was baked into the static markup. */
+check('the sidebar highlights what is actually rendered',
+  (win.document.querySelector('.nav-item.active')||{}).dataset === undefined
+    ? false
+    : win.document.querySelector('.nav-item.active').dataset.tool === 'audit',
+  'active nav = ' + ((win.document.querySelector('.nav-item.active')||{}).dataset||{}).tool);
 /* Assert the SOURCE default, not the live value: `current` has been reassigned by the
    tests above, so reading it here would prove nothing about what a first visitor gets. */
 check('the default landing tool in source is the audit', /let current\s*=\s*"audit"/.test(html),

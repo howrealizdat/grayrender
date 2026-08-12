@@ -1174,6 +1174,12 @@ function handleLocked(d){
 function needsBrand(t){ return !!(t && t.system); }
 function renderTool(){
   try{window.scrollTo(0,0);}catch(e){}
+  /* The sidebar follows whatever we are about to render, always. It used to be set only by
+     the click handler, so on first load the pane showed the audit while the nav still
+     highlighted the tool whose active class was baked into the static markup. Nav saying one
+     thing while the screen says another is what made the brand gate feel broken; doing this
+     here rather than at each call site means it cannot drift again. */
+  setActiveNav();
   const t=TOOLS[current];
   if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
