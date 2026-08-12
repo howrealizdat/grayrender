@@ -440,6 +440,15 @@ check('it renders as a document, not a wall of text',
   strat.querySelectorAll('.st-sec').length === 5, String(strat.querySelectorAll('.st-sec').length));
 check('numbered moves are pulled out', strat.querySelectorAll('.st-move').length === 2);
 check('the ninety day phases are marked', strat.querySelectorAll('.st-phase').length === 1);
+/* The model writes the phase and its content on one line about half the time. Uppercasing
+   that shouted an entire paragraph at the reader on the first live run. */
+win.eval("PLAN.strategyDoc={text:'THE NEXT NINETY DAYS\\nDays 1 to 30: Ship the two fixes, then test both on mobile yourself.\\nDays 31 to 60\\nRun the campaign builder.',at:Date.now(),done:2};");
+win.renderHome();
+const phases = [...win.document.querySelectorAll('.st-phase')].map(e => e.textContent);
+check('a phase written on one line keeps its label short', phases.length === 2 && phases.every(p => p.length < 18), JSON.stringify(phases));
+check('and its sentence renders as ordinary prose, not shouting',
+  /Ship the two fixes/.test(win.document.querySelector('.st-b p').textContent),
+  (win.document.querySelector('.st-b p') || {}).textContent);
 check('it says how much of the program it was written from, not how much is done NOW',
   /written from 2 of 6 steps done/.test(strat.textContent.replace(/\s+/g, ' ')),
   strat.textContent.replace(/\s+/g, ' ').slice(0, 160));

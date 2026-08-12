@@ -920,7 +920,7 @@
     font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
     font-variant-numeric:tabular-nums;margin-top:1px}
   .st-phase{margin:12px 0 6px;font-size:10px;font-weight:700;letter-spacing:1.2px;
-    text-transform:uppercase;color:var(--accent)}
+    text-transform:uppercase;color:var(--accent);max-width:22ch;overflow-wrap:anywhere}
   .st-phase:first-child{margin-top:0}
   .st-stale{margin:0 20px 14px;padding:11px 13px;border:1px solid rgba(138,109,59,.35);
     border-radius:9px;font-size:12.5px;color:var(--accent);line-height:1.5}
@@ -2977,7 +2977,15 @@ function paintStrategy(){
       if(open) html+="</div></section>";
       html+=`<section class="st-sec"><h3>${escMd(t)}</h3><div class="st-b">`; open=true; return;
     }
-    if(/^days?\s+\d+\s+to\s+\d+/i.test(t)){ html+=`<div class="st-phase">${escMd(t)}</div>`; return; }
+    /* The phase label is styled small-caps. The model writes "Days 1 to 30: do this, then
+       that" on ONE line about half the time, and uppercasing that shouts a whole paragraph
+       at the reader. Split the label off and let the rest be prose. */
+    const ph=t.match(/^(days?\s+\d+\s+(?:to|-|\u2013)\s+\d+)\s*[:.\u2013-]?\s*([\s\S]*)$/i);
+    if(ph){
+      html+=`<div class="st-phase">${escMd(ph[1])}</div>`;
+      if(ph[2]&&ph[2].trim()) html+=`<p>${escMd(ph[2].trim())}</p>`;
+      return;
+    }
     const num=t.match(/^(\d+)[.)]\s*(.+)$/);
     if(num){ html+=`<div class="st-move"><span class="st-n">${esc(num[1])}</span><span>${escMd(num[2])}</span></div>`; return; }
     html+=`<p>${escMd(t.replace(/^[-•*]\s*/,""))}</p>`;
