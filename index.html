@@ -752,9 +752,13 @@ const TOOLS = {
       {id:"tone",label:"Tone",type:"select",options:["Professional","Consultative","Bold"]}
     ],
     system:`You are an elite B2B cold-email copywriter writing for __CO__. ${NODASH}EXPERT STANDARD: write to the bar set by Josh Braun on cold outreach (earn the second sentence, never assume the problem), the Challenger Sale research of Dixon and Adamson (teach them something about their own business before you ask for anything), and Robert Cialdini on which proof persuades. If the email could have been sent to any company in the industry, it has failed. Write ONE cold outreach email from an account executive at __CO_NAME__ to a decision maker (CIO, VP of Engineering, or Talent Acquisition leader) at the target company. Follow these expert rules exactly:
-- SUBJECT: 3-8 words, specific and curiosity-driving, ideally a question tied to their hiring pain. No ALL CAPS, no emojis, no clickbait. Put it on the first line labeled "Subject:".
+- SUBJECT: 3-8 words and NO MORE THAN 40 CHARACTERS, because the iPhone preview cuts around 35 to 40 and the Gmail Android preview cuts around 30. Write it in all lowercase: lowercase reads as mail from a colleague, title case reads as marketing. Specific and curiosity-driving, ideally a question tied to their situation. No ALL CAPS, no emojis, no clickbait. Put it on the first line labeled "Subject:".
 - LENGTH: 50-125 words total (aim ~90). It must be readable in under 10 seconds on a phone.
-- STRUCTURE (4 beats): (1) open with a specific observation about THEM and their industry/hiring need, never open with "I'm from __CO_NAME__"; (2) name the real problem for their role; (3) ONE concrete proof point with a number, drawn only from the company profile above; (4) ONE soft, low-friction CTA to a 20-minute discovery call.
+- STRUCTURE, Josh Braun's 4-T, in this order and all four required:
+  (1) TRIGGER. Open on a specific OBSERVATION about them, then bridge to what it implies, using a phrase like "which suggests" or "which usually means". The observation must be something a person could actually have noticed about that company. Never open with "I'm from __CO_NAME__", and never assert their problem as fact.
+  (2) THINK. Ask ONE question that makes them reconsider how they handle this today. The target reaction is "hm, I am not sure", not "yes I have that problem". A question they can answer with a confident no has failed.
+  (3) THIRD-PARTY CREDIBILITY. ONE concrete proof point with a number, drawn ONLY from the company profile above. Never invent a client, a logo, or a statistic.
+  (4) TALK. One low-friction binary ask, answerable yes or no, for a 20-minute call. Never "let me know your thoughts".
 - VOICE: peer-to-peer, plain-spoken, confident, not salesy. 1-3 sentences per paragraph with white space.
 - AVOID entirely: buzzwords and spam-trigger words (free, guaranteed, act now, limited time, urgent, 100%, opportunity), exclamation stacks, feature lists, multiple CTAs, and jargon.
 Make it specific to the industry and hiring need provided. Match the requested tone.
@@ -787,6 +791,7 @@ End with this exact line: ${WATERMARK}`,
     hl:"Ad Studio",
     blurb:"Generate three ad variations (Google Ad, LinkedIn Ad, and a landing page hero) for one of your services.",
     btn:"Generate Ad Campaign",
+    maxTokens:2600,
     fields:[
       {id:"service",label:"What You Are Promoting",type:"select",options:b=>b.offerings},
       {id:"buyer",label:"Target Buyer",type:"select",options:b=>b.buyers},
@@ -795,11 +800,12 @@ End with this exact line: ${WATERMARK}`,
     system:`You are an elite performance-marketing copywriter for __CO__. ${NODASH}EXPERT STANDARD: write to the bar set by David Ogilvy on the promise in the headline, Joanna Wiebe on conversion copy (use the words the buyer already uses), and current Google Responsive Search Ad guidance on asset variety. Specificity beats cleverness every time, and a headline that fits the limit but says nothing is a wasted slot. Generate three ad variations. Label each with these exact headers on their own lines: "GOOGLE AD", "LINKEDIN AD", "LANDING PAGE".
 
 Output PLAIN TEXT ONLY, no markdown, asterisks, or bold anywhere.
-GOOGLE AD (Responsive Search Ad), these are HARD Google limits; going over gets the ad rejected, so COUNT characters and keep them short:
-- Headline 1: 30 characters max (aim ~24).
-- Headline 2: 30 characters max (aim ~24).
-- Description: aim for about 70 characters and NEVER exceed 90, ONE short sentence (about 11 words) ending in a 2-3 word CTA. Shorter is safer. Example of a compliant 84-char description: "Vetted engineers deployed in days, not months. 400+ ready. Book a free discovery call."
-Front-load the value and a keyword in the first ~15 characters. Make H1 and H2 distinct: one benefit/keyword-led, one with a number or CTA. Do not restate the headlines.
+GOOGLE AD (Responsive Search Ad). A real RSA has FIFTEEN headline assets and FOUR description assets, and Google's own guidance is explicit that filling every slot is what raises Ad Strength; advertisers who move Ad Strength from Poor to Excellent average about 15 percent more clicks and conversions. Two headlines is not an RSA, it is a rejected draft. Output ALL of them, each on its own line:
+- Headline 1 through Headline 15: 30 characters max each (aim ~24). Label each exactly "Headline N:".
+- Description 1 through Description 4: 90 characters max each (aim ~75). Label each exactly "Description N:". One sentence, ending in a short CTA.
+These are HARD Google limits; going over gets the asset rejected, so COUNT characters.
+ASSET VARIETY IS THE WHOLE POINT: Google assembles these in unpredictable combinations, so EVERY headline must read correctly next to EVERY other headline. Never write a set that only works in one order, and never write fifteen rewordings of one idea. Cover distinctly different angles across the fifteen: the core benefit, a keyword-led match to search intent, a number or proof point, price or value, speed or convenience, risk reversal or guarantee, social proof, a direct CTA, and an objection handled. Front-load the value and the keyword in the first ~15 characters.
+PINNING: after the assets, add one line "Pinning note:" recommending that only a brand name or a legally required disclaimer be pinned, because pinning everything defeats the responsiveness the format exists for.
 
 LINKEDIN AD (Sponsored Content): Headline (aim under 60 chars, 70 max), Intro text (aim about 120 chars and never exceed 150; open with a stat, question, or bold claim that speaks to the buyer's pain, not the product), and a CTA button label matched to the campaign goal.
 
@@ -847,7 +853,7 @@ Be concrete and credible, named advantages and numbers, no vague claims or theor
       {id:"channels",label:"Channels",type:"select",options:["LinkedIn + YouTube + Instagram","LinkedIn only","LinkedIn + Instagram","LinkedIn + YouTube","All channels + X/Threads"]},
       {id:"cadence",label:"Weekly Cadence",type:"select",options:["3 posts per week","4 posts per week","5 posts per week","Daily (7 per week)"]}
     ],
-    system:`You are a senior B2B social media strategist building a real, shippable organic content calendar. ${NODASH}EXPERT STANDARD: plan to the bar set by Byron Sharp on mental availability and distinctive brand assets (show up consistently, look like yourself every time, and reach beyond the small in-market group), Amanda Natividad and Rand Fishkin on zero-click content (deliver the whole value inside the post rather than teasing a link), Dave Gerhardt on B2B social voice (a company account should sound like a person with a point of view), and Paddy Galloway on YouTube packaging (the title carries the click, the video keeps the promise). Ann Handley's rule governs every caption: nobody woke up wanting your content, so earn the read.
+    system:`You are a senior B2B social media strategist building a real, shippable organic content calendar. ${NODASH}EXPERT STANDARD: plan to the bar set by Byron Sharp on mental availability, CATEGORY ENTRY POINTS and distinctive brand assets. Category entry points are the real buying situations that make someone think of this category at all, and a calendar that ignores them just talks about the product. Plan the four weeks so the posts collectively cover several DIFFERENT entry points rather than repeating one, add a "POSTING NOTES" line naming which entry points the month covers, and keep the brand's distinctive assets present so every post is recognisably the same brand (show up consistently, look like yourself every time, and reach beyond the small in-market group), Amanda Natividad and Rand Fishkin on zero-click content (deliver the whole value inside the post rather than teasing a link), Dave Gerhardt on B2B social voice (a company account should sound like a person with a point of view), and Paddy Galloway on YouTube packaging (the title carries the click, the video keeps the promise). Ann Handley's rule governs every caption: nobody woke up wanting your content, so earn the read.
 Return FOUR weeks. Start each week on its own line exactly as "WEEK 1", "WEEK 2", "WEEK 3", "WEEK 4".
 Under each week, output ONE LINE PER POST, starting with "- " and containing EXACTLY seven fields separated by a pipe character, in this order and nothing else:
 Day | Channel | Format | Hook | Caption | CTA | Asset needed
@@ -979,7 +985,7 @@ DO THESE THREE THINGS NEXT
 WHAT WE STILL CANNOT SEE
 RULES:
 - HEADLINE: two sentences maximum. The single most important thing that happened, stated plainly, tied to the stated goal.
-- WHAT THE NUMBERS SAY: quote ONLY numbers the user actually pasted, verbatim. Compute a rate or a delta only when both inputs were given, and show the arithmetic in parentheses. If a number was not provided, do not estimate it, do not infer it, and do not fill the gap with an industry benchmark.
+- WHAT THE NUMBERS SAY: open by applying Kaushik's four platform-independent social metrics BY NAME, in this order: Conversation Rate (replies or comments per post), Amplification Rate (shares or reposts per post), Applause Rate (likes or saves per post), and Economic Value (revenue or cost saving, including signups or leads where that is the stated goal). For each one, either compute it from the pasted data and show the arithmetic, or state plainly that the input it needs was not provided and name the exact figure required. Do not silently skip one. Then quote ONLY numbers the user actually pasted, verbatim. Compute a rate or a delta only when both inputs were given, and show the arithmetic in parentheses. If a number was not provided, do not estimate it, do not infer it, and do not fill the gap with an industry benchmark.
 - WHAT IS WORKING / WHAT IS NOT WORKING: 3 bullets each, every bullet anchored to a specific figure or a named post from the data.
 - DO THESE THREE THINGS NEXT: exactly 3 recommendations. Each states the action, the metric it should move, and how you will know within 30 days whether it worked. Be specific enough to assign to a person.
 - WHAT WE STILL CANNOT SEE: the honest gaps. Which metrics were missing, which conclusions therefore cannot be drawn, and what to start tracking. This section is mandatory and must never be empty.
@@ -2580,12 +2586,15 @@ function bullets(txt){
   return items.length?items.map(l=>`<li>${escMd(l)}</li>`).join(""):"";
 }
 // Platform character limits for the fields that actually have hard limits.
+/* Google Ad assets are NUMBERED and there are nineteen of them (15 headlines, 4 descriptions),
+   so they cannot be metered by a fixed list the way LinkedIn's two fields can. `numbered`
+   walks whatever the model actually returned and meters each asset it finds, which also means
+   a short set still meters correctly instead of silently showing nothing. */
 const AD_SPECS={
-  "Google Ad":[
-    {k:"H1",re:/headline\s*1\s*:?\s*(.+)/i,max:30},
-    {k:"H2",re:/headline\s*2\s*:?\s*(.+)/i,max:30},
-    {k:"Desc",re:/description\s*:?\s*(.+)/i,max:90}
-  ],
+  "Google Ad":{numbered:[
+    {label:"H",re:/^[ \t]*headline\s*(\d+)\s*:?[ \t]*(.+)$/gim,max:30},
+    {label:"D",re:/^[ \t]*description\s*(\d+)\s*:?[ \t]*(.+)$/gim,max:90}
+  ]},
   "LinkedIn Sponsored":[
     {k:"Headline",re:/headline\s*:?\s*(.+)/i,max:70},
     {k:"Intro",re:/intro(?:\s*text)?\s*:?\s*(.+)/i,max:150}
@@ -2595,12 +2604,30 @@ const AD_SPECS={
 function adMeters(tag,block){
   const specs=AD_SPECS[tag];
   if(!specs)return "";
-  const chips=specs.map(s=>{
-    const m=(block||"").match(s.re);
-    if(!m)return "";
-    const n=deDash(stripMd(m[1])).trim().length;
-    return `<span class="cc ${n>s.max?'over':'ok'}">${s.k} ${n}/${s.max}</span>`;
-  }).filter(Boolean).join("");
+  const txt=block||"";
+  let chips="";
+  if(specs.numbered){
+    // Meter every numbered asset the model returned, and say how many of the slots are filled,
+    // because a half-empty RSA is the actual defect Google penalises with a low Ad Strength.
+    const counts=[];
+    specs.numbered.forEach(s=>{
+      const re=new RegExp(s.re.source,s.re.flags); let m,found=0;
+      while((m=re.exec(txt))){
+        found++;
+        const n=deDash(stripMd(m[2])).trim().length;
+        chips+=`<span class="cc ${n>s.max?'over':'ok'}">${s.label}${m[1]} ${n}/${s.max}</span>`;
+      }
+      counts.push(s.label==="H"?found+"/15 headlines":found+"/4 descriptions");
+    });
+    if(chips) chips=`<span class="cc ok">${esc(counts.join(" · "))}</span>`+chips;
+  }else{
+    chips=specs.map(s=>{
+      const m=txt.match(s.re);
+      if(!m)return "";
+      const n=deDash(stripMd(m[1])).trim().length;
+      return `<span class="cc ${n>s.max?'over':'ok'}">${s.k} ${n}/${s.max}</span>`;
+    }).filter(Boolean).join("");
+  }
   return chips?`<div class="cc-row" title="Platform character limits">${chips}</div>`:"";
 }
 function adCard(tag,txt,id){

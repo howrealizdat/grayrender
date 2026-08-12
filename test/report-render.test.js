@@ -457,6 +457,34 @@ check('no gate notice once a brand exists', !win.document.querySelector('.bw-gat
 check('needsBrand is what decides, not the tool count',
   win.eval('needsBrand(TOOLS.audit)') === false && win.eval('needsBrand(TOOLS.outreach)') === true);
 
+/* ---------------------------------------------------------------------------
+   A REAL RESPONSIVE SEARCH AD HAS 19 ASSETS, NOT 3.
+
+   Google's own guidance: fill all 15 headline and 4 description slots, because
+   Ad Strength is driven by asset variety and Poor -> Excellent averages about
+   15% more clicks and conversions. The tool used to emit two headlines and one
+   description, which is not an RSA. The meters have to count numbered assets
+   and show how many slots are actually filled.
+--------------------------------------------------------------------------- */
+console.log('\nRESPONSIVE SEARCH AD METERS  (two headlines is not an RSA)');
+const RSA = ['Headline 1: Concept Albums Built Right',
+             'Headline 2: Charted #5 On iTunes R&B',
+             'Headline 3: This one is deliberately far too long to be a legal headline asset',
+             'Description 1: Full concept albums with a short film and a playable game included.',
+             'Description 2: Hear the record before release. Join the early list today.'].join('\n');
+const meters = win.adMeters('Google Ad', RSA);
+check('it meters every numbered headline', /H1 /.test(meters) && /H2 /.test(meters) && /H3 /.test(meters), meters);
+check('it meters the descriptions too', /D1 /.test(meters) && /D2 /.test(meters));
+check('it reports how many of the 15 slots are filled', /3\/15 headlines/.test(meters), meters);
+check('and how many of the 4 description slots', /2\/4 descriptions/.test(meters));
+check('an over-limit headline is flagged, not hidden', /cc over">H3/.test(meters), meters);
+check('a compliant headline is marked ok', /cc ok">H1/.test(meters));
+check('LinkedIn still meters on its own two fields',
+  /Headline 3[0-9]?\/70|Headline \d+\/70/.test(win.adMeters('LinkedIn Sponsored', 'Headline: Detroit R&B\nIntro text: Short intro.')),
+  win.adMeters('LinkedIn Sponsored', 'Headline: Detroit R&B\nIntro text: Short intro.'));
+check('an unrecognised block meters nothing rather than throwing',
+  win.adMeters('Google Ad', 'no assets here') === '');
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
