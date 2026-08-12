@@ -78,7 +78,7 @@
   .byline{font-size:9.5px;font-weight:500;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-2);margin-top:4px}
   .product-tag{margin-left:14px;padding-left:15px;border-left:1px solid var(--border);color:var(--ink-2);font-size:13px;font-weight:500}
   .product-tag b{color:var(--ink);font-weight:700}
-  .top-right{display:flex;align-items:center;gap:12px}
+  .top-right{display:flex;align-items:center;gap:12px;position:relative}
   .brand-chip[hidden]{display:none}
   .brand-chip{display:inline-flex;align-items:center;gap:7px;font-family:var(--font);font-size:12px;
     font-weight:500;color:var(--ink-2);background:transparent;border:1px solid var(--border);
@@ -329,6 +329,32 @@
     border:1px solid var(--border);border-radius:999px;padding:3px 9px}
   .sp-badge.ok{color:#2e7d52;border-color:#2e7d52}
   .sp-badge.bad{color:#b3261e;border-color:#b3261e}
+  .bc-caret{font-size:9px;color:var(--ink-2);margin-left:2px}
+  .brand-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:250px;z-index:70;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow:0 18px 50px rgba(17,17,17,.14);padding:7px;text-align:left}
+  .bm-head{font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);padding:8px 10px 6px}
+  .bm-item{position:relative;display:block;width:100%;text-align:left;background:none;border:0;
+    padding:9px 30px 9px 10px;border-radius:9px;cursor:pointer;font:inherit}
+  .bm-item:hover{background:var(--surface-2)}
+  .bm-item.on{background:var(--surface-2)}
+  .bm-item.on .bm-name:after{content:" ·";color:var(--accent)}
+  .bm-name{display:block;font-size:13.5px;color:var(--ink);font-weight:600}
+  .bm-sub{display:block;font-size:11.5px;color:var(--ink-2);margin-top:1px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+  .bm-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--ink-2);
+    font-size:15px;padding:2px 6px;border-radius:6px}
+  .bm-x:hover{color:#b3261e;background:var(--bg)}
+  .bm-add{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--border);
+    margin-top:6px;padding:11px 10px 7px;font:inherit;font-size:13px;color:var(--accent);cursor:pointer}
+  .bm-add:hover{text-decoration:underline}
+  .pick-up{margin-top:12px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .pu-lbl{font-size:12.5px;color:var(--ink-2)}
+  .pu-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .pu-chip{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+    padding:5px 11px;font:inherit;font-size:12px;color:var(--ink-2);cursor:pointer}
+  .pu-chip:hover{border-color:var(--accent);color:var(--ink)}
+  .pu-chip.on{border-color:var(--accent);color:var(--ink);background:var(--surface-2)}
   .bc-hint{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
@@ -720,7 +746,7 @@
   </div>
   <div class="top-right">
     <button class="brand-chip" id="brandChip" hidden title="Change the brand this suite writes for">
-      <span class="bc-dot"></span><span id="brandChipName">Your brand</span>
+      <span class="bc-dot"></span><span id="brandChipName">Your brand</span><span class="bc-caret">&#9662;</span>
     </button>
   </div>
 </header>
@@ -826,16 +852,77 @@ const DEFAULT_BRAND = {
   buyers:["Founder / Owner","Operations Lead","Marketing Lead","Finance Lead","IT Lead"],
   proof:[], profile:""
 };
-let BRAND = loadBrand();
+/* ---------------- SAVED PROFILES ---------------------------------------------------------
+   One company was never going to be enough. An agency works for several clients, and anyone
+   who does this for a living will want to build a campaign for one business without losing
+   the setup for another. So a read is SAVED AS A PROFILE, the header chip switches between
+   them, and adding a second company never costs you the first.
+
+   The single-brand era wrote one object to gr_brand. That is migrated into the profile list
+   on first load, so nobody loses the company they already set up. */
+const BRANDS_KEY="gr_brands", ACTIVE_KEY="gr_brand_active";
+function newBrandId(){ return "b"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function loadBrands(){
+  try{
+    const raw=localStorage.getItem(BRANDS_KEY);
+    if(raw){ const a=JSON.parse(raw); if(Array.isArray(a)) return a.map(b=>Object.assign({},DEFAULT_BRAND,b)); }
+    const legacy=localStorage.getItem("gr_brand");          // migrate the one-brand era
+    if(legacy){
+      const b=Object.assign({},DEFAULT_BRAND,JSON.parse(legacy));
+      b.id=b.id||newBrandId();
+      localStorage.setItem(BRANDS_KEY,JSON.stringify([b]));
+      localStorage.setItem(ACTIVE_KEY,b.id);
+      return [b];
+    }
+  }catch(e){}
+  return [];
+}
+let BRANDS = loadBrands();
+function persistBrands(){ try{ localStorage.setItem(BRANDS_KEY,JSON.stringify(BRANDS)); }catch(e){} }
 function loadBrand(){
-  try{ const raw=localStorage.getItem("gr_brand"); if(!raw) return null;
-       return Object.assign({},DEFAULT_BRAND,JSON.parse(raw)); }catch(e){ return null; }
+  try{
+    const id=localStorage.getItem(ACTIVE_KEY);
+    return BRANDS.find(b=>b.id===id) || BRANDS[0] || null;
+  }catch(e){ return BRANDS[0]||null; }
 }
+let BRAND = loadBrand();
+/* Upsert. Re-reading a company you already have updates that profile rather than making a
+   duplicate called the same thing, which is what happens if you match on nothing. */
 function saveBrand(b){
-  BRAND=Object.assign({},DEFAULT_BRAND,b||{});
-  try{ localStorage.setItem("gr_brand",JSON.stringify(BRAND)); }catch(e){}
+  const prof=Object.assign({},DEFAULT_BRAND,b||{});
+  const nm=(prof.name||"").trim().toLowerCase();
+  const i=BRANDS.findIndex(x=>(prof.id&&x.id===prof.id) || (nm&&(x.name||"").trim().toLowerCase()===nm));
+  prof.id = (i>=0 ? BRANDS[i].id : (prof.id||newBrandId()));
+  if(i>=0) BRANDS[i]=prof; else BRANDS.push(prof);
+  BRAND=prof;
+  try{ localStorage.setItem(ACTIVE_KEY,prof.id); }catch(e){}
+  persistBrands();
 }
-function clearBrand(){ BRAND=null; try{ localStorage.removeItem("gr_brand"); }catch(e){} }
+function switchBrand(id){
+  const b=BRANDS.find(x=>x.id===id); if(!b) return;
+  BRAND=b; try{ localStorage.setItem(ACTIVE_KEY,id); }catch(e){}
+  // Work belongs to the company it was written for: swap to that company's own workspace.
+  REFINE=null; refineOpen(false); CAMPAIGN=null;
+  hydrateWork();
+  reflectBrand(); renderTool();
+}
+function removeBrand(id){
+  const i=BRANDS.findIndex(x=>x.id===id); if(i<0) return;
+  const wasActive=BRAND&&BRAND.id===id;
+  try{ localStorage.removeItem("gr_work_"+id); }catch(e){}
+  BRANDS.splice(i,1); persistBrands();
+  if(wasActive){
+    BRAND=BRANDS[0]||null;
+    try{ BRAND?localStorage.setItem(ACTIVE_KEY,BRAND.id):localStorage.removeItem(ACTIVE_KEY); }catch(e){}
+    REFINE=null; CAMPAIGN=null; hydrateWork();
+  }
+  reflectBrand(); renderTool();
+}
+function clearBrand(){
+  BRAND=null; BRANDS=[];
+  try{ localStorage.removeItem(BRANDS_KEY); localStorage.removeItem(ACTIVE_KEY);
+       localStorage.removeItem("gr_brand"); }catch(e){}
+}
 function B(){ return BRAND||DEFAULT_BRAND; }
 function brandName(){ return (B().name||"").trim() || "the company"; }
 /* The paragraph every generator is briefed with. Built from the learned profile,
@@ -1209,7 +1296,11 @@ function goTool(id){
 document.querySelectorAll(".nav-item").forEach(el=>{
   el.addEventListener("click",()=>goTool(el.dataset.tool));
 });
-document.getElementById("brandChip").addEventListener("click",()=>renderBrandSetup());
+document.getElementById("brandChip").addEventListener("click",e=>{ e.stopPropagation(); toggleBrandMenu(); });
+document.addEventListener("click",e=>{
+  const m=document.getElementById("brandMenu");
+  if(m && !m.contains(e.target)) m.remove();
+});
 
 function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 // Strip stray markdown so the model can never leak **bold**, __ or backticks into a plain-text card.
@@ -1328,6 +1419,18 @@ function needsBrand(t){ return !!(t && (t.system || t.orchestrates)); }
    engine, but on screen that just looks like a hardcoded list for one industry: load a
    musician and every menu says albums, and a visitor reasonably concludes this is a music
    tool. Naming the source turns a confusing list into the feature it actually is. */
+/* Where you left off. Without this the memory is invisible: you would have to click every
+   tool to discover which ones already have work in them. */
+function pickUpLine(t){
+  const done=Object.keys(LAST_OUT).filter(k=>TOOLS[k]&&LAST_OUT[k]);
+  if(!done.length) return "";
+  done.sort((a,b)=>(LAST_OUT[b].at||0)-(LAST_OUT[a].at||0));
+  const last=LAST_OUT[done[0]];
+  const chips=done.slice(0,6).map(k=>
+    `<button type="button" class="pu-chip${k===current?" on":""}" data-go="${esc(k)}">${esc(TOOLS[k].title)}</button>`).join("");
+  return `<div class="pick-up"><span class="pu-lbl">Already done for ${esc(brandName())}${last&&last.at?", last touched "+esc(agoWords(last.at)):""}</span>
+    <span class="pu-chips">${chips}</span></div>`;
+}
 function brandSourceLine(t){
   if(!BRAND||!BRAND.name) return "";
   const adaptive=(t.fields||[]).some(f=>typeof f.options==="function"||typeof f.placeholder==="function");
@@ -1363,6 +1466,7 @@ function renderTool(){
       <h1>${title}</h1>
       <p>${t.blurb}</p>
       ${brandSourceLine(t)}
+      ${pickUpLine(t)}
     </div>
     <div class="card">
       <div class="grid">${fieldsHtml}</div>
@@ -1379,6 +1483,7 @@ function renderTool(){
   // Switching tools abandons the draft, so the dock must not offer to edit a stale one.
   REFINE=null; refineOpen(false);
   document.getElementById("refineBtn").addEventListener("click",()=>refineOpen(true));
+  main.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>goTool(b.getAttribute("data-go"))));
   const bsw=document.getElementById("brandSrcSwap");
   if(bsw) bsw.addEventListener("click",()=>renderBrandSetup());
   restoreOutput();   // put this tool's last result back, rather than losing it to a sidebar click
@@ -1582,6 +1687,32 @@ function reflectBrand(){
   el.hidden=!b;
   if(b) el.querySelector("#brandChipName").textContent=b.name||"Your brand";
 }
+/* The chip is the switcher. Every saved company is one click away, and adding another never
+   costs you the one you already set up. */
+function toggleBrandMenu(){
+  const open=document.getElementById("brandMenu");
+  if(open){ open.remove(); return; }
+  const chip=document.getElementById("brandChip");
+  const items=BRANDS.map(b=>`
+    <button class="bm-item${BRAND&&b.id===BRAND.id?" on":""}" data-switch="${esc(b.id)}">
+      <span class="bm-name">${esc(b.name||"Untitled")}</span>
+      <span class="bm-sub">${esc(b.industry||b.what||"")}</span>
+      ${BRANDS.length>1?`<span class="bm-x" data-del="${esc(b.id)}" title="Remove this profile">&times;</span>`:""}
+    </button>`).join("");
+  const el=document.createElement("div");
+  el.className="brand-menu"; el.id="brandMenu";
+  el.innerHTML=`<div class="bm-head">Saved businesses</div>${items}
+    <button class="bm-add" id="bmAdd">+ Add another business</button>`;
+  chip.parentNode.appendChild(el);
+  el.querySelectorAll("[data-switch]").forEach(btn=>btn.addEventListener("click",ev=>{
+    if(ev.target.hasAttribute("data-del")) return;
+    el.remove(); switchBrand(btn.getAttribute("data-switch"));
+  }));
+  el.querySelectorAll("[data-del]").forEach(x=>x.addEventListener("click",ev=>{
+    ev.stopPropagation(); el.remove(); removeBrand(x.getAttribute("data-del"));
+  }));
+  document.getElementById("bmAdd").addEventListener("click",()=>{ el.remove(); renderBrandSetup(); });
+}
 
 /* ---------------- Command palette ----------------
    Eleven tools do not fit in anyone's head. Cmd+K is muscle memory for the people
@@ -1682,7 +1813,7 @@ async function generate(){
   const endpoint=isAudit?"/.netlify/functions/audit":"/.netlify/functions/generate";
   const payload=isAudit
     ? {url:vals.url,focus:vals.focus,passcode:getPasscode(),owner:isOwner()}
-    : {systemPrompt:withBrand(t.system),userMessage:t.user(vals),tool:current,inputs:vals,maxTokens:t.maxTokens||1500,passcode:getPasscode(),owner:isOwner()};
+    : {systemPrompt:withBrand(t.system)+workDigest(current),userMessage:t.user(vals),tool:current,inputs:vals,maxTokens:t.maxTokens||1500,passcode:getPasscode(),owner:isOwner()};
 
   try{
     const res=await fetch(endpoint,{
@@ -1908,7 +2039,75 @@ let REFINE=null;   // {tool, vals, versions:[raw,...], busy}
    guard still applies. Not persisted to storage on purpose: it can hold a full-page screenshot
    per page and that does not belong in localStorage. */
 const LAST_OUT={};
-function rememberOutput(tool,payload){ LAST_OUT[tool]=payload; }
+
+/* ---------------- THE WORKSPACE MEMORY -------------------------------------------------
+   Until now the suite forgot everything the moment you closed the tab, and each tool worked
+   as if the other ten had never run. That is eleven strangers, not a marketing team.
+
+   Work is now kept PER PROFILE and survives the day: reopen tomorrow and the campaign, the
+   calendar and the brand voice you wrote are still there. And each tool is briefed on what
+   the others already produced, so the ad set knows the positioning you agreed and the
+   calendar knows the campaign angle, instead of quietly contradicting them.
+
+   Only TEXT is stored. An audit result carries a full-page screenshot per page and would
+   blow the storage quota in one run, so screenshots stay in memory for the session and the
+   report itself is what persists. */
+function workKey(){ return "gr_work_"+((BRAND&&BRAND.id)||"none"); }
+function loadWork(){
+  try{ const raw=localStorage.getItem(workKey()); return raw?JSON.parse(raw):{}; }catch(e){ return {}; }
+}
+function persistWork(){
+  try{
+    const slim={};
+    Object.keys(LAST_OUT).forEach(k=>{
+      const p=LAST_OUT[k]; if(!p) return;
+      if(p.kind==="gen")      slim[k]={kind:"gen",raw:p.raw,vals:p.vals,brief:p.brief||"",at:p.at||Date.now()};
+      else if(p.kind==="campaign"&&p.campaign)
+                              slim[k]={kind:"campaign",campaign:{vals:p.campaign.vals,steps:p.campaign.steps,
+                                        results:p.campaign.results,secs:p.campaign.secs},at:p.at||Date.now()};
+      else if(p.kind==="audit") slim[k]={kind:"audit",body:p.body,vals:p.vals,mark:p.mark,raw:p.raw,
+                                        pages:p.pages,at:p.at||Date.now()};   // no shots: too big
+    });
+    localStorage.setItem(workKey(),JSON.stringify(slim));
+  }catch(e){ /* quota or private mode: memory still works for this session */ }
+}
+function hydrateWork(){
+  Object.keys(LAST_OUT).forEach(k=>delete LAST_OUT[k]);
+  const w=loadWork();
+  Object.keys(w).forEach(k=>{ LAST_OUT[k]=w[k]; });
+}
+function rememberOutput(tool,payload){
+  payload.at=Date.now();
+  LAST_OUT[tool]=payload;
+  persistWork();
+}
+/* What the rest of the team has already done, in a form a prompt can use. Kept short on
+   purpose: this is context, not a second brief, and every tool already has its own. */
+function workDigest(exclude){
+  const bits=[];
+  Object.keys(LAST_OUT).forEach(k=>{
+    if(k===exclude||!TOOLS[k]) return;
+    const p=LAST_OUT[k]; if(!p) return;
+    let txt="";
+    if(p.kind==="gen") txt=splitBriefing(splitWatermark(p.raw||"").body).asset;
+    else if(p.kind==="campaign"&&p.campaign) txt=(p.campaign.vals&&p.campaign.vals.angle)||"";
+    else if(p.kind==="audit") txt=(p.body||"").slice(0,400);
+    txt=String(txt||"").replace(/\s+/g," ").trim();
+    if(txt) bits.push(TOOLS[k].title+": "+txt.slice(0,320));
+  });
+  if(!bits.length) return "";
+  return "\n\nWORK ALREADY DONE FOR THIS BUSINESS, by the other tools in this suite. Stay consistent with it: "+
+         "reuse the same positioning, claims and vocabulary, and never contradict a decision already made here. "+
+         "Do not repeat it back or summarise it, just do not fight it.\n"+bits.slice(0,6).join("\n");
+}
+/* When you left off, in words rather than a timestamp. */
+function agoWords(ts){
+  const m=Math.round((Date.now()-ts)/60000);
+  if(m<1) return "just now";
+  if(m<60) return m+" min ago";
+  const h=Math.round(m/60); if(h<24) return h===1?"an hour ago":h+" hours ago";
+  const d=Math.round(h/24); return d===1?"yesterday":d+" days ago";
+}
 function restoreOutput(){
   const p=LAST_OUT[current]; if(!p) return false;
   try{
@@ -2124,7 +2323,7 @@ async function runCampaign(vals){
     tool.fields.forEach(f=>{ if(!sub[f.id]) sub[f.id]=(f.type==="select")?optsOf(f)[0]:""; });
     try{
       const r=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({systemPrompt:withBrand(tool.system)+spine,userMessage:tool.user(sub),
+        body:JSON.stringify({systemPrompt:withBrand(tool.system)+spine+workDigest("campaign"),userMessage:tool.user(sub),
           tool:"campaign-"+k,inputs:sub,maxTokens:tool.maxTokens||1500,
           passcode:getPasscode(),owner:isOwner()})});
       const d=await r.json().catch(()=>({}));
@@ -3283,6 +3482,7 @@ document.getElementById("rfInput").addEventListener("keydown",e=>{
 });
 
 reflectBrand();
+hydrateWork();          // yesterday's work is still here
 renderTool();
 if(!isUnlocked()) showLock();
 </script>

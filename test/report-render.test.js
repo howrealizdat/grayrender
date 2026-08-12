@@ -829,6 +829,105 @@ win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
 check('an emptied field falls back to the read rather than wiping it',
   /Thing/.test(win.eval("JSON.stringify(BRAND.offerings)")), win.eval("JSON.stringify(BRAND.offerings)"));
 
+/* ---------------------------------------------------------------------------
+   SAVED PROFILES.
+
+   Edmund: save the company as a profile so you never set it up again, and add
+   other profiles later for other businesses. One brand was never going to be
+   enough for an agency, or for anyone running a campaign for a second company
+   without losing the first.
+--------------------------------------------------------------------------- */
+console.log('\nSAVED PROFILES  (several businesses, one click apart)');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Northwind', industry: 'Trades', offerings: ['Install'], audiences: ['Facilities'], goals: ['Leads'] });
+win.saveBrand({ name: 'Basecamp',  industry: 'Software', offerings: ['Project Management'], audiences: ['Teams'], goals: ['Signups'] });
+check('both businesses are saved', Number(win.eval('BRANDS.length')) === 2, win.eval('JSON.stringify(BRANDS.map(b=>b.name))'));
+check('the newest one is active', win.eval('BRAND.name') === 'Basecamp');
+
+/* Re-reading a company you already have updates it, rather than making a duplicate. */
+win.saveBrand({ name: 'Northwind', industry: 'Commercial HVAC', offerings: ['Install','Maintenance'], audiences: ['Facilities'], goals: ['Leads'] });
+check('re-reading an existing business updates it, no duplicate',
+  Number(win.eval('BRANDS.length')) === 2, win.eval('JSON.stringify(BRANDS.map(b=>b.name))'));
+check('and the update took', /Commercial HVAC/.test(win.eval('BRAND.industry')));
+
+/* Switching must change what every tool offers. */
+const northwindId = win.eval("BRANDS.find(b=>b.name==='Northwind').id");
+const basecampId  = win.eval("BRANDS.find(b=>b.name==='Basecamp').id");
+win.eval("current='ads';");
+win.switchBrand(basecampId);
+let opts = [...win.document.getElementById('f_service').options].map(o => o.textContent);
+check('switching profile changes the dropdowns', opts.includes('Project Management'), opts.join(' | '));
+win.switchBrand(northwindId);
+opts = [...win.document.getElementById('f_service').options].map(o => o.textContent);
+check('and switching back changes them again', opts.includes('Maintenance') && !opts.includes('Project Management'), opts.join(' | '));
+
+/* Work belongs to the company it was written for. */
+win.rememberOutput('ads', { kind: 'gen', raw: 'GOOGLE AD\nHeadline 1: x', vals: {} });
+win.switchBrand(basecampId);
+check('work does not follow you to another business', win.eval('Object.keys(LAST_OUT).length') === 0);
+
+/* Removing one leaves the other intact and active. */
+win.removeBrand(basecampId);
+check('removing a profile leaves the others', Number(win.eval('BRANDS.length')) === 1);
+check('and hands the active slot to a survivor', win.eval('BRAND.name') === 'Northwind');
+
+/* The single-brand era must not lose the company someone already set up. */
+win.eval("clearBrand(); localStorage.setItem('gr_brand', JSON.stringify({name:'Legacy Co', offerings:['Old Thing']}));");
+const migrated = win.loadBrands();
+check('a legacy single brand is migrated into the profile list',
+  migrated.length === 1 && migrated[0].name === 'Legacy Co', JSON.stringify(migrated.map(b => b.name)));
+check('and it is given an id so it can be switched to', !!migrated[0].id);
+
+/* ---------------------------------------------------------------------------
+   THE WORKSPACE MEMORY.
+
+   Edmund: the sections should talk to each other and remember, so you can work
+   daily and it knows where you left off, "almost working as your marketing
+   team". Before this the suite forgot everything when the tab closed, and each
+   tool behaved as if the other eleven had never run: eleven strangers, not a
+   team.
+--------------------------------------------------------------------------- */
+console.log('\nTHE WORKSPACE MEMORY  (it remembers, and the tools brief each other)');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Northwind', industry: 'Commercial HVAC', offerings: ['Install'], audiences: ['Facilities'], goals: ['Leads'] });
+win.eval("hydrateWork();");
+win.rememberOutput('brand', { kind: 'gen', vals: {},
+  raw: 'POSITIONING STATEMENT\nFor facilities managers who cannot afford downtime, Northwind is the HVAC partner that answers at 2am.' });
+
+/* It has to survive the tab closing, which means it has to be in storage. */
+check('the work is written to storage, not just memory',
+  /answers at 2am/.test(win.eval("localStorage.getItem(workKey())||''")), win.eval("(localStorage.getItem(workKey())||'').slice(0,80)"));
+win.eval("Object.keys(LAST_OUT).forEach(k=>delete LAST_OUT[k]);");   // simulate closing the tab
+win.eval("hydrateWork();");
+check('and it comes back on the next visit', !!win.eval("LAST_OUT.brand"), win.eval('JSON.stringify(Object.keys(LAST_OUT))'));
+
+/* The tools must brief each other, or they are still strangers. */
+const digest = win.workDigest('ads');
+check('another tool is told what has already been decided', /answers at 2am/.test(digest), digest.slice(0, 140));
+check('and told to stay consistent rather than restate it', /never contradict/i.test(digest));
+check('a tool is never fed its own output back', !/POSITIONING/.test(win.workDigest('brand')));
+
+/* Where you left off has to be visible, or the memory is invisible. */
+win.eval("current='ads';"); win.renderTool();
+const pu = win.document.querySelector('.pick-up');
+check('the tool screen shows what is already done', !!pu, 'no pick-up strip');
+check('and names the business it belongs to', !!pu && /Northwind/.test(pu.textContent));
+check('with a shortcut into that work', !!win.document.querySelector('[data-go="brand"]'));
+
+/* Each business keeps its own workspace. */
+win.saveBrand({ name: 'Basecamp', industry: 'Software', offerings: ['PM'], audiences: ['Teams'], goals: ['Signups'] });
+win.eval("hydrateWork();");
+check('a second business starts with an empty desk', win.eval('Object.keys(LAST_OUT).length') === 0);
+const nwId = win.eval("BRANDS.find(b=>b.name==='Northwind').id");
+win.switchBrand(nwId);
+check('and switching back finds the first one’s work intact', !!win.eval("LAST_OUT.brand"));
+
+/* Deleting a business should not leave its work orphaned in storage. */
+const bcId = win.eval("BRANDS.find(b=>b.name==='Basecamp').id");
+win.removeBrand(bcId);
+check('removing a business clears its stored work',
+  win.eval("localStorage.getItem('gr_work_'+" + JSON.stringify(bcId) + ") === null"));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
