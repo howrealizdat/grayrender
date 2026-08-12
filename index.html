@@ -313,6 +313,22 @@
   .brand-src b{color:var(--ink);font-weight:600}
   .brand-src-a{background:none;border:0;padding:0 0 0 4px;font:inherit;font-size:13px;
     color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .camp-lede{font-size:14px;color:var(--ink-2);margin-bottom:16px;line-height:1.6}
+  .camp-lede b{color:var(--ink)}
+  .camp-actions{display:flex;gap:8px}
+  .camp-grid{display:grid;gap:16px}
+  .camp-item{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+  .camp-item-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:14px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+  .camp-item-head h3{margin:0;font-family:var(--display);font-size:19px}
+  .camp-tool{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2)}
+  .camp-body{padding:16px 18px;white-space:pre-wrap;font-size:14px;line-height:1.7;color:var(--ink)}
+  .sp-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 2px}
+  .sp-lbl{font-size:13.5px}
+  .sp-badge{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-2);
+    border:1px solid var(--border);border-radius:999px;padding:3px 9px}
+  .sp-badge.ok{color:#2e7d52;border-color:#2e7d52}
+  .sp-badge.bad{color:#b3261e;border-color:#b3261e}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
   /* ---- Refine dock -------------------------------------------------------
@@ -710,7 +726,13 @@
 
 <div class="shell">
   <aside class="sidebar" role="navigation" aria-label="Tools">
-    <div class="nav-label">Marketing Tools</div>
+    <div class="nav-label">Campaign</div>
+    <div class="nav-item" data-tool="campaign">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l16-6-4 15-4-6z"/><path d="M11 14l-4 5"/></svg>
+      Campaign Builder
+    </div>
+
+    <div class="nav-label" style="margin-top:18px">Marketing Tools</div>
 
     <div class="nav-item active" data-tool="outreach">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
@@ -1111,6 +1133,20 @@ Fix grammar, cut hedging and filler, kill passive voice where it weakens the lin
 End with this exact line on a new line: ${WATERMARK}`,
     user:v=>`Type: ${v.kind}\nTarget voice: ${v.voice}\n\nDRAFT:\n${v.draft||"[no draft provided]"}`
   },
+  campaign:{
+    title:"Campaign Builder",
+    hl:"Campaign",
+    blurb:"One brief, one launch. Grayrender writes the whole campaign at once, every channel working off the same message: the outreach email, the LinkedIn post, the ad set, the multi-channel content pack and four weeks of calendar. This is the part a marketing department does in a fortnight.",
+    btn:"Build The Campaign",
+    orchestrates:["outreach","linkedin","ads","social","calendar"],
+    fields:[
+      {id:"push",label:"What Are You Launching",type:"select",options:b=>b.offerings},
+      {id:"who",label:"Who It Is For",type:"select",options:b=>b.audiences},
+      {id:"goal",label:"Campaign Goal",type:"select",options:b=>b.goals},
+      {id:"angle",label:"The One Thing To Land",type:"text",
+       placeholder:b=>"The single idea every channel repeats, e.g. why "+((b.offerings&&b.offerings[0])||"this")+" is different"}
+    ]
+  },
   audit:{
     title:"AI Marketing Audit",
     hl:"Audit",
@@ -1286,7 +1322,7 @@ function handleLocked(d){
    else's website and never touches BRAND at all, so making people do setup before they could
    run one was pure friction in front of the best thing here. An employer will not do extra
    steps to see a demo. Paste a website, get the report. */
-function needsBrand(t){ return !!(t && t.system); }
+function needsBrand(t){ return !!(t && (t.system || t.orchestrates)); }
 /* The dropdowns are filled from whoever is loaded, which is the whole point of the brand
    engine, but on screen that just looks like a hardcoded list for one industry: load a
    musician and every menu says albums, and a visitor reasonably concludes this is a music
@@ -1597,6 +1633,8 @@ async function generate(){
 
   // The audit tool runs a multi-step full-site flow (discover -> scan -> synthesize).
   if(isAudit){ return runSiteAudit(vals); }
+  // The campaign builder orchestrates the other tools rather than calling a prompt of its own.
+  if(t.orchestrates){ return runCampaign(vals); }
 
   // Audit needs a URL; validate before spending a call.
   if(isAudit && !(vals.url && vals.url.indexOf(".")>0)){
@@ -1849,7 +1887,9 @@ function rememberOutput(tool,payload){ LAST_OUT[tool]=payload; }
 function restoreOutput(){
   const p=LAST_OUT[current]; if(!p) return false;
   try{
-    if(p.kind==="audit"){
+    if(p.kind==="campaign"){
+      CAMPAIGN=p.campaign; renderCampaign();
+    }else if(p.kind==="audit"){
       if(p.shots) registerShots(p.shots);
       renderAudit(p.body,p.vals,p.mark,p.raw,p.pages);
     }else{
@@ -2001,6 +2041,131 @@ function briefingHtml(brief){
   }).join("");
   return `<div class="brief-panel"><div class="brief-head"><h3>The briefing</h3><span>Why it works, what to try, what to watch</span></div>${secs}</div>`;
 }
+/* ---------------- CAMPAIGN BUILDER ------------------------------------------------------
+   The competitive gap. Every serious tool in this space has moved from "write me one thing"
+   to "here is the brief, produce the launch": that is Copy.ai's headline workflow and the
+   reason Jasper sells campaigns rather than snippets. Eleven separate boxes is a toolbox; one
+   brief that comes back as a coordinated campaign is a marketing department.
+
+   It orchestrates the tools that already exist rather than adding an twelfth prompt, so every
+   asset arrives with the same guards, the same expert standards and the same renderer it
+   would have had on its own. They run in PARALLEL, so the whole campaign lands in about the
+   time the slowest single asset takes, and one failure never takes the campaign down. */
+const CAMPAIGN_STEPS={
+  outreach:{label:"Outreach email",   map:v=>({company:"[Target company]",industry:"",need:v.push,tone:"Consultative"})},
+  linkedin:{label:"LinkedIn post",    map:v=>({topic:v.angle||v.push,style:"",audience:v.who})},
+  ads:     {label:"Ad set",           map:v=>({service:v.push,buyer:v.who,goal:v.goal})},
+  social:  {label:"Channel pack",     map:v=>({brief:(v.angle?v.angle+". ":"")+"Launching "+v.push+" for "+v.who+". Goal: "+v.goal+".",audience:v.who,tone:""})},
+  calendar:{label:"Four week calendar",map:v=>({brand:brandName(),audience:v.who,goal:v.goal,channels:"",cadence:""})}
+};
+let CAMPAIGN=null;
+function campaignShell(vals,steps){
+  return `<div class="output-wrap"><div class="card camp-prog">
+    <div class="sp-head">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div><div class="sp-title" id="campStatus">Writing the campaign…</div>
+           <div class="sp-sub">${esc(vals.push||"")} for ${esc(vals.who||"")}</div></div>
+      <div class="sp-timer" id="campTimer">0.0s</div>
+    </div>
+    <div class="sp-list" id="campList">${steps.map(k=>
+      `<div class="sp-row" id="cs_${k}"><span class="sp-lbl">${esc(CAMPAIGN_STEPS[k].label)}</span>
+        <span class="sp-badge" id="csb_${k}">…</span></div>`).join("")}</div>
+  </div></div>`;
+}
+async function runCampaign(vals){
+  const t=TOOLS.campaign, out=document.getElementById("outArea");
+  const steps=t.orchestrates.filter(k=>TOOLS[k]&&TOOLS[k].system);
+  const btn=document.getElementById("genBtn");
+  btn.disabled=true; btn.classList.add("loading");
+  out.innerHTML=campaignShell(vals,steps);
+  const t0=Date.now();
+  const timer=setInterval(()=>{const el=document.getElementById("campTimer");
+    if(el) el.textContent=((Date.now()-t0)/1000).toFixed(1)+"s";},100);
+
+  // Every asset carries the SAME through line, which is what makes it a campaign and not
+  // five unrelated pieces that happen to be about the same product.
+  const spine=vals.angle
+    ? `\n\nCAMPAIGN THROUGH LINE, every asset in this launch must land the same idea: ${vals.angle}. Goal: ${vals.goal}. Audience: ${vals.who}.`
+    : `\n\nCAMPAIGN CONTEXT: this asset is part of one coordinated launch of ${vals.push} to ${vals.who}. Goal: ${vals.goal}.`;
+
+  const results={};
+  await Promise.all(steps.map(async k=>{
+    const tool=TOOLS[k], sub=Object.assign({},CAMPAIGN_STEPS[k].map(vals));
+    tool.fields.forEach(f=>{ if(!sub[f.id]) sub[f.id]=(f.type==="select")?optsOf(f)[0]:""; });
+    try{
+      const r=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({systemPrompt:withBrand(tool.system)+spine,userMessage:tool.user(sub),
+          tool:"campaign-"+k,inputs:sub,maxTokens:tool.maxTokens||1500,
+          passcode:getPasscode(),owner:isOwner()})});
+      const d=await r.json().catch(()=>({}));
+      if(d&&d.locked) throw new Error("locked");
+      results[k]=((d&&d.result)||"").trim();
+    }catch(e){ results[k]=""; }
+    const b=document.getElementById("csb_"+k);
+    if(b){ b.textContent=results[k]?"done":"failed"; b.className="sp-badge "+(results[k]?"ok":"bad"); }
+  }));
+  clearInterval(timer);
+  btn.disabled=false; btn.classList.remove("loading");
+
+  const got=steps.filter(k=>results[k]);
+  if(!got.length){ out.innerHTML=auditErrBox("The campaign did not come back. Please run it again."); return; }
+  CAMPAIGN={vals:vals,steps:got,results:results,secs:((Date.now()-t0)/1000).toFixed(1)};
+  renderCampaign();
+  rememberOutput("campaign",{kind:"campaign",campaign:CAMPAIGN});
+}
+function renderCampaign(){
+  if(!CAMPAIGN) return;
+  const {vals,steps,results}=CAMPAIGN;
+  const cards=steps.map(k=>{
+    const {body,mark}=splitWatermark(results[k]);
+    const {asset}=splitBriefing(body);
+    return `<div class="camp-item">
+      <div class="camp-item-head"><h3>${esc(CAMPAIGN_STEPS[k].label)}</h3>
+        <span class="camp-tool">${esc(TOOLS[k].title)}</span></div>
+      <div class="camp-body">${escMd(asset)}</div>
+    </div>`;
+  }).join("");
+  const out=document.getElementById("outArea");
+  out.innerHTML=`<div class="output-wrap">
+    <div class="row-between" style="margin-bottom:12px">
+      <div class="out-title" style="margin:0">Campaign · ${steps.length} assets · built in ${esc(CAMPAIGN.secs)}s</div>
+      <div class="camp-actions">
+        <button class="btn-copy" id="campCopy">Copy all</button>
+        <button class="btn-copy" id="campDl">Download</button>
+      </div>
+    </div>
+    <div class="camp-lede">Every asset below is written off one brief and lands the same idea${vals.angle?`: <b>${esc(vals.angle)}</b>`:"."}</div>
+    <div class="camp-grid">${cards}</div>
+    <div class="watermark">${esc(WATERMARK)}</div>
+  </div>`;
+  const txt=campaignText();
+  const c=document.getElementById("campCopy");
+  if(c) c.addEventListener("click",()=>{ navigator.clipboard.writeText(txt).then(()=>{c.textContent="Copied";setTimeout(()=>c.textContent="Copy all",1400);}); });
+  const d=document.getElementById("campDl");
+  if(d) d.addEventListener("click",()=>downloadText((brandName()||"campaign").replace(/[^\w -]/g,"")+" campaign.md",txt));
+}
+function campaignText(){
+  if(!CAMPAIGN) return "";
+  const {vals,steps,results}=CAMPAIGN;
+  return ["CAMPAIGN: "+(vals.push||"")+" for "+(vals.who||""),
+    "GOAL: "+(vals.goal||""), vals.angle?"THROUGH LINE: "+vals.angle:"", ""]
+    .filter(Boolean).concat(steps.map(k=>{
+      const {asset}=splitBriefing(splitWatermark(results[k]).body);
+      return "\n\n=== "+CAMPAIGN_STEPS[k].label.toUpperCase()+" ===\n\n"+cleanCopy(asset);
+    })).join("\n")+"\n\n"+WATERMARK;
+}
+/* Download anything as a file. Until now the only way out of this product was the clipboard,
+   or the audit's print dialog. A deliverable you cannot hand to someone is half a deliverable. */
+function downloadText(filename,text){
+  try{
+    const blob=new Blob([text],{type:"text/markdown;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download=filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500);
+  }catch(e){}
+}
+
 async function fetchBriefing(tool,vals,asset){
   const t=TOOLS[tool]; if(!t||!t.system) return "";
   try{
