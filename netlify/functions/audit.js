@@ -195,6 +195,14 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       // model may emit before it (e.g. a restated PLATFORM FAIRNESS block, or the fix pass
       // warming up with a sentence of its own) so it never renders.
       out = out.replace(new RegExp('^[\\s\\S]*?(?=' + anchor + '\\b)', 'i'), '').trim() || out;
+      // Then cut this half down to the sections it actually owns, so a model that wandered
+      // into the other half's territory cannot produce a duplicated section after stitching.
+      if (part !== 'all') {
+        var before = out.length;
+        out = keepSections(out, part === 'fixes' ? FIX_SECTIONS : MAIN_SECTIONS);
+        if (out.length !== before) console.warn('[audit] synthesis (' + part + '): dropped ' +
+          (before - out.length) + ' chars belonging to the other half');
+      }
       // ENFORCE, do not merely ask: drop absence claims the facts contradict, invented
       // percentages/timeframes, and platform limitations masquerading as owner fixes.
       // Layout claims are allowed only if at least one page was actually rendered and measured.
@@ -627,6 +635,40 @@ function synthClosing(lastSection, budget) {
     'and fix any typos or dropped spaces.';
 }
 
+/* ENFORCE THE SPLIT IN CODE, DO NOT MERELY ASK FOR IT.
+   Told to write everything except the fix list, the model wrote a PRIORITIZED FIXES section
+   anyway on one live run in three, which after stitching would have rendered TWO fix lists
+   in one report. The shared rules text is saturated with the words PRIORITIZED FIXES (the
+   severity rubric, the platform brief and the brevity rule all name it), so writing one is a
+   standing temptation no instruction reliably removes. This file already records the law:
+   anything that must never appear is enforced after generation, not requested before it.
+   So each half is cut down to the sections it owns, keeping the first copy of each. */
+const REPORT_SECTIONS = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS',
+  'PRIORITIZED FIXES', 'STRATEGIC MOVES', 'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT'];
+const MAIN_SECTIONS = ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS',
+  'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT'];
+const FIX_SECTIONS = ['PRIORITIZED FIXES', 'STRATEGIC MOVES'];
+
+function keepSections(text, allowed) {
+  if (!text || !allowed) return text;
+  var marks = [];
+  REPORT_SECTIONS.forEach(function (name) {
+    var re = new RegExp('(^|\\n)[ \\t]*' + name + '[ \\t]*(?=\\n|$)', 'gi'), m;
+    while ((m = re.exec(text))) marks.push({ name: name, at: m.index + (m[1] ? m[1].length : 0) });
+  });
+  if (!marks.length) return text;               // nothing recognisable: leave it alone
+  marks.sort(function (a, b) { return a.at - b.at; });
+  var seen = {}, kept = '';
+  for (var i = 0; i < marks.length; i++) {
+    var end = i + 1 < marks.length ? marks[i + 1].at : text.length;
+    if (allowed.indexOf(marks[i].name) >= 0 && !seen[marks[i].name]) {
+      seen[marks[i].name] = 1;
+      kept += text.slice(marks[i].at, end).replace(/\s+$/, '') + '\n\n';
+    }
+  }
+  return kept.trim() || text;
+}
+
 /* WHERE THE CUT GOES. The first attempt put only the fix list in the second call, which
    measured 5,375 chars / 27.7s against 2,367 chars / 9.7s: the split was real but the halves
    were nowhere near even, so the slow half still sat on the ceiling. Moving STRATEGIC MOVES
@@ -634,7 +676,10 @@ function synthClosing(lastSection, budget) {
    the cut stay contiguous in report order, the seam is still a single splice. */
 const SYNTH_SYSTEM_MAIN =
   SYNTH_RULES + SEC_OVERVIEW + SEC_WORKING + SEC_COSTING + SEC_AI + SEC_UNVERIFIED +
-  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 3000);
+  SYNTH_BREVITY + synthClosing('NOT VERIFIED IN THIS AUDIT', 3000) +
+  '\n\nYOU ARE NOT WRITING THE FIX LIST. A second pass is writing PRIORITIZED FIXES and STRATEGIC MOVES at the ' +
+  'same time, so do NOT output a PRIORITIZED FIXES header, a STRATEGIC MOVES header, or any numbered or bracketed ' +
+  'fix lines, even though the rules above describe how fixes are written. Write only the sections listed above.';
 
 /* The fix list and the strategic moves. This runs beside the call above and cannot see that
    call's output, so the no-contradiction rule is re-pointed at the per page WINS in the
@@ -2196,7 +2241,8 @@ exports.__internals = {
   stripDerivedNumbers: stripDerivedNumbers, applyDomTruth: applyDomTruth,
   enforceMetaCraft: enforceMetaCraft, stripScaffolding: stripScaffolding,
   buildDigest: buildDigest, digestBlock: digestBlock,
-  scorePath: scorePath, discoverPages: discoverPages, labelFromUrl: labelFromUrl
+  scorePath: scorePath, discoverPages: discoverPages, labelFromUrl: labelFromUrl,
+  keepSections: keepSections, MAIN_SECTIONS: MAIN_SECTIONS, FIX_SECTIONS: FIX_SECTIONS
 };
 
 /* ============================ plumbing ============================ */

@@ -328,6 +328,70 @@ check('fixesSectionOf still finds the fix list after stitching',
 check('the honesty appendix is still last',
   stitched.lastIndexOf('NOT VERIFIED IN THIS AUDIT') > stitched.lastIndexOf('WHERE AI CREATES LEVERAGE'));
 
+/* ---------------------------------------------------------------------------
+   EACH HALF STAYS IN ITS OWN LANE.
+
+   Told to write everything EXCEPT the fix list, the model wrote a PRIORITIZED
+   FIXES section anyway on one live run in three. Stitched, that renders two fix
+   lists in one report. The shared rules name PRIORITIZED FIXES repeatedly, so the
+   temptation never goes away and the prompt cannot be trusted to hold it.
+   keepSections is the code that does.
+--------------------------------------------------------------------------- */
+console.log('\nEACH HALF STAYS IN ITS LANE  (the main pass wrote a fix list anyway)');
+const LEAKY_MAIN = [
+  'OVERVIEW',
+  'Northwind is a tech staffing firm.',
+  'OVERALL GRADE: B',
+  '',
+  'WHAT IS WORKING',
+  '- Transparent pricing.',
+  '',
+  'WHAT IS COSTING YOU LEADS',
+  '- Two H1 tags on every page.',
+  '',
+  'PRIORITIZED FIXES',
+  '- [Critical] Home page (/), title tag: leaked from the other half. Current: "x". Use: "y". Effort: 10 min (SEO specialist).',
+  '',
+  'STRATEGIC MOVES',
+  '- Also leaked.',
+  '',
+  'WHERE AI CREATES LEVERAGE',
+  '- Continuous auditing catches these.',
+  '',
+  'NOT VERIFIED IN THIS AUDIT',
+  '- Mobile viewports were not measured.'
+].join('\n');
+
+const cleanedMain = A.keepSections(LEAKY_MAIN, A.MAIN_SECTIONS);
+check('the leaked fix list is dropped from the main half', !/PRIORITIZED FIXES/.test(cleanedMain), cleanedMain);
+check('the leaked strategic moves are dropped too', !/STRATEGIC MOVES/.test(cleanedMain));
+check('the main half keeps everything it owns',
+  ['OVERVIEW', 'WHAT IS WORKING', 'WHAT IS COSTING YOU LEADS', 'WHERE AI CREATES LEVERAGE', 'NOT VERIFIED IN THIS AUDIT']
+    .every(s => cleanedMain.includes(s)), cleanedMain);
+check('the grade line survives the cut', /OVERALL GRADE: B/.test(cleanedMain));
+check('the main half still ends at the honesty appendix',
+  cleanedMain.trim().endsWith('- Mobile viewports were not measured.'));
+
+const cleanedFix = A.keepSections(LEAKY_MAIN, A.FIX_SECTIONS);
+check('the fix half keeps only its two sections',
+  /PRIORITIZED FIXES/.test(cleanedFix) && /STRATEGIC MOVES/.test(cleanedFix)
+  && !/OVERVIEW/.test(cleanedFix) && !/NOT VERIFIED/.test(cleanedFix), cleanedFix);
+check('the fix half starts at the fix list', cleanedFix.trim().startsWith('PRIORITIZED FIXES'));
+
+/* A duplicated section (the model restating itself) keeps only the first copy. */
+const dupe = A.keepSections('PRIORITIZED FIXES\n- first\n\nPRIORITIZED FIXES\n- second\n', A.FIX_SECTIONS);
+check('a repeated section keeps only the first copy',
+  /first/.test(dupe) && !/second/.test(dupe), dupe);
+
+/* A clean half must pass through untouched, or the guard is doing harm. */
+const already = ['PRIORITIZED FIXES', '- [High] Home page (/), meta: reason. Current: "a". Use: "b". Effort: 5 min (SEO specialist).',
+                 '', 'STRATEGIC MOVES', '- Standardize headings.'].join('\n');
+check('a well-behaved half is left alone', A.keepSections(already, A.FIX_SECTIONS).trim() === already.trim());
+
+/* Something unrecognisable is never silently emptied. */
+check('unrecognisable text is returned rather than blanked',
+  A.keepSections('no headers here at all', A.MAIN_SECTIONS) === 'no headers here at all');
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
