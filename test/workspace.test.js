@@ -483,6 +483,17 @@ check('opening it shows everything again', win.document.querySelectorAll('.pg-s'
 win.renderHome();
 check('and the choice survives a re-render', win.document.querySelectorAll('.pg-s').length === 6);
 
+console.log('\nA STEP TICKS THE MOMENT IT IS FINISHED');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Tick Co', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [], url: 'https://tick.example' });
+win.eval("PLAN = blankPlan(); Object.keys(LAST_OUT).forEach(function(k){delete LAST_OUT[k]});");
+win.eval("current='intel';"); win.renderTool();
+const intelBadge = () => (win.document.querySelector('.nav-item[data-tool="intel"] .np') || {}).textContent;
+check('before the work, the step shows its number', intelBadge() === '3', intelBadge());
+win.rememberOutput('intel', { kind: 'gen', raw: 'WHY WE WIN\nbecause', vals: {} });
+check('producing it ticks the sidebar without navigating anywhere', intelBadge() === '✓', intelBadge());
+check('and its program job closes itself', !win.openItems().some(x => x.key === 'program:intel'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }

@@ -2713,6 +2713,10 @@ function logWork(tool,p){
       }
     }
     PLAN.lastSeen=Date.now(); persistPlan();
+    /* Tick the sidebar the moment the work lands, rather than the next time something
+       happens to re-render. Finishing a step and watching it tick is the whole point of
+       numbering them. */
+    syncProgramItem(); paintProgram();
   }catch(e){}   // the work is already saved; a timeline entry is never worth losing it over
 }
 function firstLine(raw){
