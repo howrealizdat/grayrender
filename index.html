@@ -1282,6 +1282,7 @@ function renderTool(){
   // Switching tools abandons the draft, so the dock must not offer to edit a stale one.
   REFINE=null; refineOpen(false);
   document.getElementById("refineBtn").addEventListener("click",()=>refineOpen(true));
+  restoreOutput();   // put this tool's last result back, rather than losing it to a sidebar click
   // Custom-dropdown: reveal a text box when "Custom (type your own)" is selected
   t.fields.forEach(f=>{
     if(f.type!=="select")return;
@@ -1564,6 +1565,7 @@ async function generate(){
     if(!res.ok && !data.result){throw new Error("Server returned "+res.status);}
     renderOutput((data.result||"").trim(),vals);
     refineArm((data.result||"").trim(),vals);   // the draft is now something you can talk to
+    rememberOutput(current,{kind:"gen",raw:(data.result||"").trim(),vals:vals});
   }catch(err){
     clearInterval(timer);
     out.innerHTML=`<div class="output-wrap"><div class="error-box">Could not complete the request: ${esc(err.message)}.<br/><span>Check that the Netlify function is deployed and ANTHROPIC_API_KEY is set.</span></div></div>`;
@@ -1747,6 +1749,29 @@ function renderChannels(body,mark){
    is restated hard, because a revision that drops the section headers would render as raw text.
    Writing tools only: the audit is a multi-call site crawl, not something to chat with. */
 let REFINE=null;   // {tool, vals, versions:[raw,...], busy}
+
+/* THE LAST OUTPUT PER TOOL, so glancing at another tool does not destroy your work.
+   Switching tools rebuilds main, which threw the result away: generate an ad campaign, look
+   at the calendar, come back, and it was gone. That is a model call for a generator and about
+   ten cents and ninety seconds for a site audit, lost to a sidebar click. Results are kept in
+   memory for the session and re-rendered on return, through the same render path, so every
+   guard still applies. Not persisted to storage on purpose: it can hold a full-page screenshot
+   per page and that does not belong in localStorage. */
+const LAST_OUT={};
+function rememberOutput(tool,payload){ LAST_OUT[tool]=payload; }
+function restoreOutput(){
+  const p=LAST_OUT[current]; if(!p) return false;
+  try{
+    if(p.kind==="audit"){
+      if(p.shots) registerShots(p.shots);
+      renderAudit(p.body,p.vals,p.mark,p.raw,p.pages);
+    }else{
+      renderOutput(p.raw,p.vals);
+      refineArm(p.raw,p.vals);
+    }
+    return true;
+  }catch(e){ return false; }   // a restore must never take the tool screen down with it
+}
 
 function refineArm(raw,vals){
   const btn=document.getElementById("refineBtn");
@@ -2177,6 +2202,8 @@ async function runSiteAudit(vals){
     // 4) render the site report + the per-page grade strip
     const pages=SITE_PAGES.map((p,i)=>({label:p.label,url:p.url,grade:(SITE_RESULTS[i]||{}).grade}));
     renderAudit(reportBody,{url:url, platform:sitePlatform}, WATERMARK, reportBody, pages);
+    rememberOutput("audit",{kind:"audit",body:reportBody,vals:{url:url, platform:sitePlatform},
+                            mark:WATERMARK,raw:reportBody,pages:pages,shots:good});
   }catch(err){
     out.innerHTML=auditErrBox("Could not complete the site audit: "+((err&&err.message)||"unknown error")+".");
   }finally{

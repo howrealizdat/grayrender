@@ -617,6 +617,51 @@ win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
 check('Continue still lands on the tool you clicked', win.eval('current') === 'intel');
 check('and an edited name is kept', win.eval('BRAND.name') === 'Zhaion Music', win.eval('BRAND.name'));
 
+/* ---------------------------------------------------------------------------
+   YOUR RESULT SURVIVES A SIDEBAR CLICK.
+
+   Switching tools rebuilds main, which threw the output away. Generate an ad
+   campaign, glance at the calendar, come back, and it was gone: a model call
+   for a generator, and about ten cents and ninety seconds for a site audit,
+   lost to a click. Same family as the brand read that was discarded on
+   navigation.
+--------------------------------------------------------------------------- */
+console.log('\nRESULTS SURVIVE NAVIGATION  (a sidebar click used to destroy them)');
+win.eval("saveBrand(DEFAULT_BRAND); current='outreach';");
+win.renderTool();
+const DRAFT = 'Subject: how meridian handles ai-native artists\n\nMeridian has been scaling releases.\n\nWorth a 15 minute call?';
+win.renderOutput(DRAFT, { company: 'Meridian' });
+win.rememberOutput('outreach', { kind: 'gen', raw: DRAFT, vals: { company: 'Meridian' } });
+const beforeLen = win.document.getElementById('outArea').textContent.trim().length;
+check('the draft is on screen to begin with', beforeLen > 0);
+
+win.eval("current='linkedin';"); win.renderTool();
+check('leaving shows a clean tool, not the old output',
+  win.document.getElementById('outArea').textContent.trim().length === 0);
+
+win.eval("current='outreach';"); win.renderTool();
+check('COMING BACK RESTORES THE DRAFT',
+  /15 minute call/.test(win.document.getElementById('outArea').textContent),
+  win.document.getElementById('outArea').textContent.slice(0, 60));
+check('and the refine dock re-arms on the restored draft', win.eval('!!REFINE'));
+check('restored through the real renderer, so the subject is still a field',
+  !!win.document.querySelector('.email-card .subject'));
+
+/* Each tool keeps its own result; they must not bleed into each other. */
+win.rememberOutput('intel', { kind: 'gen', raw: 'WHY WE WIN\n- Something specific.', vals: {} });
+win.eval("current='intel';"); win.renderTool();
+check('a different tool restores ITS output, not the last one',
+  /Something specific/.test(win.document.getElementById('outArea').textContent)
+  && !/15 minute call/.test(win.document.getElementById('outArea').textContent));
+
+/* A restore must never take the tool screen down with it. */
+win.rememberOutput('editor', { kind: 'audit', body: null, vals: null, mark: null, raw: null, pages: null });
+let restoreThrew = false;
+win.eval("current='editor';");
+try { win.renderTool(); } catch (e) { restoreThrew = true; }
+check('a broken restore does not break the tool screen', !restoreThrew);
+check('and the tool form still rendered', !!win.document.getElementById('genBtn'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
