@@ -1138,7 +1138,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     hl:"Campaign",
     blurb:"One brief, one launch. Grayrender writes the whole campaign at once, every channel working off the same message: the outreach email, the LinkedIn post, the ad set, the multi-channel content pack and four weeks of calendar. This is the part a marketing department does in a fortnight.",
     btn:"Build The Campaign",
-    orchestrates:["outreach","linkedin","ads","social","calendar"],
+    orchestrates:["comms","linkedin","ads","social","calendar"],
     fields:[
       {id:"push",label:"What Are You Launching",type:"select",options:b=>b.offerings},
       {id:"who",label:"Who It Is For",type:"select",options:b=>b.audiences},
@@ -2052,7 +2052,12 @@ function briefingHtml(brief){
    would have had on its own. They run in PARALLEL, so the whole campaign lands in about the
    time the slowest single asset takes, and one failure never takes the campaign down. */
 const CAMPAIGN_STEPS={
-  outreach:{label:"Outreach email",   map:v=>({company:"[Target company]",industry:"",need:v.push,tone:"Consultative"})},
+  /* A launch announcement, NOT the cold outreach email. Outreach writes to ONE named company
+     and a launch brief has no such company: asked to pitch a product to an unnamed firm in an
+     unrelated industry, it correctly refused rather than invent a fake buyer, which is the
+     anti-fabrication rule doing its job. The announcement is the asset a launch actually needs. */
+  comms:   {label:"Launch announcement", map:v=>({brand:brandName(),asset:"Press release",
+              subject:(v.angle?v.angle+". ":"")+"Launching "+v.push,audience:v.who})},
   linkedin:{label:"LinkedIn post",    map:v=>({topic:v.angle||v.push,style:"",audience:v.who})},
   ads:     {label:"Ad set",           map:v=>({service:v.push,buyer:v.who,goal:v.goal})},
   social:  {label:"Channel pack",     map:v=>({brief:(v.angle?v.angle+". ":"")+"Launching "+v.push+" for "+v.who+". Goal: "+v.goal+".",audience:v.who,tone:""})},
