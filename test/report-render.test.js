@@ -485,6 +485,38 @@ check('LinkedIn still meters on its own two fields',
 check('an unrecognised block meters nothing rather than throwing',
   win.adMeters('Google Ad', 'no assets here') === '');
 
+/* ---------------------------------------------------------------------------
+   OVER-LENGTH RSA ASSETS NEVER REACH THE USER.
+
+   Measured live on one brief: run one returned compliant descriptions but seven
+   headlines up to 38 characters against a 30 cap; run two returned clean
+   headlines and all four descriptions between 113 and 133 against a 90 cap. The
+   model will not hold two hard caps at once and copy cannot be trimmed in code
+   without mangling it, so the prompt over-generates and tightenRsa keeps only
+   the legal assets.
+--------------------------------------------------------------------------- */
+console.log('\nONLY LEGAL RSA ASSETS SURVIVE  (the model will not hold two caps at once)');
+const MESSY = [
+  'Headline 1: Concept Albums Built Right',
+  'Headline 2: This headline is far too long to ever be accepted by Google',
+  'Headline 3: Charted #5 On iTunes R&B',
+  'Description 1: Full concept albums with a short film and a playable game. Hear it first.',
+  'Description 2: This description rambles on well past the ninety character cap that Google enforces on every single description asset.',
+  'Pinning note: Pin only the brand name or a required disclaimer.'
+].join('\n');
+const tight = win.tightenRsa(MESSY);
+check('the over-length headline is dropped', !/far too long/.test(tight), tight);
+check('the over-length description is dropped', !/rambles on/.test(tight));
+check('compliant assets survive', /Concept Albums Built Right/.test(tight) && /Charted #5/.test(tight));
+check('survivors are renumbered contiguously', /Headline 1:/.test(tight) && /Headline 2:/.test(tight) && !/Headline 3:/.test(tight), tight);
+check('the pinning note is preserved', /Pinning note:/.test(tight));
+check('a short set is declared, not hidden', /still to fill/.test(tight), tight);
+check('nothing over the cap survives at all',
+  (tight.match(/^Headline \d+: (.+)$/gm) || []).every(l => l.replace(/^[^:]*:\s*/, '').length <= 30));
+check('an unrecognised block is passed through untouched',
+  win.tightenRsa('GOOGLE AD\nsomething unexpected') === 'GOOGLE AD\nsomething unexpected');
+check('empty input does not throw', win.tightenRsa('') === '');
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }

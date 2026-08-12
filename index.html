@@ -801,8 +801,8 @@ End with this exact line: ${WATERMARK}`,
 
 Output PLAIN TEXT ONLY, no markdown, asterisks, or bold anywhere.
 GOOGLE AD (Responsive Search Ad). A real RSA has FIFTEEN headline assets and FOUR description assets, and Google's own guidance is explicit that filling every slot is what raises Ad Strength; advertisers who move Ad Strength from Poor to Excellent average about 15 percent more clicks and conversions. Two headlines is not an RSA, it is a rejected draft. Output ALL of them, each on its own line:
-- Headline 1 through Headline 15: 30 characters max each (aim ~24). Label each exactly "Headline N:".
-- Description 1 through Description 4: 90 characters max each, aim for about 75. Label each exactly "Description N:". ONE short sentence of roughly 11 words ending in a 2-3 word CTA. Shorter is safer. COUNT THE CHARACTERS BEFORE YOU WRITE THE NEXT ONE: a description is not a sentence you happen to like, it is an asset with a hard cap, and Google rejects anything past 90. Here is a compliant 84-character description, match this length and rhythm: "Vetted engineers deployed in days, not months. 400+ ready. Book a free discovery call." Two clauses and a CTA is the whole shape. If yours runs past one line of that length, cut it, do not reword it longer.
+- Headline 1 through Headline 18: 30 characters max each (aim ~24). Label each exactly "Headline N:". Eighteen, not fifteen: any asset over the cap is discarded before the ad is built, so the surplus is what guarantees a full set survives.
+- Description 1 through Description 6: 90 characters max each, aim for about 75. Six, not four, for the same reason: the over-length ones are discarded and only the legal ones are used. Label each exactly "Description N:". ONE short sentence of roughly 11 words ending in a 2-3 word CTA. Shorter is safer. COUNT THE CHARACTERS BEFORE YOU WRITE THE NEXT ONE: a description is not a sentence you happen to like, it is an asset with a hard cap, and Google rejects anything past 90. Here is a compliant 84-character description, match this length and rhythm: "Vetted engineers deployed in days, not months. 400+ ready. Book a free discovery call." Two clauses and a CTA is the whole shape. If yours runs past one line of that length, cut it, do not reword it longer.
 These are HARD Google limits; going over gets the asset rejected, so COUNT characters.
 ASSET VARIETY IS THE WHOLE POINT: Google assembles these in unpredictable combinations, so EVERY headline must read correctly next to EVERY other headline. Never write a set that only works in one order, and never write fifteen rewordings of one idea. Cover distinctly different angles across the fifteen: the core benefit, a keyword-led match to search intent, a number or proof point, price or value, speed or convenience, risk reversal or guarantee, social proof, a direct CTA, and an objection handled. Front-load the value and the keyword in the first ~15 characters.
 PINNING: after the assets, add one line "Pinning note:" recommending that only a brand name or a legally required disclaimer be pinned, because pinning everything defeats the responsiveness the format exists for.
@@ -1714,7 +1714,7 @@ function renderOutput(raw,vals){
     out.innerHTML=`<div class="output-wrap">
       <div class="out-title">Ad Campaign: 3 Variations</div>
       <div class="ad-grid">
-        ${adCard("Google Ad",parts.google,"a1")}
+        ${adCard("Google Ad",tightenRsa(parts.google),"a1")}
         ${adCard("LinkedIn Sponsored",parts.linkedin,"a2")}
         ${adCard("Landing Page Hero",parts.landing,"a3")}
       </div>
@@ -2629,6 +2629,39 @@ function adMeters(tag,block){
     }).filter(Boolean).join("");
   }
   return chips?`<div class="cc-row" title="Platform character limits">${chips}</div>`:"";
+}
+/* OVER-GENERATE, THEN KEEP ONLY WHAT FITS.
+   Measured across two live runs on the same brief: one returned compliant descriptions but
+   seven headlines at up to 38 characters against a 30 cap, the next returned clean headlines
+   and all four descriptions between 113 and 133 against a 90 cap. The model will not hold two
+   hard caps at once, and copy cannot be trimmed in code without mangling it. So the prompt now
+   asks for MORE assets than Google takes, and this keeps the compliant ones, renumbers them,
+   and caps at the real slot counts. A rejected asset is worth nothing; a shorter set of legal
+   ones is worth something. If too few survive it says so rather than quietly shipping a thin
+   ad, because a silent cap reads as "we covered it" when we did not. */
+function tightenRsa(block){
+  const txt=block||""; if(!txt.trim()) return txt;
+  const grab=(re,max)=>{
+    const out=[]; let m; const r=new RegExp(re.source,re.flags);
+    while((m=r.exec(txt))){
+      const v=deDash(stripMd(m[2])).trim();
+      if(v && v.length<=max) out.push(v);
+    }
+    return out;
+  };
+  const heads=grab(/^[ \t]*headline\s*(\d+)\s*:[ \t]*(.+)$/gim,30).slice(0,15);
+  const descs=grab(/^[ \t]*description\s*(\d+)\s*:[ \t]*(.+)$/gim,90).slice(0,4);
+  if(!heads.length && !descs.length) return txt;           // unrecognised shape: leave it alone
+  const pin=(txt.match(/^[ \t]*pinning note\s*:.*$/im)||[])[0]||"";
+  const lines=[];
+  heads.forEach((h,i)=>lines.push("Headline "+(i+1)+": "+h));
+  descs.forEach((d,i)=>lines.push("Description "+(i+1)+": "+d));
+  const short=[];
+  if(heads.length<15) short.push((15-heads.length)+" headline slot"+(heads.length===14?"":"s"));
+  if(descs.length<4) short.push((4-descs.length)+" description slot"+(descs.length===3?"":"s"));
+  if(short.length) lines.push("Note: "+short.join(" and ")+" still to fill. Generate again to top up the set; Google rates the ad on how many usable assets it has.");
+  if(pin) lines.push(pin.trim());
+  return lines.join("\n");
 }
 function adCard(tag,txt,id){
   return `<div class="ad-card"><div class="ad-tag">${tag}</div><div class="ad-body">${escMd(txt||"")}</div>${adMeters(tag,txt||"")}<button class="btn-copy" id="btn_${id}">Copy</button></div>`;
