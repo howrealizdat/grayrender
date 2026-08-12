@@ -1403,6 +1403,13 @@ async function runBrandSetup(){
 }
 function renderBrandConfirm(prof,url){
   try{window.scrollTo(0,0);}catch(e){}
+  /* SAVE THE MOMENT IT IS READ, not when Continue is pressed.
+     The sidebar stays live on this screen, so anyone who reads their site and then clicks a
+     tool instead of Continue threw the whole read away and got gated straight back into setup
+     by the next tool. That is an infinite loop from the user's side: every tool they click
+     shows them this screen again and they never reach a single output. The read cost a model
+     call and it is good, so it is kept. Continue is now a review step, not a commit gate. */
+  saveBrand(prof); reflectBrand();
   const rows=[["What you do",prof.what],["Industry",prof.industry],["How you sound",prof.tone],
               ["Who buys",(prof.audiences||[]).slice(0,4).join(", ")],
               ["What you offer",(prof.offerings||[]).slice(0,4).join(", ")],
@@ -1410,7 +1417,7 @@ function renderBrandConfirm(prof,url){
   main.innerHTML=`
     <div class="tool-head">
       <h1>Here is what I <span class="hl">read</span>.</h1>
-      <p>From ${esc(url)}. Change the name if I got it wrong, then start. You can redo this any time from the brand chip in the header.</p>
+      <p>From ${esc(url)}. This is saved already, so you can go anywhere in the suite from here. Change the name if I got it wrong, or redo it any time from the brand chip in the header.</p>
     </div>
     <div class="card">
       <div class="field span2"><label>Company or product name</label>

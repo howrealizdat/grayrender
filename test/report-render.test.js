@@ -579,6 +579,44 @@ check('a real hyphenated word is untouched',
   (win.renderOutput('Subject: x\n\nWe are a full-stack team.', {}),
    /full-stack/.test(win.document.querySelector('.email-card .body').textContent)));
 
+/* ---------------------------------------------------------------------------
+   THE READ IS SAVED IMMEDIATELY, NOT ON "CONTINUE".
+
+   Edmund clicked Competitive Intelligence, got gated into setup, read
+   zhaion.com correctly, then clicked another tool in the still-live sidebar
+   instead of Continue. saveBrand only ran on Continue, so the read was thrown
+   away and the next tool gated him straight back into setup. From his side
+   every tool he touched showed the same screen and he never reached a single
+   output. His header had no brand chip, which is what gave it away.
+--------------------------------------------------------------------------- */
+console.log('\nTHE BRAND READ SURVIVES NAVIGATION  (the loop that hid every tool)');
+win.eval("clearBrand(); current='intel';");
+win.renderBrandConfirm({ name: 'Zhaion', what: 'AI-hybrid R&B artist', industry: 'Music',
+                         tone: 'Bold', audiences: ['R&B fans'], offerings: ['Studio Albums'], proof: [] },
+                       'https://zhaion.com');
+check('the read is saved on arrival, before any click', win.eval('!!BRAND'));
+check('and the header chip appears immediately', !win.document.getElementById('brandChip').hidden);
+check('the copy tells you it is already saved',
+  /saved already/i.test(win.document.querySelector('.tool-head p').textContent));
+
+/* THE ACTUAL BUG: leave via the sidebar instead of Continue. */
+win.eval("current='calendar';");
+win.renderTool();
+check('a different tool now opens instead of re-gating',
+  !win.document.querySelector('.bw-gate') && !win.document.getElementById('bwUrl'),
+  win.document.querySelector('.tool-head h1').textContent);
+check('and it is the tool that was clicked',
+  /Content Calendar/i.test(win.document.querySelector('.tool-head h1').textContent));
+
+/* Continue must still work, and still honour a name edit. */
+win.eval("clearBrand(); current='intel';");
+win.renderBrandConfirm({ name: 'Zhaion', what: 'x', industry: 'Music', tone: 'Bold',
+                         audiences: [], offerings: [], proof: [] }, 'https://zhaion.com');
+win.document.getElementById('bcName').value = 'Zhaion Music';
+win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
+check('Continue still lands on the tool you clicked', win.eval('current') === 'intel');
+check('and an edited name is kept', win.eval('BRAND.name') === 'Zhaion Music', win.eval('BRAND.name'));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
