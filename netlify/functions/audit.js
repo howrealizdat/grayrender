@@ -739,18 +739,26 @@ function scorePath(u, label) {
   try { seg = new URL(u).pathname.toLowerCase().replace(/^\/|\/$/g, ''); } catch (e) { seg = (u || '').toLowerCase(); }
   var last = seg.split('/').pop();
   var depth = seg ? seg.split('/').length : 0;
-  var s = -(depth - 1) * 8; // strongly prefer shallow, canonical pages
+  var s = -(depth - 1) * 14; // strongly prefer shallow, canonical pages
   var hay = (seg + ' ' + (label || '')).toLowerCase();
-  // Weighted by exact-segment match (a canonical nav page) vs merely containing the word.
-  var kw = [['pricing', 60], ['ai-team', 55], ['about', 45], ['services', 38], ['solution', 34], ['industr', 34],
-    ['how-it-work', 32], ['how-we-work', 32], ['platform', 30], ['product', 30], ['use-case', 24], ['case-stud', 24],
-    ['features', 24], ['company', 22], ['team', 18], ['contact', 12]];
+  /* Industry-neutral. This table used to be one client's: it scored "ai-team" at 55 and
+     gave a bonus to staffing/recruit/placement/offshore, which quietly ranked one
+     company's nav for every site the tool ever audited. These are the pages a marketing
+     audit wants on ANY commercial site. */
+  var kw = [['pricing', 60], ['plans', 55], ['about', 45], ['services', 38], ['solution', 34],
+    ['product', 32], ['features', 30], ['platform', 30], ['how-it-work', 28], ['how-we-work', 28],
+    ['use-case', 24], ['case-stud', 24], ['industr', 22], ['company', 22], ['team', 18], ['contact', 12]];
   kw.forEach(function (k) {
     if (last.indexOf(k[0]) > -1) s += k[1];
     else if (hay.indexOf(k[0]) > -1) s += Math.round(k[1] * 0.5);
   });
-  // Service-detail pages (staffing/recruiting/placement variants) get a modest boost only.
-  if (/staffing|recruit|placement|augmentation|temp|contract|offshore|managed|project-based/.test(last)) s += 16;
+  /* A segment that opens with a chapter/article number ("01.2-about-basecamp",
+     "11.1-theres-nothing-functional") is numbered content, not a nav page. Without this,
+     the substring "about" inside a book chapter earned the full about-page bonus and
+     basecamp.com's 2006 book outranked /features and /how-it-works. */
+  if (/^\d+[.\-_]/.test(last)) s -= 40;
+  /* Article silos are content, not the commercial pages an audit should grade. */
+  if (/(^|\/)(blog|news|press|docs?|help|support|handbook|guide|guides|article|articles|gettingreal|changelog|legal|privacy|terms)(\/|$)/.test(seg)) s -= 30;
   // Deprioritize stale "-old" duplicate pages.
   if (/(-old|_old|\bold\b)/.test(last)) s -= 40;
   return s;
@@ -2081,7 +2089,8 @@ exports.__internals = {
   enforceLayoutClaims: enforceLayoutClaims, forceUxUnassessed: forceUxUnassessed,
   stripDerivedNumbers: stripDerivedNumbers, applyDomTruth: applyDomTruth,
   enforceMetaCraft: enforceMetaCraft, stripScaffolding: stripScaffolding,
-  buildDigest: buildDigest, digestBlock: digestBlock
+  buildDigest: buildDigest, digestBlock: digestBlock,
+  scorePath: scorePath, discoverPages: discoverPages, labelFromUrl: labelFromUrl
 };
 
 /* ============================ plumbing ============================ */

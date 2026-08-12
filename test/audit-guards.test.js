@@ -663,6 +663,40 @@ console.log('\nSHELL DETECTION  (only a true empty SPA should trigger the render
 check('a server-rendered page is NOT a shell', A.isShell(HTML) === false);
 check('an empty SPA shell IS a shell', A.isShell('<html><body><div id="root"></div><script src="/app.js"></script></body></html>') === true);
 
+/* ------------------------------------------------------------------
+   PAGE DISCOVERY RANKING
+
+   A live basecamp.com audit spent two of its five page slots on chapters of
+   Basecamp's 2006 book "Getting Real" (/gettingreal/01.2-about-basecamp), because
+   indexOf('about') matched inside the chapter slug and handed it the full
+   about-page bonus. It outranked /features and /how-it-works.
+
+   The keyword table was also still one client's — 'ai-team' at 55 and a bonus for
+   staffing/recruit/placement/offshore — which ranked one company's navigation on
+   every site the tool audited.
+------------------------------------------------------------------ */
+console.log('\nPAGE DISCOVERY RANKING  (which five pages a marketing audit should grade)');
+const sp = (p, l) => A.scorePath('https://example.com' + p, l || '');
+
+check('pricing outranks everything', sp('/pricing') > sp('/about') && sp('/about') > sp('/features'));
+check('a numbered book chapter loses to a real nav page',
+  sp('/gettingreal/01.2-about-basecamp') < sp('/features'),
+  `chapter ${sp('/gettingreal/01.2-about-basecamp')} vs features ${sp('/features')}`);
+check('"about" inside a slug does not earn the about-page bonus',
+  sp('/gettingreal/11.1-theres-nothing-functional-about-afunctional-spec') < 0);
+check('article silos are deprioritised',
+  sp('/blog/a-post') < 0 && sp('/docs/setup') < 0 && sp('/help/faq') < 0);
+check('a genuine /about page still scores well', sp('/about') >= 45);
+check('shallow pages beat deep ones', sp('/services') > sp('/solutions/x/services'));
+
+// The table must not privilege one industry's navigation.
+const neutral = ['/pricing', '/features', '/product', '/services', '/platform', '/about'];
+check('every generic commercial page scores positively',
+  neutral.every(p => sp(p) > 0), JSON.stringify(neutral.map(p => [p, sp(p)])));
+check('no staffing-specific bonus survives',
+  sp('/recruiting') === sp('/somethingelse') && sp('/ai-teams') === sp('/xy-teams'),
+  `recruiting=${sp('/recruiting')} other=${sp('/somethingelse')} ai-teams=${sp('/ai-teams')} xy-teams=${sp('/xy-teams')}`);
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nREGRESSION: a false claim the audit already shipped once can ship again.\n'); process.exit(1); }
