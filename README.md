@@ -2,10 +2,16 @@
 
 **An AI marketing audit that renders the page before it judges it.**
 
-Built by Edmund Gray. Eleven tools, one flagship: a full-site marketing audit that drives a real
-headless browser over every key page, measures the layout, looks at a screenshot, and only then
-writes the report. Everything runs behind Netlify serverless functions, so API keys never reach
-the browser.
+Built by Edmund Gray. Twelve tools and a workspace, one flagship: a full-site marketing audit
+that drives a real headless browser over every key page, measures the layout, looks at a
+screenshot, and only then writes the report. Everything runs behind Netlify serverless
+functions, so API keys never reach the browser.
+
+**It is something you come back to, not something you run.** Every finding the audit files
+becomes tracked work with a status and a date, every calendar row becomes a dated post, and the
+whole plan leaves as a calendar file or a written update. Each business you add keeps its own
+workspace, and every tool is briefed on what the others have already produced and what is
+currently open, so the suite builds on itself day to day instead of starting over each time.
 
 **You configure it by pasting your website.** Grayrender reads the rendered page, learns your
 name, what you sell, who buys it and how you sound, and every tool and every dropdown in the
@@ -108,10 +114,12 @@ npm install
 npm test
 ```
 
-`npm test` runs 319 assertions across three suites: `passcode.test.js` (an unauthenticated
+`npm test` runs 438 assertions across four suites: `passcode.test.js` (an unauthenticated
 caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
-every real finding survives) and `report-render.test.js` (the report renders, the print document
-builds, the evidence is in both, and every guard holds on the thing a human actually receives).
+every real finding survives), `report-render.test.js` (the report renders, the print document
+builds, the evidence is in both, and every guard holds on the thing a human actually receives)
+and `workspace.test.js` (findings become tracked work and only the ones the report actually
+showed, dates are local rather than UTC, and the calendar file parses in somebody else's app).
 
 The frontend is a single `index.html` with no build step. Serve the folder and open it; the
 audit backend needs Netlify Functions, so audits only run against a deployment.

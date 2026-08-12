@@ -729,6 +729,140 @@
     main{padding:22px 18px}
     .tool-head h1{font-size:31px}
   }
+
+  /* ---- The workspace ---------------------------------------------------
+     Everything above this line is a tool you run. This is the place you come
+     back to: what is open, what is due, and what happened while you were
+     away. Same materials as the rest of the suite, no new vocabulary. */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .wk-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 20px}
+  .wk-tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:16px 18px;display:flex;flex-direction:column;gap:3px}
+  .wk-tile b{font-family:var(--display);font-size:30px;font-weight:400;line-height:1;
+    font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .wk-tile span{font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2)}
+  .wk-card{padding:0;margin-bottom:18px;overflow:hidden}
+  .wk-head{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .wk-head h2{font-family:var(--display);font-size:21px;font-weight:400;letter-spacing:-.2px;margin:0}
+  .wk-count{font-size:11px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .wk-acts{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-mini{background:var(--surface);border:1px solid var(--border);color:var(--ink);
+    border-radius:999px;padding:11px 17px;min-height:44px;font-family:inherit;font-size:12.5px;
+    font-weight:600;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+  .btn-mini:hover{border-color:var(--accent);color:var(--accent)}
+  .btn-mini:active{transform:scale(.978)}
+  .btn-mini:disabled{opacity:.55;cursor:default}
+  .btn-mini.solid{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .btn-mini.solid:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .wk-empty{padding:20px 24px;color:var(--ink-2);font-size:13.5px;margin:0}
+  .wk-note{margin:18px 24px 0;padding:14px 16px;border:1px solid var(--border);border-left:2px solid var(--accent);
+    border-radius:10px;background:var(--surface);font-size:13.5px;line-height:1.6}
+  .wk-wait::after{content:"";animation:dots 1.2s steps(4,end) infinite}
+  @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+  /* next moves: the product's opinion, arrived at in code */
+  .wk-moves{list-style:none;margin:0;padding:6px 0}
+  .wk-moves li{padding:16px 24px;border-bottom:1px solid var(--border)}
+  .wk-moves li:last-child{border-bottom:none}
+  .wm-t{font-size:14.5px;font-weight:600;letter-spacing:-.1px}
+  .wm-d{font-size:13px;color:var(--ink-2);margin-top:3px;line-height:1.55}
+  .wm-go{margin-top:10px;display:inline-flex;align-items:center;gap:7px;min-height:44px;
+    background:none;border:none;color:var(--accent);font-family:inherit;font-size:12.5px;
+    font-weight:700;cursor:pointer;padding:0}
+  .wm-go svg{width:14px;height:14px}
+  .wm-go:hover{text-decoration:underline}
+
+  /* work items */
+  .wk-items{list-style:none;margin:0;padding:0}
+  .wi{display:flex;gap:14px;padding:15px 24px;border-bottom:1px solid var(--border)}
+  .wi:last-child{border-bottom:none}
+  .wi.is-done{opacity:.5}
+  .wi.is-done .wi-title{text-decoration:line-through}
+  /* The box reads at 26px, but the BUTTON is a real 44 square, which is the rule this
+     product enforces on everybody else's site. A pseudo-element would have extended the
+     hit area just as well and still measured 26 to the next audit, including our own. */
+  .wi-check{flex-shrink:0;width:44px;height:44px;margin:-9px 0 0 -9px;padding:0;cursor:pointer;
+    background:none;border:none;display:flex;align-items:center;justify-content:center}
+  .wi-check::before{content:"";position:absolute;width:26px;height:26px;border-radius:8px;
+    border:1.5px solid var(--border);background:var(--surface);transition:border-color .15s,background .15s}
+  .wi-check span{position:relative;color:#fff;font-size:14px;line-height:1}
+  .wi-check:hover::before{border-color:var(--accent)}
+  .wi.is-done .wi-check::before{background:var(--accent);border-color:var(--accent)}
+  .wi-main{flex:1;min-width:0}
+  .wi-t{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .wi-title{font-size:14px;font-weight:600;letter-spacing:-.1px}
+  .wi-back{font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;
+    color:#8a3b3b;border:1px solid rgba(138,59,59,.3);border-radius:5px;padding:1px 6px}
+  .wi-d{font-size:12.8px;color:var(--ink-2);margin-top:4px;line-height:1.55}
+  .wi-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:8px}
+  .wi-src{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-2)}
+  .wi-due{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2)}
+  .wi-duelbl{font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .wi-due input{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:9px 10px;min-height:44px;font-family:inherit;font-size:12px;color:var(--ink);outline:none}
+  .wi-due input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+  .wi-when{font-variant-numeric:tabular-nums}
+  .wi-due.late .wi-when,.wi-due.late .wi-duelbl{color:#8a3b3b;font-weight:700}
+  .wi-due.now .wi-when{color:var(--accent);font-weight:700}
+  .wi-x{background:none;border:none;color:var(--ink-2);font-family:inherit;font-size:11.5px;
+    cursor:pointer;padding:11px 0;min-height:44px}
+  .wi-x:hover{color:#8a3b3b;text-decoration:underline}
+
+  .wk-add{display:flex;gap:10px;padding:20px 24px;flex-wrap:wrap}
+  .wk-add input[type=text]{flex:1;min-width:220px}
+  .wk-add input{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:12px 13px;min-height:44px;font-family:inherit;font-size:14px;color:var(--ink);outline:none}
+  .wk-add input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
+
+  /* the day plan */
+  .dayplan{margin:18px 24px 0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .dayplan ul{list-style:none;margin:0;padding:0}
+  .dayplan li{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13.6px;line-height:1.6}
+  .dayplan li:last-child{border-bottom:none}
+  .dp-focus{font-family:var(--display);font-size:19px;line-height:1.4;letter-spacing:-.2px}
+  .dp-do{display:flex;gap:12px}
+  .dp-n{flex-shrink:0;width:22px;height:22px;border-radius:7px;background:var(--ink);color:#fff;
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    font-variant-numeric:tabular-nums;margin-top:1px}
+  .dp-ref{font-size:11.5px;color:var(--ink-2);margin-top:4px}
+  .dp-next{color:var(--ink-2)}
+  .dp-foot{padding:11px 18px;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--ink-2);border-top:1px solid var(--border)}
+
+  /* the update draft */
+  .wk-mail{margin:18px 24px 4px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .wm-sub{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:baseline}
+  .wm-sub span{font-size:9.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2)}
+  .wm-sub b{font-size:13.5px;font-weight:600}
+  .wm-body{padding:18px;font-size:13.6px;line-height:1.68}
+  .wm-row{display:flex;gap:8px;padding:0 18px 16px;flex-wrap:wrap}
+  .wm-note{padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;
+    color:var(--ink-2);line-height:1.55}
+
+  /* what has happened */
+  .wk-log{list-style:none;margin:0;padding:8px 0}
+  .wk-log li{display:flex;align-items:baseline;gap:11px;padding:10px 24px;font-size:13px}
+  .wl-k{flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--ink-2);opacity:.45}
+  .wl-audit{background:var(--accent);opacity:1}
+  .wl-done{background:#3d7a4e;opacity:1}
+  .wl-campaign{background:var(--ink);opacity:1}
+  .wl-t{font-weight:600}
+  .wl-m{color:var(--ink-2);font-size:12px}
+  .wl-a{margin-left:auto;color:var(--ink-2);font-size:11px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  @media(max-width:900px){
+    .wk-tiles{grid-template-columns:1fr 1fr}
+    .wk-head{padding:16px 18px}
+    .wi{padding:14px 18px}
+    .wk-moves li{padding:15px 18px}
+    .wk-empty,.wk-log li{padding-left:18px;padding-right:18px}
+    .wk-note,.dayplan,.wk-mail{margin-left:18px;margin-right:18px}
+    .wk-add{padding:16px 18px}
+    .wl-a{margin-left:0}
+    .wk-log li{flex-wrap:wrap}
+  }
 </style>
 </head>
 <body>
@@ -766,7 +900,12 @@
 
 <div class="shell">
   <aside class="sidebar" role="navigation" aria-label="Tools">
-    <div class="nav-label">Campaign</div>
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item" data-tool="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>
+      Today
+    </div>
+    <div class="nav-label" style="margin-top:18px">Campaign</div>
     <div class="nav-item" data-tool="campaign">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l16-6-4 15-4-6z"/><path d="M11 14l-4 5"/></svg>
       Campaign Builder
@@ -916,18 +1055,18 @@ function switchBrand(id){
   BRAND=b; try{ localStorage.setItem(ACTIVE_KEY,id); }catch(e){}
   // Work belongs to the company it was written for: swap to that company's own workspace.
   REFINE=null; refineOpen(false); CAMPAIGN=null;
-  hydrateWork();
+  hydrateWork(); hydratePlan();
   reflectBrand(); renderTool();
 }
 function removeBrand(id){
   const i=BRANDS.findIndex(x=>x.id===id); if(i<0) return;
   const wasActive=BRAND&&BRAND.id===id;
-  try{ localStorage.removeItem("gr_work_"+id); }catch(e){}
+  try{ localStorage.removeItem("gr_work_"+id); localStorage.removeItem("gr_plan_"+id); }catch(e){}
   BRANDS.splice(i,1); persistBrands();
   if(wasActive){
     BRAND=BRANDS[0]||null;
     try{ BRAND?localStorage.setItem(ACTIVE_KEY,BRAND.id):localStorage.removeItem(ACTIVE_KEY); }catch(e){}
-    REFINE=null; CAMPAIGN=null; hydrateWork();
+    REFINE=null; CAMPAIGN=null; hydrateWork(); hydratePlan();
   }
   reflectBrand();
   if(!BRANDS.length) return renderOnboard();   // back to the start rather than an empty product
@@ -954,6 +1093,15 @@ function brandContext(){
 
 /* ---------------- tool definitions (demo client business) ---------------- */
 const TOOLS = {
+  /* Not a generator. The workspace is where the work already done lives, so it carries no
+     fields and no prompt of its own, and renderTool hands straight over to renderHome. */
+  home:{
+    workspace:true,
+    title:"Today",
+    hl:"Today",
+    blurb:"What is open, what is due, and what has happened for this business.",
+    fields:[]
+  },
   outreach:{
     maxTokens:2400,
     title:"Client Outreach Generator",
@@ -1404,7 +1552,7 @@ async function tryUnlock(){
     setPasscode(v);
     const card=document.querySelector(".lock-card");
     if(card) card.classList.add("ok");
-    setTimeout(()=>{ hideLock(); reflectBrand(); hydrateWork(); bootScreen(); },260);
+    setTimeout(()=>{ hideLock(); reflectBrand(); hydrateWork(); hydratePlan(); bootScreen(); },260);
     return;
   }
   if(d&&d.reason==="unset"){ setLockMsg("This deployment has no passcode configured yet. Contact Edmund."); return; }
@@ -1462,6 +1610,7 @@ function renderTool(){
      here rather than at each call site means it cannot drift again. */
   setActiveNav();
   const t=TOOLS[current];
+  if(t&&t.workspace) return renderHome();
   if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
@@ -1557,7 +1706,11 @@ function onboardSteps(active){
   }).join('<span class="ob-line"></span>')}</div>`;
 }
 /* Nobody has set anything up yet: start at the beginning rather than mid product. */
-function bootScreen(){ if(!BRANDS.length) return renderOnboard(); renderTool(); }
+function bootScreen(){
+  if(!BRANDS.length) return renderOnboard();   // first run: the 3 step setup, unchanged
+  current="home";                              // coming back: what is open, not a blank form
+  renderTool();
+}
 function renderOnboard(msg){
   try{window.scrollTo(0,0);}catch(e){}
   main.innerHTML=`
@@ -2171,6 +2324,7 @@ function rememberOutput(tool,payload){
   payload.at=Date.now();
   LAST_OUT[tool]=payload;
   persistWork();
+  logWork(tool,payload);   // the workspace hears about every piece of work, from one place
 }
 /* What the rest of the team has already done, in a form a prompt can use. Kept short on
    purpose: this is context, not a second brief, and every tool already has its own. */
@@ -2186,10 +2340,26 @@ function workDigest(exclude){
     txt=String(txt||"").replace(/\s+/g," ").trim();
     if(txt) bits.push(TOOLS[k].title+": "+txt.slice(0,320));
   });
-  if(!bits.length) return "";
+  const plan=planDigest();
+  if(!bits.length) return plan;
   return "\n\nWORK ALREADY DONE FOR THIS BUSINESS, by the other tools in this suite. Stay consistent with it: "+
          "reuse the same positioning, claims and vocabulary, and never contradict a decision already made here. "+
-         "Do not repeat it back or summarise it, just do not fight it.\n"+bits.slice(0,6).join("\n");
+         "Do not repeat it back or summarise it, just do not fight it.\n"+bits.slice(0,6).join("\n")+plan;
+}
+/* The other half of continuity. The digest above says what has been WRITTEN; this says what
+   the business is currently trying to do, so a post drafted on Thursday knows about the fix
+   that was filed on Monday. Kept short deliberately: the two longest tools in the suite hit
+   the function ceiling before anyone else does, and this rides along on every single call. */
+function planDigest(){
+  const bits=[];
+  if(PLAN.strategy && PLAN.strategy.text && daysSince(PLAN.strategy.at)<7){
+    bits.push("The agreed focus for this business right now: "+
+      String(PLAN.strategy.text).replace(/\s+/g," ").replace(/\[\d+\]/g,"").trim().slice(0,220));
+  }
+  const open=openItems().slice(0,5);
+  if(open.length) bits.push("Work currently open: "+open.map(x=>x.title).join("; ").slice(0,260));
+  if(!bits.length) return "";
+  return "\n\n"+bits.join("\n")+"\nWrite something that fits alongside this. Do not restate it or refer to it directly.";
 }
 /* When you left off, in words rather than a timestamp. */
 function agoWords(ts){
@@ -2213,6 +2383,590 @@ function restoreOutput(){
     }
     return true;
   }catch(e){ return false; }   // a restore must never take the tool screen down with it
+}
+
+/* ---------------- THE PLAN: what this business is actually doing ----------------
+   The work memory above remembers OUTPUT. This remembers INTENT, which is the difference
+   between a tool you run and a place you come back to.
+
+   Three things live here, per profile:
+     items    real work with a status, so a finding becomes something you can finish
+     log      an activity timeline, so a week of work is visible rather than remembered
+     strategy the running plan that carries from one day to the next
+
+   Text only, same rule as the work memory: an audit carries a full-page screenshot per
+   page and would blow the quota in one run. Every write is wrapped, so a full disk or
+   private mode degrades to this-session-only instead of breaking the product. */
+const PLAN_VER=1, LOG_CAP=120;
+function planKey(){ return "gr_plan_"+((BRAND&&BRAND.id)||"none"); }
+function blankPlan(){ return {v:PLAN_VER,items:[],log:[],strategy:null,lastSeen:0}; }
+let PLAN=blankPlan();
+function loadPlan(){
+  try{
+    const raw=localStorage.getItem(planKey());
+    if(!raw) return blankPlan();
+    const p=JSON.parse(raw)||{};
+    return Object.assign(blankPlan(),p,{
+      items:Array.isArray(p.items)?p.items:[],
+      log:Array.isArray(p.log)?p.log:[]});
+  }catch(e){ return blankPlan(); }
+}
+function persistPlan(){
+  try{ PLAN.log=PLAN.log.slice(0,LOG_CAP); localStorage.setItem(planKey(),JSON.stringify(PLAN)); }catch(e){}
+}
+function hydratePlan(){ PLAN=loadPlan(); }
+
+/* Local dates, deliberately not toISOString. Building a due date in UTC puts anyone west
+   of Greenwich a day out after 5pm, which on a "due today" list is the whole feature. */
+function ymd(d){ d=d||new Date(); const p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function parseYmd(s){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||"")); return m?new Date(+m[1],+m[2]-1,+m[3]):null; }
+function daysUntil(s){
+  const d=parseYmd(s); if(!d) return null;
+  const t=new Date(); t.setHours(0,0,0,0); d.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+function dueWords(s){
+  const n=daysUntil(s); if(n===null) return "";
+  if(n<0) return n===-1?"yesterday":Math.abs(n)+" days late";
+  if(n===0) return "today"; if(n===1) return "tomorrow";
+  if(n<7) return "in "+n+" days";
+  const d=parseYmd(s); try{ return d.toLocaleDateString(undefined,{month:"short",day:"numeric"}); }catch(e){ return s; }
+}
+function addDays(d,n){ const x=new Date(d.getTime()); x.setDate(x.getDate()+n); return x; }
+
+/* A stable key per item, so re-running the audit UPDATES the fix you are already working
+   on instead of filing a second copy of it beside the first. */
+function itemKey(src,title){
+  return src+":"+String(title||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60);
+}
+function newId(p){ return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function addItem(it){
+  const key=it.key||itemKey(it.source||"manual",it.title);
+  const ex=PLAN.items.find(x=>x.key===key);
+  if(ex){
+    // Refresh the wording, never silently overwrite a decision the human made.
+    ex.detail=it.detail||ex.detail; ex.priority=it.priority||ex.priority;
+    ex.tool=it.tool||ex.tool; ex.updated=Date.now();
+    if(!ex.due && it.due) ex.due=it.due;
+    /* It came back. A fix marked done that a FRESH audit still reports was never actually
+       live, so say so rather than leaving a tick beside a problem the site still has.
+       Only a later audit can reopen it, so marking things done today is not undone by the
+       same run that filed them. */
+    if(ex.status==="done" && it.source==="audit" && (it.foundAt||0) > (ex.done_at||0)){
+      ex.status="open"; ex.returned=true;
+    }
+    return ex;
+  }
+  const row={key,id:newId("i"),title:it.title||"",detail:it.detail||"",source:it.source||"manual",
+    tool:it.tool||"",priority:it.priority||"",due:it.due||"",status:"open",
+    created:Date.now(),updated:Date.now()};
+  PLAN.items.push(row);
+  return row;
+}
+function findItem(id){ return PLAN.items.find(x=>x.id===id)||null; }
+function setItemStatus(id,st){
+  const it=findItem(id); if(!it) return null;
+  it.status=st; it.updated=Date.now(); it.returned=false;
+  if(st==="done"){ it.done_at=Date.now(); logEvent("done",it.title); }
+  persistPlan(); return it;
+}
+function setItemDue(id,due){ const it=findItem(id); if(!it) return; it.due=due||""; it.updated=Date.now(); persistPlan(); }
+function removeItem(id){ const i=PLAN.items.findIndex(x=>x.id===id); if(i>=0){ PLAN.items.splice(i,1); persistPlan(); } }
+const PRI_RANK={Critical:0,High:1,Medium:2,Low:3,"":4};
+function openItems(){
+  return PLAN.items.filter(x=>x.status!=="done").sort((a,b)=>{
+    const ad=daysUntil(a.due), bd=daysUntil(b.due);
+    if(ad!==null&&bd!==null&&ad!==bd) return ad-bd;
+    if(ad!==null&&bd===null) return -1;
+    if(bd!==null&&ad===null) return 1;
+    // Critical ranks 0, and 0||4 is 4, which sorted the most urgent work last.
+    const rank=p=>(p in PRI_RANK)?PRI_RANK[p]:4;
+    return rank(a.priority)-rank(b.priority);
+  });
+}
+function dueWithin(n){ return openItems().filter(x=>{ const d=daysUntil(x.due); return d!==null && d<=n; }); }
+
+/* The timeline. Written at rememberOutput, the one place every tool's result already
+   flows through, so nothing can produce work without the workspace knowing about it. */
+function logEvent(kind,title,meta){
+  const now=Date.now(), last=PLAN.log[0];
+  // A refine and its undo are the same piece of work being edited, not three days of it.
+  if(last && last.kind===kind && last.title===title && now-last.at<90000){
+    last.at=now; last.meta=meta||last.meta; persistPlan(); return last;
+  }
+  const row={id:newId("e"),at:now,kind:kind,title:title||"",meta:String(meta||"").slice(0,160)};
+  PLAN.log.unshift(row); persistPlan(); return row;
+}
+
+/* ---------------- findings become work ----------------
+   An audit that ends in a PDF is a report. An audit whose fixes arrive as things you can
+   tick off, with the date you meant to do them by, is a job. This is that conversion. */
+const DUE_BY_PRIORITY={Critical:2,High:5,Medium:12,Low:25};
+function syncAuditItems(p){
+  let fixes=[];
+  try{
+    const sec=fixesSectionOf(p.body||"");
+    if(!sec) return 0;
+    fixBullets(sec,(p.vals&&p.vals.platform)||null,cleanHost((p.vals&&p.vals.url)||""));
+    fixes=FIX_PARSED.slice();
+  }catch(e){ return 0; }
+  const foundAt=p.at||Date.now();
+  let n=0;
+  fixes.forEach(f=>{
+    const title=(f.location||f.reason||"").trim(); if(!title) return;
+    // A visible separator: HTML collapses the double space these were joined with, so the
+    // replacement copy ran straight into the effort estimate as one unreadable sentence.
+    const detail=[f.reason&&f.location?f.reason:"", f.use?"Use this: "+f.use:"", f.effort?"Effort: "+f.effort:""]
+      .filter(Boolean).join("  ·  ");
+    const off=DUE_BY_PRIORITY[f.priority];
+    addItem({source:"audit",tool:"audit",title:title.slice(0,180),detail:detail.slice(0,600),
+      priority:f.priority,foundAt:foundAt,
+      due:off!==undefined?ymd(addDays(new Date(),off)):""});
+    n++;
+  });
+  persistPlan();
+  return n;
+}
+/* A content calendar already knows what day everything goes out on. Until now that lived
+   in a table you had to keep open. Rows become dated items, which is what makes the .ics
+   export real rather than a guess. */
+const DAY_OFF={monday:0,mon:0,tuesday:1,tue:1,tues:1,wednesday:2,wed:2,thursday:3,thu:3,thur:3,thurs:3,
+  friday:4,fri:4,saturday:5,sat:5,sunday:6,sun:6};
+function nextMonday(from){
+  const d=from?new Date(from):new Date(); d.setHours(0,0,0,0);
+  const shift=(8-(d.getDay()||7))%7;          // getDay: 0=Sun. Today, if today is Monday.
+  return addDays(d,shift===0?0:shift);
+}
+function syncCalendarItems(p){
+  let cal;
+  try{ cal=parseCalendar(splitBriefing(splitWatermark(p.raw||"").body).asset); }catch(e){ return 0; }
+  if(!cal||!cal.weeks||!cal.weeks.length) return 0;
+  const base=nextMonday(p.at||Date.now());
+  let n=0;
+  cal.weeks.forEach((w,wi)=>{
+    (w.rows||[]).forEach(r=>{
+      const off=DAY_OFF[String(r.day||"").trim().toLowerCase().replace(/[^a-z]/g,"")];
+      // No invented dates. A row whose day we cannot read becomes an undated item rather
+      // than one quietly scheduled on a day the plan never said.
+      const due=off===undefined?"":ymd(addDays(base,wi*7+off));
+      const title=[r.channel,r.hook].filter(Boolean).join(": ");
+      if(!title) return;
+      addItem({key:itemKey("calendar","w"+(wi+1)+"-"+(r.day||"")+"-"+(r.channel||"")+"-"+(r.hook||"")),
+        source:"calendar",tool:"calendar",title:title.slice(0,180),
+        detail:[r.format,r.caption,r.cta?"CTA: "+r.cta:"",r.asset?"Asset: "+r.asset:""].filter(Boolean).join("  ·  ").slice(0,600),
+        due:due});
+      n++;
+    });
+  });
+  persistPlan();
+  return n;
+}
+/* One entry point, called from rememberOutput, so a tool cannot produce work without the
+   workspace hearing about it. */
+function logWork(tool,p){
+  const t=TOOLS[tool]; if(!t||!p) return;
+  try{
+    if(p.kind==="audit"){
+      const n=syncAuditItems(p);
+      logEvent("audit","Audited "+cleanHost((p.vals&&p.vals.url)||""),
+        (p.mark?p.mark+" overall":"")+(n?(p.mark?", ":"")+n+" fixes filed":""));
+    }else if(p.kind==="campaign"){
+      const v=(p.campaign&&p.campaign.vals)||{};
+      logEvent("campaign","Campaign: "+(v.push||"launch"),v.goal||"");
+    }else{
+      logEvent("generated",t.title,firstLine(p.raw));
+      if(tool==="calendar"){
+        const n=syncCalendarItems(p);
+        if(n) logEvent("scheduled",n+" posts scheduled","from the content calendar");
+      }
+    }
+    PLAN.lastSeen=Date.now(); persistPlan();
+  }catch(e){}   // the work is already saved; a timeline entry is never worth losing it over
+}
+function firstLine(raw){
+  const s=String(raw||"").replace(/\s+/g," ").trim();
+  return s.slice(0,120);
+}
+
+/* ---------------- the calendar exit (RFC 5545) ----------------
+   Deliberately a file, not an integration. An .ics opens in Apple Calendar, Google Calendar
+   and Outlook with no login, no OAuth screen and nothing to expire, so an employer trying
+   this can put a plan in their own calendar in about five seconds. */
+function icsEsc(s){
+  return String(s==null?"":s)
+    .replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,")
+    .replace(/\r?\n/g,"\\n");
+}
+/* RFC 5545 folds at 75 OCTETS, not characters. Folding by character length splits a
+   multi-byte character across two lines and produces a file some calendars refuse to
+   open, which is exactly the kind of bug you only find on somebody else's machine. */
+function utf8Len(ch){
+  const c=ch.codePointAt(0);
+  return c<0x80?1:c<0x800?2:c<0x10000?3:4;
+}
+function icsFold(line){
+  /* Counted directly rather than through TextEncoder, which is not present in every
+     runtime. The version that fell back to character length when it was missing folded a
+     120 character accented line into 142 octets and looked fine in every ASCII test. */
+  const size=utf8Len;
+  const segs=[]; let cur="", len=0;
+  for(const ch of String(line)){
+    const cap=segs.length?74:75;              // continuation lines spend one octet on the space
+    const b=size(ch);
+    if(len+b>cap){ segs.push(cur); cur=""; len=0; }
+    cur+=ch; len+=b;
+  }
+  segs.push(cur);
+  return segs.join("\r\n ");
+}
+function icsStamp(d){
+  const p=n=>String(n).padStart(2,"0");
+  return d.getUTCFullYear()+p(d.getUTCMonth()+1)+p(d.getUTCDate())+"T"+
+         p(d.getUTCHours())+p(d.getUTCMinutes())+p(d.getUTCSeconds())+"Z";
+}
+function icsDate(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate()); }
+/* Returns the file AND what it could not schedule, because a calendar export that quietly
+   drops half your list is worse than one that tells you it did. */
+function buildIcs(items,label){
+  const now=new Date(), lines=[], skipped=[];
+  lines.push("BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Grayrender//AI Marketing Suite//EN",
+             "CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:"+icsEsc(label||"Grayrender plan"));
+  (items||[]).forEach(it=>{
+    const d=parseYmd(it.due);
+    if(!d){ skipped.push(it); return; }        // no invented dates, ever
+    const body=[it.detail||"", it.priority?"Priority: "+it.priority:"",
+      "Tracked in Grayrender"+(BRAND&&BRAND.name?" for "+BRAND.name:"")].filter(Boolean).join("\n\n");
+    lines.push("BEGIN:VEVENT",
+      // A stable UID means re-importing an updated plan REPLACES the event instead of
+      // filing a second copy of it beside the first.
+      "UID:"+(it.id||newId("i"))+"@grayrender",
+      "DTSTAMP:"+icsStamp(now),
+      "DTSTART;VALUE=DATE:"+icsDate(d),
+      "DTEND;VALUE=DATE:"+icsDate(addDays(d,1)),   // all-day DTEND is exclusive
+      "SUMMARY:"+icsEsc(cleanCopy(it.title||"Task")),
+      "DESCRIPTION:"+icsEsc(cleanCopy(body)),
+      "CATEGORIES:"+icsEsc(it.source==="audit"?"Website fix":it.source==="calendar"?"Content":"Marketing"),
+      "STATUS:"+(it.status==="done"?"COMPLETED":"CONFIRMED"),
+      "END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return {ics:lines.map(icsFold).join("\r\n")+"\r\n", skipped:skipped};
+}
+function downloadIcs(items,label,filename){
+  const out=buildIcs(items,label);
+  downloadText(filename||((BRAND&&BRAND.name?slugify(BRAND.name):"grayrender")+"-plan.ics"),out.ics,"text/calendar;charset=utf-8");
+  return out;
+}
+function slugify(s){ return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"plan"; }
+
+/* ---------------- the email exit ----------------
+   mailto, for the same reason as the .ics: it opens the mail client they already use,
+   signed in as them, with nothing sent on anyone's behalf. The full text always goes to
+   the clipboard first, because mailto has a URL length limit that varies by client and a
+   silently truncated update is a worse failure than a manual paste. */
+const MAILTO_SAFE=1400;
+function mailtoLink(to,subject,body){
+  const short=body.length>MAILTO_SAFE
+    ? body.slice(0,MAILTO_SAFE).replace(/\s+\S*$/,"")+"\n\n[The rest of this update is on your clipboard, paste it here.]"
+    : body;
+  return "mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject||"")+"&body="+encodeURIComponent(short);
+}
+
+/* ---------------- the two calls the workspace is allowed to make ----------------
+   Everything above is free and instant. Opening the app costs nothing and waits for
+   nothing: a model call happens only when you press a button that says it will. */
+async function askModel(systemPrompt,userMessage,tool,maxTokens){
+  try{
+    const r=await fetch("/.netlify/functions/generate",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({systemPrompt:systemPrompt,userMessage:userMessage,tool:tool,
+        inputs:{business:brandName()},maxTokens:maxTokens||700,passcode:getPasscode(),owner:isOwner()})});
+    const d=await r.json().catch(()=>({}));
+    if(handleLocked(d)) return "";
+    return ((d&&d.result)||"").trim();
+  }catch(e){ return ""; }
+}
+/* A figure nobody supplied is a fabricated figure. Percentages, comma-grouped numbers and
+   multipliers are the shapes a model reaches for when it wants to sound like a strategist;
+   years and small integers are not, so they are left alone and this cannot over-fire on a
+   date or a count of three. */
+const FIGURE_SHAPE=/\b\d+(?:\.\d+)?\s?%|\b\d{1,3}(?:,\d{3})+\b|\b\d+(?:\.\d+)?x\b/gi;
+function dropUnbackedFigures(out,src){
+  const hay=String(src||"");
+  return String(out||"").split("\n").filter(line=>{
+    const figs=line.match(FIGURE_SHAPE);
+    if(!figs) return true;
+    return figs.every(f=>hay.indexOf(String(f).trim())>=0);
+  }).join("\n");
+}
+const DAYPLAN_SYSTEM=`You are a senior marketing strategist briefing the owner of a business at the start of their working day. ${NODASH}
+You are given: the business, what has already been done for it, and a NUMBERED list of open work.
+Write, in this exact shape and nothing else:
+FOCUS: one sentence naming the single most valuable thing to do today and why it is the most valuable.
+Then two or three lines, each starting with the number in square brackets of an item from the list, like [2], followed by what to do with it and the one sentence of reasoning a strategist would give.
+Then a final line starting with NEXT: naming what this sets up for later in the week.
+HARD RULES: only ever cite a number that appears in the list. Never invent a statistic, a percentage, a benchmark, a result figure or a deadline that was not given to you. Never claim anything about performance you were not told. If the list is short, say so plainly rather than padding it. No preamble, no sign off, no markdown.`;
+/* The citation is the tether. Asking the model to pick FROM a numbered list and then
+   checking every number it cites is exact: a drifted bullet cannot survive by being
+   plausible, the way it can when the check is fuzzy text matching. */
+function tetherDayPlan(text,count){
+  return String(text||"").split("\n").filter(line=>{
+    const m=line.match(/^\s*\[(\d+)\]/);
+    if(!m) return true;                         // FOCUS / NEXT lines carry no citation
+    const n=+m[1];
+    return n>=1 && n<=count;
+  }).join("\n");
+}
+const UPDATE_SYSTEM=`You are a marketing lead writing a short status email to a manager or client. ${NODASH}
+You are given the business, the work completed recently, and the open work with its priorities and dates.
+Write a plain email body: one line of context, a short "what we did" list, a short "what is next" list with the dates you were given, and one closing line naming anything you need a decision on. Between 120 and 220 words.
+HARD RULES: use only the facts given to you. Never invent a metric, a percentage, a result, a person's name, a company name or a date that was not supplied. Do not write a subject line, a greeting with an invented name, or a signature block. No markdown, no bullets with asterisks, use plain hyphens.`;
+
+/* ---------------- what to do next, decided in code ----------------
+   Rules over stored state, so this is free, instant and identical every time. The model is
+   for the writing, never for working out that an audit from six weeks ago is stale. */
+function daysSince(ts){ return Math.floor((Date.now()-(ts||0))/86400000); }
+function nextMoves(){
+  const moves=[], has=k=>!!LAST_OUT[k], a=LAST_OUT.audit;
+  const late=openItems().filter(x=>{ const d=daysUntil(x.due); return d!==null&&d<0; });
+  const hot=openItems().filter(x=>x.priority==="Critical"||x.priority==="High");
+  if(late.length) moves.push({t:late.length===1?"One item is past its date":late.length+" items are past their date",
+    d:"Move the date or get them shipped, but do not leave them sitting.",go:""});
+  if(!a) moves.push({t:"Run your first site audit",
+    d:"It grades the site and files the fixes here, so the rest of the suite has something real to work from.",go:"audit"});
+  else if(daysSince(a.at)>=30) moves.push({t:"Re-run the audit",
+    d:"The last one was "+daysSince(a.at)+" days ago. A fresh run shows what actually shipped and reopens anything that did not.",go:"audit"});
+  if(hot.length) moves.push({t:hot.length===1?"Ship the highest priority fix":"Ship the "+hot.length+" highest priority fixes",
+    d:hot.length===1?"This is the one costing you leads today.":"These are the ones costing you leads today.",go:""});
+  if(a&&!has("campaign")) moves.push({t:"Turn the findings into a campaign",
+    d:"One brief, and the press release, posts, ads and calendar all come back saying the same thing.",go:"campaign"});
+  if(has("campaign")&&!has("calendar")) moves.push({t:"Put the campaign on a calendar",
+    d:"Four weeks of posts, dated, and they land in your work here.",go:"calendar"});
+  if(!has("brand")) moves.push({t:"Lock your brand voice",
+    d:"Every other tool reads it, so the whole suite stops sounding like eleven different people.",go:"brand"});
+  if(has("calendar")&&!has("report")) moves.push({t:"Report on what went out",
+    d:"Paste the numbers and it will tell you what they say, and what it still cannot see.",go:"report"});
+  return moves.slice(0,4);
+}
+function greeting(){
+  const h=new Date().getHours();
+  return h<12?"Good morning":h<18?"Good afternoon":"Good evening";
+}
+function srcLabel(s){ return s==="audit"?"From the audit":s==="calendar"?"Scheduled post":"Added by you"; }
+
+/* ---------------- Today ---------------- */
+function itemRow(it){
+  const d=daysUntil(it.due), lateCls=d!==null&&d<0?" late":d===0?" now":"";
+  const pri=it.priority?`<span class="fx ${it.priority==="Critical"?"crit":it.priority==="High"?"high":it.priority==="Low"?"low":"med"}">${esc(it.priority)}</span>`:"";
+  return `<li class="wi${it.status==="done"?" is-done":""}" data-item="${esc(it.id)}">
+    <button type="button" class="wi-check" data-act="toggle" data-id="${esc(it.id)}"
+      aria-label="${it.status==="done"?"Mark as not done":"Mark as done"}" title="${it.status==="done"?"Mark as not done":"Mark as done"}"><span>${it.status==="done"?"&#10003;":""}</span></button>
+    <div class="wi-main">
+      <div class="wi-t">${pri}<span class="wi-title">${escMd(it.title)}</span>${it.returned?`<span class="wi-back" title="A later audit still found this">still there</span>`:""}</div>
+      ${it.detail?`<div class="wi-d">${escMd(it.detail)}</div>`:""}
+      <div class="wi-meta">
+        <span class="wi-src">${esc(srcLabel(it.source))}</span>
+        <label class="wi-due${lateCls}"><span class="wi-duelbl">Due</span>
+          <input type="date" value="${esc(it.due||"")}" data-act="due" data-id="${esc(it.id)}" aria-label="Due date for ${esc(it.title).slice(0,60)}"/>
+          ${it.due?`<span class="wi-when">${esc(dueWords(it.due))}</span>`:""}</label>
+        <button type="button" class="wi-x" data-act="drop" data-id="${esc(it.id)}" aria-label="Remove this item">Remove</button>
+      </div>
+    </div>
+  </li>`;
+}
+function renderHome(){
+  try{window.scrollTo(0,0);}catch(e){}
+  setActiveNav();
+  if(!BRANDS.length) return renderOnboard();
+  const open=openItems(), soon=dueWithin(7), moves=nextMoves();
+  const doneWeek=PLAN.items.filter(x=>x.status==="done"&&x.done_at&&daysSince(x.done_at)<7).length;
+  const a=LAST_OUT.audit;
+  const touched=Object.keys(LAST_OUT).filter(k=>TOOLS[k]&&LAST_OUT[k]).sort((x,y)=>(LAST_OUT[y].at||0)-(LAST_OUT[x].at||0));
+  const last=touched.length?LAST_OUT[touched[0]]:null;
+  const gap=PLAN.lastSeen?daysSince(PLAN.lastSeen):0;
+
+  const tiles=[
+    {n:open.length,l:open.length===1?"open item":"open items"},
+    {n:soon.length,l:"due this week"},
+    {n:doneWeek,l:"done this week"},
+    {n:(a&&a.mark)||"—",l:a?"site grade":"no audit yet"}
+  ].map(t=>`<div class="wk-tile"><b>${esc(String(t.n))}</b><span>${esc(t.l)}</span></div>`).join("");
+
+  const movesHtml=moves.length?`<ul class="wk-moves">${moves.map(m=>
+    `<li><div class="wm-t">${esc(m.t)}</div><div class="wm-d">${esc(m.d)}</div>
+      ${m.go?`<button type="button" class="wm-go" data-go="${esc(m.go)}">Open ${esc(TOOLS[m.go]?TOOLS[m.go].title:m.go)}${ARROW}</button>`:""}</li>`).join("")}</ul>`
+    : `<p class="wk-empty">Nothing outstanding. Run something and it will show up here.</p>`;
+
+  const soonHtml=soon.length?`<ul class="wk-items">${soon.map(itemRow).join("")}</ul>`
+    : `<p class="wk-empty">Nothing dated in the next seven days.</p>`;
+  const restList=open.filter(x=>soon.indexOf(x)<0);
+  const restHtml=restList.length?`<ul class="wk-items">${restList.map(itemRow).join("")}</ul>`:"";
+
+  const logHtml=PLAN.log.length?`<ul class="wk-log">${PLAN.log.slice(0,12).map(e=>
+    `<li><span class="wl-k wl-${esc(e.kind)}"></span><span class="wl-t">${escMd(e.title)}</span>
+      ${e.meta?`<span class="wl-m">${escMd(e.meta)}</span>`:""}<span class="wl-a">${esc(agoWords(e.at))}</span></li>`).join("")}</ul>`
+    : `<p class="wk-empty">Nothing logged yet for this business.</p>`;
+
+  main.innerHTML=`
+    <div class="tool-head">
+      <h1>${esc(greeting())}<span class="hl">.</span></h1>
+      <p>${gap>=1?`It has been ${gap===1?"a day":gap+" days"} since you were last in here for <b>${esc(brandName())}</b>. `:`Everything ${esc(brandName())} has in flight, in one place. `}
+        ${last?`You last worked on ${esc(TOOLS[touched[0]].title)}, ${esc(agoWords(last.at))}.`:``}</p>
+    </div>
+
+    <div class="wk-tiles">${tiles}</div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Today</h2>
+        <div class="wk-acts">
+          <button type="button" class="btn-mini" id="wkPlan">Plan my day</button>
+          <button type="button" class="btn-mini" id="wkMail">Draft the update</button>
+          <button type="button" class="btn-mini" id="wkIcs">Add to calendar</button>
+        </div>
+      </div>
+      <div id="wkOut" aria-live="polite"></div>
+      ${movesHtml}
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Due next</h2><span class="wk-count">${soon.length}</span></div>
+      ${soonHtml}
+    </div>
+
+    ${restList.length?`<div class="card wk-card">
+      <div class="wk-head"><h2>Open work</h2><span class="wk-count">${restList.length}</span></div>
+      ${restHtml}</div>`:""}
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Add something</h2></div>
+      <div class="wk-add">
+        <label class="sr-only" for="wkNew">What needs doing</label>
+        <input id="wkNew" type="text" placeholder="Anything you want to remember to do" autocomplete="off"/>
+        <label class="sr-only" for="wkNewDue">Due date</label>
+        <input id="wkNewDue" type="date" value="${esc(ymd(addDays(new Date(),3)))}"/>
+        <button type="button" class="btn-mini solid" id="wkAdd">Add</button>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>What has happened</h2></div>
+      ${logHtml}
+    </div>
+  `;
+  wireHome();
+}
+function wireHome(){
+  main.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>goTool(b.getAttribute("data-go"))));
+  main.querySelectorAll("[data-act]").forEach(el=>{
+    const act=el.getAttribute("data-act"), id=el.getAttribute("data-id");
+    if(act==="toggle") el.addEventListener("click",()=>{
+      const it=findItem(id); if(!it) return;
+      setItemStatus(id,it.status==="done"?"open":"done"); renderHome();
+    });
+    if(act==="drop") el.addEventListener("click",()=>{ removeItem(id); renderHome(); });
+    if(act==="due") el.addEventListener("change",()=>{ setItemDue(id,el.value); renderHome(); });
+  });
+  const add=document.getElementById("wkAdd"), nw=document.getElementById("wkNew"), nd=document.getElementById("wkNewDue");
+  function doAdd(){
+    const v=(nw.value||"").trim(); if(!v) return;
+    addItem({source:"manual",title:v,due:nd.value||""}); persistPlan();
+    logEvent("added",v); renderHome();
+  }
+  if(add) add.addEventListener("click",doAdd);
+  if(nw) nw.addEventListener("keydown",e=>{ if(e.key==="Enter") doAdd(); });
+  const p=document.getElementById("wkPlan"); if(p) p.addEventListener("click",planMyDay);
+  const m=document.getElementById("wkMail"); if(m) m.addEventListener("click",draftUpdate);
+  const i=document.getElementById("wkIcs"); if(i) i.addEventListener("click",exportPlanIcs);
+}
+function wkOut(html){ const el=document.getElementById("wkOut"); if(el) el.innerHTML=html; }
+function exportPlanIcs(){
+  const items=openItems();
+  if(!items.length) return wkOut(`<div class="wk-note">There is nothing open to put in a calendar yet.</div>`);
+  const out=downloadIcs(items,brandName()+" marketing plan");
+  const n=items.length-out.skipped.length;
+  // Say what did not go, rather than letting a short file look like a complete one.
+  wkOut(`<div class="wk-note"><b>${n} ${n===1?"item":"items"} downloaded as a calendar file.</b> Open it and your calendar will ask which calendar to add them to. Re-exporting later updates the same events rather than duplicating them.
+    ${out.skipped.length?`<br/>${out.skipped.length} ${out.skipped.length===1?"item has":"items have"} no date yet, so ${out.skipped.length===1?"it was":"they were"} left out. Give ${out.skipped.length===1?"it":"them"} a due date and export again.`:""}</div>`);
+}
+
+/* The work already done, in a form the two workspace calls can use. Short on purpose:
+   this briefs the strategist, it is not the strategy. */
+function doneSummary(){
+  const bits=[];
+  PLAN.log.slice(0,10).forEach(e=>{
+    if(e.kind==="done") bits.push("Completed: "+e.title);
+    else if(e.kind==="audit") bits.push(e.title+(e.meta?" ("+e.meta+")":""));
+    else if(e.kind==="campaign"||e.kind==="generated") bits.push("Produced: "+e.title);
+  });
+  return bits.slice(0,8).join("\n");
+}
+function itemLines(items){
+  return items.map((it,i)=>`[${i+1}] ${it.title}`+
+    (it.priority?" (priority "+it.priority+")":"")+
+    (it.due?" (due "+it.due+", "+dueWords(it.due)+")":" (no date set)")).join("\n");
+}
+async function planMyDay(){
+  const btn=document.getElementById("wkPlan");
+  const items=openItems().slice(0,12);
+  if(!items.length) return wkOut(`<div class="wk-note">There is no open work to plan yet. Run an audit or add something below.</div>`);
+  if(btn){ btn.disabled=true; btn.textContent="Thinking"; }
+  wkOut(`<div class="wk-note wk-wait">Working out where today is best spent</div>`);
+  const msg=`BUSINESS: ${brandName()}\n${brandContext()}\n\nTODAY IS: ${new Date().toDateString()}\n\nWHAT HAS ALREADY BEEN DONE:\n${doneSummary()||"Nothing logged yet."}\n\nOPEN WORK:\n${itemLines(items)}\n\nWrite today's focus now.`;
+  let out=await askModel(DAYPLAN_SYSTEM,msg,"workspace-plan",700);
+  if(btn){ btn.disabled=false; btn.textContent="Plan my day"; }
+  if(!out) return wkOut(`<div class="wk-note">That did not come back. Try it again in a moment.</div>`);
+  out=dropUnbackedFigures(tetherDayPlan(out,items.length),msg);
+  PLAN.strategy={text:out,at:Date.now()}; persistPlan();
+  logEvent("planned","Planned the day");
+  paintDayPlan(out,items);
+}
+/* A cited item becomes the item itself: the plan is the list, not a description of it. */
+function paintDayPlan(text,items){
+  const lines=String(text||"").split("\n").map(l=>l.trim()).filter(Boolean);
+  const html=lines.map(l=>{
+    const m=l.match(/^\[(\d+)\]\s*([\s\S]*)$/);
+    if(m){
+      const it=items[+m[1]-1];
+      return `<li class="dp-do"><span class="dp-n">${esc(m[1])}</span><div><div class="dp-x">${escMd(m[2])}</div>
+        ${it?`<div class="dp-ref">${escMd(it.title)}${it.due?" · due "+esc(dueWords(it.due)):""}</div>`:""}</div></li>`;
+    }
+    if(/^FOCUS:/i.test(l)) return `<li class="dp-focus">${escMd(l.replace(/^FOCUS:\s*/i,""))}</li>`;
+    if(/^NEXT:/i.test(l)) return `<li class="dp-next"><b>Sets up</b> ${escMd(l.replace(/^NEXT:\s*/i,""))}</li>`;
+    return `<li class="dp-x">${escMd(l)}</li>`;
+  }).join("");
+  wkOut(`<div class="dayplan"><ul>${html}</ul>
+    <div class="dp-foot">Written from your open work, ${esc(agoWords(PLAN.strategy?PLAN.strategy.at:Date.now()))}</div></div>`);
+}
+async function draftUpdate(){
+  const btn=document.getElementById("wkMail");
+  const open=openItems().slice(0,12);
+  if(!open.length && !PLAN.log.length) return wkOut(`<div class="wk-note">There is nothing to report yet.</div>`);
+  if(btn){ btn.disabled=true; btn.textContent="Writing"; }
+  wkOut(`<div class="wk-note wk-wait">Writing the update</div>`);
+  const msg=`BUSINESS: ${brandName()}\n${brandContext()}\n\nTODAY IS: ${new Date().toDateString()}\n\nWORK COMPLETED RECENTLY:\n${doneSummary()||"Nothing logged yet."}\n\nOPEN WORK AND DATES:\n${itemLines(open)}\n\nWrite the update now.`;
+  let out=await askModel(UPDATE_SYSTEM,msg,"workspace-update",800);
+  if(btn){ btn.disabled=false; btn.textContent="Draft the update"; }
+  if(!out) return wkOut(`<div class="wk-note">That did not come back. Try it again in a moment.</div>`);
+  out=cleanCopy(dropUnbackedFigures(out,msg));
+  logEvent("emailed","Drafted a status update");
+  const subject=brandName()+" marketing update, "+new Date().toLocaleDateString(undefined,{month:"long",day:"numeric"});
+  wkOut(`<div class="wk-mail">
+      <div class="wm-sub"><span>Subject</span><b>${escMd(subject)}</b></div>
+      <div class="wm-body">${escMd(out).replace(/\n/g,"<br/>")}</div>
+      <div class="wm-row">
+        <button type="button" class="btn-mini solid" id="wmSend">Open in email</button>
+        <button type="button" class="btn-mini" id="wmCopy">Copy</button>
+        <button type="button" class="btn-mini" id="wmDl">Download</button>
+      </div>
+      <div class="wm-note">Nothing is sent from here. This opens your own mail app with the draft in it, and the full text goes to your clipboard first so a long update is never cut short by the link.</div>
+    </div>`);
+  const copy=()=>navigator.clipboard.writeText(out).catch(()=>{});
+  const c=document.getElementById("wmCopy");
+  if(c) c.addEventListener("click",()=>{ copy(); c.textContent="Copied"; setTimeout(()=>c.textContent="Copy",1400); });
+  const d=document.getElementById("wmDl");
+  if(d) d.addEventListener("click",()=>downloadText(slugify(brandName())+"-update.md",subject+"\n\n"+out));
+  const s=document.getElementById("wmSend");
+  if(s) s.addEventListener("click",()=>{ copy(); location.href=mailtoLink("",subject,out); });
 }
 
 function refineArm(raw,vals){
@@ -2476,9 +3230,9 @@ function campaignText(){
 }
 /* Download anything as a file. Until now the only way out of this product was the clipboard,
    or the audit's print dialog. A deliverable you cannot hand to someone is half a deliverable. */
-function downloadText(filename,text){
+function downloadText(filename,text,mime){
   try{
-    const blob=new Blob([text],{type:"text/markdown;charset=utf-8"});
+    const blob=new Blob([text],{type:mime||"text/markdown;charset=utf-8"});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob); a.download=filename;
     document.body.appendChild(a); a.click();
@@ -3193,7 +3947,14 @@ function serpPreview(host,path,curTitle,curMeta,newTitle,newMeta){
   return `<div class="fx-serp">${card(curTitle,curMeta,"serp-now","How Google shows it now")}${card(newTitle,newMeta,"serp-new","After the fix")}</div>`;
 }
 
+/* Every fix that survives the guard stack below, collected as data on the way past.
+   The workspace turns these into tracked work, and it must track exactly what the report
+   shows: parsing the report a second time somewhere else would drift, and would quietly
+   put the platform-impossible and fabricated findings this function drops back into
+   somebody's to-do list. Reset per call because printAuditReport calls this too. */
+let FIX_PARSED=[];
 function fixBullets(txt,platform,siteHost){
+  FIX_PARSED=[];
   if(!txt) return "";
   const isBio=platform && /link-in-bio/i.test(platform.kind||"");
   return txt.split(/\n/).map(l=>{
@@ -3294,6 +4055,11 @@ function fixBullets(txt,platform,siteHost){
       if(isBio) effortFixed=effortFixed.replace(/\b(cms|staging|media library|codebase|repository)\b/gi, platform.name+" editor");
     }
     const noCurrent=!current || /^\(?\s*(none|n\/a|new element|nothing|new\b)/i.test(current);
+    /* Past every guard, so this one is real. Collect it for the workspace before rendering. */
+    if(loc||reason){
+      const pri=chip?(/crit/.test(chip)?"Critical":/high/.test(chip)?"High":/low/.test(chip)?"Low":"Medium"):"";
+      FIX_PARSED.push({location:loc,reason:reason,current:current,use:replacement,effort:effortFixed,priority:pri});
+    }
     const head=(chip||loc)?`<div class="fx-row">${chip}${loc?`<span class="fx-loc">${escMd(loc)}</span>`:""}</div>`:"";
     const reasonLine=reason?`<div class="fx-body">${escMd(reason)}</div>`:"";
 
@@ -3574,6 +4340,7 @@ document.getElementById("rfInput").addEventListener("keydown",e=>{
 
 reflectBrand();
 hydrateWork();          // yesterday's work is still here
+hydratePlan();          // and so is what you meant to do with it
 bootScreen();
 if(!isUnlocked()) showLock();
 </script>
