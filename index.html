@@ -807,7 +807,7 @@ const TOOLS = {
     blurb:"Generate a personalized cold outreach email for your team to send to a company that needs the service you sell.",
     btn:"Generate Outreach Email",
     fields:[
-      {id:"company",label:"Target Company Name",type:"text",placeholder:"e.g. Meridian Financial"},
+      {id:"company",label:"Target Company Name",type:"text",placeholder:b=>"A company that needs "+((b.offerings&&b.offerings[0])||"what you sell")},
       {id:"industry",label:"Their Industry",type:"select",options:b=>["Technology / SaaS","Financial Services","Healthcare","Manufacturing","Professional Services","Retail & eCommerce","Education","Hospitality","Construction & Trades","Nonprofit"]},
       {id:"need",label:"What They Need From You",type:"select",options:b=>b.offerings},
       {id:"tone",label:"Tone",type:"select",options:["Professional","Consultative","Bold"]}
@@ -881,7 +881,7 @@ Lead with benefits over features and use credible numbers. End with this exact l
     blurb:"Generate a competitive positioning brief showing how you win against a named competitor for a specific engagement.",
     btn:"Generate Competitive Brief",
     fields:[
-      {id:"competitor",label:"Competitor Name",type:"text",placeholder:"Robert Half, TEKsystems, Insight Global, Randstad, Toptal...",list:["Robert Half","TEKsystems","Insight Global","Randstad","Toptal"]},
+      {id:"competitor",label:"Competitor Name",type:"text",placeholder:b=>"A rival in "+(b.industry||"your market")+", or \"doing nothing\""},
       {id:"usecase",label:"What Is Being Bought",type:"select",options:b=>b.offerings},
       {id:"deal",label:"Deal Size",type:"select",options:["Small / single purchase","Mid-sized deal","Large / enterprise program"]}
     ],
@@ -1255,10 +1255,10 @@ function renderTool(){
       return `<div class="field"><label>${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
     }
     if(f.type==="textarea"){
-      return `<div class="field span2"><label>${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${f.placeholder||""}"></textarea></div>`;
+      return `<div class="field span2"><label>${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}"></textarea></div>`;
     }
-    if(f.list){dl=`<datalist id="dl_${f.id}">${f.list.map(o=>`<option value="${o}">`).join("")}</datalist>`;}
-    return `<div class="field"><label>${f.label}</label><input id="f_${f.id}" type="text" placeholder="${f.placeholder||""}" ${f.list?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
+    const fl=listOf(f); if(fl.length){dl=`<datalist id="dl_${f.id}">${fl.map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`;}
+    return `<div class="field"><label>${f.label}</label><input id="f_${f.id}" type="text" placeholder="${esc(phOf(f))}" ${listOf(f).length?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
   }).join("");
 
   const title=t.title.replace(t.hl,`<span class="hl">${t.hl}</span>`);
@@ -1305,6 +1305,18 @@ function withBrand(tpl){
 function optsOf(f){
   const o = (typeof f.options==="function") ? f.options(B()) : f.options;
   return (o||[]).filter(Boolean);
+}
+/* Placeholders and datalists take the brand too. They were the last industry-locked thing in
+   the product: the Competitive Intelligence field suggested Robert Half, TEKsystems, Insight
+   Global, Randstad and Toptal to EVERY user, so an R&B artist was offered five staffing firms
+   as competitors. The dropdowns were made brand-aware long ago; the hints beside them were not. */
+function phOf(f){
+  const p = (typeof f.placeholder==="function") ? f.placeholder(B()) : f.placeholder;
+  return p||"";
+}
+function listOf(f){
+  const l = (typeof f.list==="function") ? f.list(B()) : f.list;
+  return (l||[]).filter(Boolean);
 }
 
 /* ---------------- Brand setup: the whole configuration story ----------------

@@ -662,6 +662,42 @@ try { win.renderTool(); } catch (e) { restoreThrew = true; }
 check('a broken restore does not break the tool screen', !restoreThrew);
 check('and the tool form still rendered', !!win.document.getElementById('genBtn'));
 
+/* ---------------------------------------------------------------------------
+   NO INDUSTRY DNA LEFT IN THE FIELDS.
+
+   Spotted on Edmund's own screen: Competitive Intelligence suggested Robert
+   Half, TEKsystems, Insight Global, Randstad and Toptal to every user, so an
+   R&B artist was offered five staffing firms as competitors. The dropdowns
+   were made brand-aware long ago; the placeholders and datalists beside them
+   were missed. Third time this repo has found leftover staffing DNA, after
+   the scorePath keyword table and the near-duplicate service regex.
+--------------------------------------------------------------------------- */
+console.log('\nNO INDUSTRY DNA IN THE FIELD HINTS  (an R&B artist was offered staffing firms)');
+const STAFFING = /robert half|teksystems|insight global|randstad|toptal|staffing|recruit|placement|talent acquisition/i;
+const BRAND_FIXTURE = { industry: 'Music, Entertainment', offerings: ['Studio Albums'], audiences: ['R&B fans'] };
+let locked = [];
+Object.keys(win.eval('Object.keys(TOOLS)') ? {} : {});
+const toolKeys = JSON.parse(win.eval('JSON.stringify(Object.keys(TOOLS))'));
+toolKeys.forEach(k => {
+  const n = Number(win.eval(`(TOOLS['${k}'].fields||[]).length`));
+  for (let i = 0; i < n; i++) {
+    const ph = win.eval(`(function(){var f=TOOLS['${k}'].fields[${i}];
+      var p = typeof f.placeholder==='function' ? f.placeholder(${JSON.stringify(BRAND_FIXTURE)}) : (f.placeholder||'');
+      var l = typeof f.list==='function' ? f.list(${JSON.stringify(BRAND_FIXTURE)}) : (f.list||[]);
+      return p + ' || ' + l.join(', ');})()`);
+    if (STAFFING.test(ph)) locked.push(k + '.' + i + ' -> ' + ph);
+  }
+});
+check('no field hint names a staffing firm or staffing work', locked.length === 0, locked.join('\n        '));
+
+/* And the two that were locked now speak the loaded brand. */
+check('the competitor hint uses the brand industry',
+  /Music, Entertainment/.test(win.eval(`TOOLS.intel.fields.find(function(f){return f.id==='competitor';}).placeholder(${JSON.stringify(BRAND_FIXTURE)})`)));
+check('and offers "doing nothing", the alternative Dunford insists on',
+  /doing nothing/i.test(win.eval(`TOOLS.intel.fields.find(function(f){return f.id==='competitor';}).placeholder(${JSON.stringify(BRAND_FIXTURE)})`)));
+check('the outreach hint uses a real offering',
+  /Studio Albums/.test(win.eval(`TOOLS.outreach.fields.find(function(f){return f.id==='company';}).placeholder(${JSON.stringify(BRAND_FIXTURE)})`)));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
