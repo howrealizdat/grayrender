@@ -777,6 +777,58 @@ check('splitBriefing separates asset from briefing',
 check('splitBriefing passes through text with no delimiter',
   win.splitBriefing('just an asset').asset === 'just an asset');
 
+/* ---------------------------------------------------------------------------
+   CONFIRM, DO NOT CONFIGURE.
+
+   Edmund's idea: ask a few qualifying questions, read the site, and set the
+   whole product up so nobody has to customise it by hand. The read already
+   filled the menus; what was missing was one place to CORRECT a wrong guess.
+   Fixing it in a dropdown fixed it for that tool only, and only that once.
+--------------------------------------------------------------------------- */
+console.log('\nTHE CONFIRM STEP  (three answers that become every dropdown)');
+win.eval("clearBrand(); current='ads';");
+win.renderBrandConfirm({ name: 'Northwind', what: 'We fit commercial HVAC', industry: 'Trades',
+  tone: 'Plain', audiences: ['Facilities Managers'], offerings: ['Install'], goals: ['Lead Generation'],
+  proof: [] }, 'https://northwind.example');
+
+check('the three qualifying answers are editable', !!win.document.getElementById('bcOff')
+  && !!win.document.getElementById('bcAud') && !!win.document.getElementById('bcGoal'));
+check('they arrive pre-filled from the read', win.document.getElementById('bcOff').value === 'Install');
+check('the screen says these become the dropdowns',
+  /become the choices in every tool/i.test(win.document.querySelector('.tool-head p').textContent));
+check('each field explains where it lands', win.document.querySelectorAll('.bc-hint').length >= 3);
+
+/* Correcting a guess must beat the read, or confirming is theatre. */
+win.document.getElementById('bcOff').value = 'Install, Maintenance, Emergency Callout';
+win.document.getElementById('bcAud').value = 'Facilities Managers, School Estates Leads';
+win.document.getElementById('bcGoal').value = 'Book Site Surveys';
+win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
+
+check('the corrected offerings won over the read',
+  win.eval("JSON.stringify(BRAND.offerings)") === JSON.stringify(['Install','Maintenance','Emergency Callout']),
+  win.eval("JSON.stringify(BRAND.offerings)"));
+check('the corrected audiences won too',
+  win.eval("BRAND.audiences.length") === 2 && /School Estates/.test(win.eval("JSON.stringify(BRAND.audiences)")));
+check('and the corrected goal', /Book Site Surveys/.test(win.eval("JSON.stringify(BRAND.goals)")));
+
+/* THE POINT: those corrections must show up in the actual tool menus. */
+win.eval("current='ads';"); win.renderTool();
+const adsOpts = [...win.document.getElementById('f_service').options].map(o => o.textContent);
+check('the corrected answers ARE the dropdown, with no per-tool editing',
+  adsOpts.includes('Emergency Callout'), adsOpts.join(' | '));
+win.eval("current='calendar';"); win.renderTool();
+const calGoals = [...win.document.getElementById('f_goal').options].map(o => o.textContent);
+check('and they reach a different tool too', calGoals.includes('Book Site Surveys'), calGoals.join(' | '));
+
+/* Blanking a field must not wipe the profile. */
+win.eval("clearBrand(); current='ads';");
+win.renderBrandConfirm({ name: 'N', what: '', industry: '', tone: '', audiences: ['Buyers'],
+  offerings: ['Thing'], goals: ['Growth'], proof: [] }, 'https://n.example');
+win.document.getElementById('bcOff').value = '   ';
+win.document.getElementById('bcGo').dispatchEvent(new win.Event('click'));
+check('an emptied field falls back to the read rather than wiping it',
+  /Thing/.test(win.eval("JSON.stringify(BRAND.offerings)")), win.eval("JSON.stringify(BRAND.offerings)"));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }

@@ -329,6 +329,7 @@
     border:1px solid var(--border);border-radius:999px;padding:3px 9px}
   .sp-badge.ok{color:#2e7d52;border-color:#2e7d52}
   .sp-badge.bad{color:#b3261e;border-color:#b3261e}
+  .bc-hint{display:block;margin-top:6px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
   /* ---- Refine dock -------------------------------------------------------
@@ -1521,18 +1522,35 @@ function renderBrandConfirm(prof,url){
      shows them this screen again and they never reach a single output. The read cost a model
      call and it is good, so it is kept. Continue is now a review step, not a commit gate. */
   saveBrand(prof); reflectBrand();
+  /* CONFIRM, DO NOT CONFIGURE.
+     Reading the site already fills these in; the job left for a human is to correct a wrong
+     guess ONCE, here, rather than discover it later inside a dropdown on some individual tool
+     and fix it there every time. These three answers ARE the dropdowns, everywhere, so saying
+     so on this screen is what stops anyone having to customise the product by hand. */
   const rows=[["What you do",prof.what],["Industry",prof.industry],["How you sound",prof.tone],
-              ["Who buys",(prof.audiences||[]).slice(0,4).join(", ")],
-              ["What you offer",(prof.offerings||[]).slice(0,4).join(", ")],
-              ["Proof on your site",(prof.proof||[]).join(", ")||"Nothing verifiable found, so nothing will be claimed"]];
+              ["Proof found on your site",(prof.proof||[]).join(", ")||"Nothing verifiable found, so nothing will be claimed"]];
+  const list=a=>(a||[]).filter(Boolean).join(", ");
   main.innerHTML=`
     <div class="tool-head">
-      <h1>Here is what I <span class="hl">read</span>.</h1>
-      <p>From ${esc(url)}. This is saved already, so you can go anywhere in the suite from here. Change the name if I got it wrong, or redo it any time from the brand chip in the header.</p>
+      <h1>I read your site. <span class="hl">Confirm</span> these.</h1>
+      <p>From ${esc(url)}. These three answers become the choices in every tool, so correcting one here fixes it everywhere. It is saved already and you only do this once.</p>
     </div>
     <div class="card">
-      <div class="field span2"><label>Company or product name</label>
+      <div class="field span2"><label for="bcName">Company or product name</label>
         <input id="bcName" type="text" value="${esc(prof.name||"")}" autocomplete="off"/></div>
+
+      <div class="field span2"><label for="bcOff">What you sell</label>
+        <input id="bcOff" type="text" value="${esc(list(prof.offerings))}" autocomplete="off"/>
+        <span class="bc-hint">Separate with commas. These fill "what they need from you", "what you are promoting" and "what is being bought".</span></div>
+
+      <div class="field span2"><label for="bcAud">Who buys it</label>
+        <input id="bcAud" type="text" value="${esc(list(prof.audiences))}" autocomplete="off"/>
+        <span class="bc-hint">These fill every audience and target-buyer menu in the suite.</span></div>
+
+      <div class="field span2"><label for="bcGoal">What you are trying to do right now</label>
+        <input id="bcGoal" type="text" value="${esc(list(prof.goals))}" autocomplete="off"/>
+        <span class="bc-hint">These fill the campaign and content goal menus.</span></div>
+
       <div class="bc-list">${rows.map(r=>`<div class="bc-row"><span class="bc-k">${esc(r[0])}</span><span class="bc-v">${escMd(r[1]||"Not stated")}</span></div>`).join("")}</div>
       <div class="gen-row">
         <button class="btn-gen" id="bcGo">Continue to ${esc((TOOLS[current]||{}).title||"the suite")}${ARROW}</button>
@@ -1541,7 +1559,14 @@ function renderBrandConfirm(prof,url){
     </div>`;
   document.getElementById("bcRedo").addEventListener("click",()=>renderBrandSetup());
   document.getElementById("bcGo").addEventListener("click",()=>{
+    const csv=id=>{const el=document.getElementById(id);
+      return el?el.value.split(",").map(x=>x.trim()).filter(Boolean):[];};
     prof.name=document.getElementById("bcName").value.trim()||prof.name;
+    // A corrected answer must win over the read, or confirming would be theatre.
+    const off=csv("bcOff"), aud=csv("bcAud"), gl=csv("bcGoal");
+    if(off.length) prof.offerings=off;
+    if(aud.length) prof.audiences=aud;
+    if(gl.length)  prof.goals=gl;
     // Go to the tool they were actually heading for. This used to hard-code the outreach
     // generator, so clicking AI Marketing Audit with no brand yet sent you through setup and
     // then dumped you on a completely different tool: you asked for an audit and got an
