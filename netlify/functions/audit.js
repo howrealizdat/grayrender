@@ -314,12 +314,17 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
 
       const msg = await client.messages.create({
         model: 'claude-haiku-4-5-20251001', max_tokens: 1200, temperature: 0,
-        /* Every page in a run sends this same prompt. A measured 5-page audit reported
-           cache_read_input_tokens: 0 on all five scans, paying full price each time.
-           Haiku 4.5's minimum cacheable prefix is 4096 tokens and this sits near it, so
-           the win is real but not guaranteed: check cache_read_input_tokens with
-           debug:true rather than assuming. */
-        system: [{ type: 'text', text: SCAN_SYSTEM, cache_control: { type: 'ephemeral' } }],
+        /* NOT CACHEABLE, MEASURED - do not re-add cache_control here.
+           Every page in a run sends this identical prompt, so caching looks like an easy
+           ~15% win. It isn't: the stable prefix is SCAN_SYSTEM alone (no tools render
+           ahead of it, and the page digest that follows differs per page), and that
+           prefix is under Haiku 4.5's 4096-token minimum. With cache_control set, a real
+           5-page run returned cache_creation_input_tokens: 0 AND cache_read_input_tokens: 0
+           on all five scans - the API declines silently, with no error and no warning.
+           The only ways to change this are a longer system prompt or a model with a lower
+           minimum, neither of which is worth 1.5 cents. Verify with debug:true if a future
+           model changes the floor. */
+        system: SCAN_SYSTEM,
         messages: [{ role: 'user', content: userContent }]
       });
       const out = textOf(msg);
