@@ -1293,6 +1293,8 @@ async function runBrandSetup(){
   try{ d=await postAudit({mode:"brand",url:url,owner:isOwner()}); }
   catch(e){ d={error:"network"}; }
   btn.disabled=false; btn.textContent="Learn my brand";
+  // A rejected passcode is not an unreadable website. Say which one it is.
+  if(handleLocked(d)) return;
   if(!d||!d.profile||(!d.profile.name&&!d.profile.profile)){
     renderBrandSetup("I could not read that site from here. You can try another URL, or enter your details by hand.");
     return;
@@ -1718,8 +1720,14 @@ function renderOutput(raw,vals){
 }
 
 /* ---------------- Full-site audit orchestration ---------------- */
+/* The passcode is attached HERE, not at the call sites. Brand setup was the one
+   caller that forgot it, so onboarding 403'd on every website anyone pasted and
+   the screen blamed the site ("I could not read that site from here") instead of
+   the lock. A caller cannot forget what it never has to remember. An explicit
+   passcode still wins, because the unlock screen posts a candidate to test it. */
 async function postAudit(payload){
-  const r=await fetch("/.netlify/functions/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const body=Object.assign({passcode:getPasscode(), owner:isOwner()}, payload);
+  const r=await fetch("/.netlify/functions/audit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   return r.json().catch(()=>({}));
 }
 // Run fn over items with at most n in flight at once.

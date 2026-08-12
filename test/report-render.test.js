@@ -222,6 +222,43 @@ check('keeps the section header', /^WHY THESE CHANGES MATTER/m.test(tethered));
 check('fixesSectionOf stops at the next header',
   !/WHY THESE/.test(win.fixesSectionOf(FILED + '\n\nWHY THESE CHANGES MATTER\n- x')));
 
+/* ---------------------------------------------------------------------------
+   THE PASSCODE MUST RIDE ON EVERY AUDIT REQUEST.
+
+   This shipped broken. Brand setup is the first screen a visitor touches, and it
+   was the one postAudit caller that never put the passcode in the body, so the
+   server 403'd every website anyone pasted and the screen said "I could not read
+   that site from here" -- blaming the website for a lock failure. The backend was
+   healthy the whole time, which is exactly why curl testing never caught it.
+
+   fetch is called synchronously inside postAudit before the first await, so the
+   body is captured the moment we invoke it, no awaiting needed.
+--------------------------------------------------------------------------- */
+console.log('\nTHE PASSCODE ON EVERY REQUEST  (brand setup forgot it and onboarding died)');
+let sent = null;
+win.fetch = function (url, opts) {
+  sent = JSON.parse(opts.body);
+  return Promise.resolve({ json: () => Promise.resolve({}) });
+};
+win.localStorage.setItem('gr_pass', 'OPEN-SESAME-TEST-ONLY');
+
+win.postAudit({ mode: 'brand', url: 'https://northwind.example' });
+check('brand setup sends the passcode', sent && sent.passcode === 'OPEN-SESAME-TEST-ONLY', JSON.stringify(sent));
+check('brand setup still sends its own fields', sent && sent.mode === 'brand' && /northwind/.test(sent.url));
+
+win.postAudit({ mode: 'scan', url: 'https://northwind.example/pricing' });
+check('a scan sends the passcode', sent && sent.passcode === 'OPEN-SESAME-TEST-ONLY');
+
+/* The unlock screen posts a CANDIDATE passcode to test it. That must win over the
+   stored one, or you could never enter a corrected code after a bad one. */
+win.postAudit({ mode: 'brand', validateOnly: true, passcode: 'A-DIFFERENT-CANDIDATE' });
+check('an explicit passcode overrides the stored one', sent && sent.passcode === 'A-DIFFERENT-CANDIDATE', JSON.stringify(sent));
+
+/* And with nothing stored it must not invent one. */
+win.localStorage.removeItem('gr_pass');
+win.postAudit({ mode: 'discover', url: 'https://northwind.example' });
+check('a locked visitor sends an empty passcode, not undefined', sent && sent.passcode === '', JSON.stringify(sent));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe report a client would hold is BROKEN. Do not deploy.\n'); process.exit(1); }
