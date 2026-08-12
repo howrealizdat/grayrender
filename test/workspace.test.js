@@ -281,6 +281,74 @@ const head = win.document.querySelector('.tool-head p').textContent;
 check('but a fresh piece of work overrides a stale lastSeen, so the two lines cannot contradict',
   !/in 3 days/.test(head), head.trim());
 
+console.log('\nTHE PROFILE FILLS IN WHAT IT ALREADY KNOWS');
+win.eval("clearBrand();");
+win.eval("current='audit';"); win.renderTool();
+check('with no business saved the audit field is empty, so zero setup still holds',
+  win.document.getElementById('f_url').value === '');
+check('and the audit is still reachable without a profile at all',
+  !!win.document.getElementById('genBtn'));
+
+win.saveBrand({ name: 'Northwind HVAC', what: 'heating and cooling for homes', url: 'https://northwind.example',
+  offerings: ['Boiler install'], audiences: ['Homeowner'], goals: ['More booked jobs'], proof: [] });
+win.eval("current='audit';"); win.renderTool();
+check('once a site is connected the audit fills its own address in',
+  win.document.getElementById('f_url').value === 'https://northwind.example');
+check('and says where that came from, so it does not read as a bug',
+  /Northwind HVAC/.test((win.document.querySelector('.brand-src') || {}).textContent || ''));
+win.document.getElementById('f_url').value = 'https://a-competitor.example';
+check('it is only a default: typing over it wins',
+  win.document.getElementById('f_url').value === 'https://a-competitor.example');
+
+['calendar', 'social', 'comms', 'brand', 'report'].forEach(k => {
+  win.eval("current='" + k + "';"); win.renderTool();
+  const v = (win.document.getElementById('f_brand') || {}).value;
+  check(k + ' no longer asks you to type your own company', v === 'Northwind HVAC, heating and cooling for homes', k + ' got "' + v + '"');
+});
+
+console.log('\nBUT NOT THE FIELDS THAT ARE ABOUT SOMEBODY ELSE');
+win.eval("current='outreach';"); win.renderTool();
+check('the outreach target company is left blank, because it is not you',
+  win.document.getElementById('f_company').value === '');
+win.eval("current='intel';"); win.renderTool();
+check('and neither is the competitor filled in with your own name',
+  win.document.getElementById('f_competitor').value === '');
+
+console.log('\nNO LEFTOVER DNA IN THE HINTS');
+const stale = JSON.parse(win.eval("JSON.stringify(Object.keys(TOOLS))"));
+let staleHits = [];
+stale.forEach(k => {
+  win.eval("current='" + k + "';");
+  if (win.eval("!!(TOOLS['" + k + "'].workspace)")) return;
+  win.renderTool();
+  [...win.document.querySelectorAll('#main input,#main textarea')].forEach(i => {
+    const ph = i.getAttribute('placeholder') || '';
+    if (/auto dealers|The Shop|dealer group/i.test(ph)) staleHits.push(k + ':' + ph);
+  });
+});
+check('no field hint still names a business from an old job spec', staleHits.length === 0, staleHits.join(' | '));
+
+console.log('\nTHE WEBSITE IS KEPT WHEN THE SITE IS READ');
+win.eval("clearBrand();");
+win.renderBrandConfirm({ name: 'Readco', what: 'a thing', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] }, 'https://readco.example');
+check('reading a site stores the address on the profile', win.eval("BRAND.url") === 'https://readco.example');
+check('and shows it on the confirm screen so a wrong one can be corrected',
+  (win.document.getElementById('bcUrl') || {}).value === 'https://readco.example');
+win.document.getElementById('bcUrl').value = 'https://readco.example/uk';
+win.document.getElementById('bcGo').dispatchEvent(new win.MouseEvent('click', { bubbles: true }));
+check('a corrected address wins over the one that was read', win.eval("BRAND.url") === 'https://readco.example/uk');
+
+console.log('\nA PROFILE FROM BEFORE THE ADDRESS WAS KEPT');
+win.eval("clearBrand();");
+win.saveBrand({ name: 'Legacy Co', offerings: ['x'], audiences: ['y'], goals: ['z'], proof: [] });
+win.eval("PLAN = blankPlan(); hydratePlan();");
+win.eval("current='audit';"); win.renderTool();
+check('the audit field stays empty rather than guessing an address',
+  win.document.getElementById('f_url').value === '');
+check('and Today asks for it instead of silently doing nothing',
+  win.nextMoves().some(m => /Tell Grayrender your website/.test(m.t)),
+  JSON.stringify(win.nextMoves().map(m => m.t)));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nThe workspace is BROKEN. Do not deploy.\n'); process.exit(1); }

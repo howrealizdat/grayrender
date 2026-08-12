@@ -1002,7 +1002,11 @@ const DEFAULT_BRAND = {
   topics:["Industry Trends","A Customer Success Story","Behind The Product","Common Mistakes We See","How It Actually Works","Team & Culture"],
   goals:["Brand Awareness","Lead Generation","Product Adoption","Community & Engagement","Event Or Launch Promotion","Thought Leadership"],
   buyers:["Founder / Owner","Operations Lead","Marketing Lead","Finance Lead","IT Lead"],
-  proof:[], profile:""
+  proof:[], profile:"",
+  /* The site the profile was read FROM. It was thrown away for months, which is why the
+     audit still asked you to type the address of the business it was already configured
+     for. Anything the setup already knows, no tool should ask for twice. */
+  url:""
 };
 /* ---------------- SAVED PROFILES ---------------------------------------------------------
    One company was never going to be enough. An agency works for several clients, and anyone
@@ -1212,7 +1216,7 @@ Be concrete and credible, named advantages and numbers, no vague claims or theor
     blurb:"Build a four-week, multi-channel organic content calendar with a hook, caption, CTA and required asset for every single post.",
     btn:"Build the Calendar",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
       {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
       {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
       {id:"channels",label:"Channels",type:"select",options:["LinkedIn + YouTube + Instagram","LinkedIn only","LinkedIn + Instagram","LinkedIn + YouTube","All channels + X/Threads"]},
@@ -1242,7 +1246,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"One brief in, native content out for LinkedIn, Instagram, YouTube and short-form video. Same message, genuinely rewritten for each platform.",
     btn:"Create the Content Set",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
       {id:"topic",label:"Topic or Announcement",type:"text",placeholder:"e.g. new one-click parts reordering for dealers"},
       {id:"audience",label:"Audience",type:"select",options:b=>b.audiences},
       {id:"tone",label:"Tone",type:"select",options:["Confident and plain-spoken","Consultative","Bold and contrarian","Warm and community-led"]}
@@ -1273,7 +1277,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"Press releases, newsletters, one-pagers, case studies and webinar abstracts, written to publish and consistent with your brand voice.",
     btn:"Write the Asset",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
       {id:"asset",label:"Asset Type",type:"select",options:["Press release","Customer newsletter","One-pager / sell sheet","Case study","Webinar abstract & promo","White paper outline","Internal announcement"]},
       {id:"subject",label:"Subject",type:"text",placeholder:"e.g. platform launch, 500th dealer enrolled, Q3 feature release"},
       {id:"audience",label:"Audience",type:"select",options:b=>["Customers & Prospects"].concat(b.audiences.slice(0,3),["Trade press","Internal team","Partners & vendors"])}
@@ -1300,7 +1304,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"A messaging framework and a usable voice guide: positioning, pillars, proof, the words you use, the words you never use.",
     btn:"Build the Framework",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
       {id:"audience",label:"Primary Audience",type:"select",options:b=>b.audiences},
       {id:"stage",label:"Brand Stage",type:"select",options:["New brand launch","Brand refresh","Early-stage / startup","Established, needs consistency"]},
       {id:"principles",label:"Core Principles (comma separated)",type:"text",placeholder:"e.g. Dealers First, Excellence, Transparency"}
@@ -1335,7 +1339,7 @@ End with this exact line on a new line: ${WATERMARK}`,
     blurb:"Paste last month's numbers. Get the read a stakeholder actually needs: what moved, why, and the three things to change next month.",
     btn:"Analyze Performance",
     fields:[
-      {id:"brand",label:"Brand or Product",type:"text",placeholder:"e.g. The Shop, a B2B eCommerce platform for auto dealers"},
+      {id:"brand",label:"Brand or Product",type:"text",placeholder:b=>b.name?b.name+(b.what?", "+b.what:""):"Your brand, and one line on what it is",prefill:b=>b.name?b.name+(b.what?", "+b.what:""):""},
       {id:"period",label:"Reporting Period",type:"select",options:["Last 30 days","Last quarter","Month over month","Since launch"]},
       {id:"goal",label:"Primary Goal",type:"select",options:b=>b.goals},
       {id:"data",label:"Paste Your Metrics",type:"textarea",placeholder:"Paste anything: followers, impressions, engagement rate, clicks, top posts, per-channel numbers. Rough notes are fine."}
@@ -1405,7 +1409,10 @@ End with this exact line on a new line: ${WATERMARK}`,
     btn:"Run Full-Site Audit",
     endpoint:"audit",
     fields:[
-      {id:"url",label:"Website to audit",type:"text",placeholder:"e.g. https://www.example.com"}
+      /* Prefilled from the profile, not required by it: with no business saved this is
+         empty and the audit still runs on anything you paste, which is the zero-setup
+         promise. It is only ever a default, and you can audit a competitor by typing over it. */
+      {id:"url",label:"Website to audit",type:"text",placeholder:"e.g. https://www.example.com",prefill:b=>b.url}
     ]
   }
 };
@@ -1597,8 +1604,13 @@ function pickUpLine(t){
 function brandSourceLine(t){
   if(!BRAND||!BRAND.name) return "";
   const adaptive=(t.fields||[]).some(f=>typeof f.options==="function"||typeof f.placeholder==="function");
-  if(!adaptive) return "";
-  return `<p class="brand-src">The choices below are written for <b>${esc(BRAND.name)}</b>, read from your website.
+  const filled=(t.fields||[]).filter(f=>preOf(f)).length;
+  if(!adaptive && !filled) return "";
+  /* A field that filled itself has to say who filled it, or it reads as a bug. */
+  const what=filled
+    ? (adaptive?"Filled in and written for":"Filled in from your profile for")
+    : "The choices below are written for";
+  return `<p class="brand-src">${what} <b>${esc(BRAND.name)}</b>, read from your website. Change anything you like.
     <button type="button" class="brand-src-a" id="brandSrcSwap">Use a different business</button></p>`;
 }
 function renderTool(){
@@ -1618,10 +1630,10 @@ function renderTool(){
       return `<div class="field"><label for="f_${f.id}">${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" aria-label="Custom ${f.label}" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
     }
     if(f.type==="textarea"){
-      return `<div class="field span2"><label for="f_${f.id}">${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}"></textarea></div>`;
+      return `<div class="field span2"><label for="f_${f.id}">${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}">${esc(preOf(f))}</textarea></div>`;
     }
     const fl=listOf(f); if(fl.length){dl=`<datalist id="dl_${f.id}">${fl.map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`;}
-    return `<div class="field"><label for="f_${f.id}">${f.label}</label><input id="f_${f.id}" type="text" placeholder="${esc(phOf(f))}" ${listOf(f).length?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
+    return `<div class="field"><label for="f_${f.id}">${f.label}</label><input id="f_${f.id}" type="text" value="${esc(preOf(f))}" placeholder="${esc(phOf(f))}" ${listOf(f).length?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
   }).join("");
 
   const title=t.title.replace(t.hl,`<span class="hl">${t.hl}</span>`);
@@ -1681,6 +1693,15 @@ function optsOf(f){
 function phOf(f){
   const p = (typeof f.placeholder==="function") ? f.placeholder(B()) : f.placeholder;
   return p||"";
+}
+/* The VALUE, not just the menu. Options and hints have been brand-aware for a while, but
+   every text box still started empty, so the audit asked you to type the address of the
+   business it had just been configured for. A prefill is a default and nothing more: it is
+   editable, it is absent when no profile is loaded, and no tool requires it. */
+function preOf(f){
+  if(!BRAND) return "";
+  const v = (typeof f.prefill==="function") ? f.prefill(B()) : f.prefill;
+  return v?String(v):"";
 }
 function listOf(f){
   const l = (typeof f.list==="function") ? f.list(B()) : f.list;
@@ -1864,6 +1885,7 @@ function renderBrandConfirm(prof,url,firstRun){
      by the next tool. That is an infinite loop from the user's side: every tool they click
      shows them this screen again and they never reach a single output. The read cost a model
      call and it is good, so it is kept. Continue is now a review step, not a commit gate. */
+  if(url && !prof.url) prof.url=url;
   saveBrand(prof); reflectBrand();
   /* CONFIRM, DO NOT CONFIGURE.
      Reading the site already fills these in; the job left for a human is to correct a wrong
@@ -1882,6 +1904,10 @@ function renderBrandConfirm(prof,url,firstRun){
     <div class="card">
       <div class="field span2"><label for="bcName">Company or product name</label>
         <input id="bcName" type="text" value="${esc(prof.name||"")}" autocomplete="off"/></div>
+
+      <div class="field span2"><label for="bcUrl">Your website</label>
+        <input id="bcUrl" type="text" value="${esc(prof.url||url||"")}" autocomplete="off"/>
+        <span class="bc-hint">Kept, so the audit and everything else already knows where you live.</span></div>
 
       <div class="field span2"><label for="bcOff">What you sell</label>
         <input id="bcOff" type="text" value="${esc(list(prof.offerings))}" autocomplete="off"/>
@@ -1906,6 +1932,7 @@ function renderBrandConfirm(prof,url,firstRun){
     const csv=id=>{const el=document.getElementById(id);
       return el?el.value.split(",").map(x=>x.trim()).filter(Boolean):[];};
     prof.name=document.getElementById("bcName").value.trim()||prof.name;
+    prof.url=(document.getElementById("bcUrl")||{}).value?document.getElementById("bcUrl").value.trim():prof.url;
     // A corrected answer must win over the read, or confirming would be theatre.
     const off=csv("bcOff"), aud=csv("bcAud"), gl=csv("bcGoal");
     if(off.length) prof.offerings=off;
@@ -2742,6 +2769,8 @@ function nextMoves(){
     d:"One brief, and the press release, posts, ads and calendar all come back saying the same thing.",go:"campaign"});
   if(has("campaign")&&!has("calendar")) moves.push({t:"Put the campaign on a calendar",
     d:"Four weeks of posts, dated, and they land in your work here.",go:"calendar"});
+  if(BRAND && !BRAND.url) moves.push({t:"Tell Grayrender your website",
+    d:"This profile was set up before the address was kept, so the audit cannot fill it in for you yet. Read your site once and it will.",go:""});
   if(!has("brand")) moves.push({t:"Lock your brand voice",
     d:"Every other tool reads it, so the whole suite stops sounding like eleven different people.",go:"brand"});
   if(has("calendar")&&!has("report")) moves.push({t:"Report on what went out",
