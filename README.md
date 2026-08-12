@@ -30,7 +30,7 @@ constraint drove the whole architecture.
 1. **AI Marketing Audit** — the flagship. Finds a site's key pages, renders and audits each one
    live, and synthesises a director-level cross-page report with a prioritised fix list, exact
    copy-ready replacements, a SERP preview, screenshot evidence crops, and a Print / Save-as-PDF
-   export. About a minute end to end.
+   export. Around 95 seconds end to end, and it needs no setup: paste a URL and go.
 2. **Client Outreach Generator** — a personalised cold outreach email.
 3. **LinkedIn Content Engine** — a thought-leadership post, with an optional generated image.
 4. **Campaign Ad Studio** — Google Ad + LinkedIn Ad + landing-page hero, with live char meters.
@@ -70,6 +70,19 @@ real browser is open, ask it.
 If no render provider is configured the audit degrades to an HTML-only read: layout claims are
 disabled, UX is graded `n/a`, and the report says so.
 
+## Every tool hands over a briefing, not just an asset
+
+The experts are the reason several outputs are short: a cold email is 50 to 125 words, a Google
+headline is 30 characters. Padding those makes them worse. So each tool returns the tight asset
+**and** a briefing beneath it: why it works with the principle named and quoted from your own
+copy, two or three paste-ready alternatives, what to test and the metric it should move, and what
+to verify before it ships. The briefing is a separate bounded call, so it can never time out the
+asset.
+
+Anything you get back can be changed by asking. **Change this** opens a dock where you type what
+you want different, and the revision runs back through the same renderer, so every guard that
+applied to the first draft applies to the rewrite.
+
 ## Truthfulness is enforced in code, not in the prompt
 
 The central lesson of this codebase: **a model ignores a prompt rule maybe 10 to 30 percent of
@@ -95,9 +108,10 @@ npm install
 npm test
 ```
 
-`npm test` runs 165 assertions across two suites: `audit-guards.test.js` (every known false
-claim is blocked, every real finding survives) and `report-render.test.js` (the report renders,
-the print document builds, the evidence is in both).
+`npm test` runs 319 assertions across three suites: `passcode.test.js` (an unauthenticated
+caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
+every real finding survives) and `report-render.test.js` (the report renders, the print document
+builds, the evidence is in both, and every guard holds on the thing a human actually receives).
 
 The frontend is a single `index.html` with no build step. Serve the folder and open it; the
 audit backend needs Netlify Functions, so audits only run against a deployment.

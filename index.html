@@ -309,6 +309,10 @@
   .brief-sec li:last-child{margin-bottom:0}
   .brief-sec p{margin:0;font-size:14px;line-height:1.65;white-space:pre-wrap}
   .brief-wait .brief-sec{display:flex;justify-content:center;padding:22px}
+  .brand-src{margin-top:10px;font-size:13px;color:var(--ink-2)}
+  .brand-src b{color:var(--ink);font-weight:600}
+  .brand-src-a{background:none;border:0;padding:0 0 0 4px;font:inherit;font-size:13px;
+    color:var(--accent);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
   .gen-row{display:flex;align-items:center;gap:14px;margin-top:20px}
   .gen-row .btn-gen{margin-top:0}
   /* ---- Refine dock -------------------------------------------------------
@@ -355,6 +359,11 @@
   .btn-refine:hover{border-color:var(--accent)}
   .btn-refine[hidden]{display:none}
   @media (max-width:900px){
+    .gen-hint{display:none}
+    .brand-chip{min-height:44px}
+    .rf-x{min-width:44px;min-height:44px}
+    .rf-undo{min-height:44px}
+    .btn-refine{min-height:44px}
     .refine-dock.open{position:fixed;inset:auto 0 0 0;width:100%;flex-basis:auto;height:70vh;z-index:60;
       border-left:0;border-top:1px solid var(--border);border-radius:18px 18px 0 0}
   }
@@ -699,7 +708,7 @@
 </header>
 
 <div class="shell">
-  <aside class="sidebar">
+  <aside class="sidebar" role="navigation" aria-label="Tools">
     <div class="nav-label">Marketing Tools</div>
 
     <div class="nav-item active" data-tool="outreach">
@@ -762,7 +771,7 @@
     </div>
     <div class="rf-log" id="rfLog"></div>
     <div class="rf-foot">
-      <textarea id="rfInput" placeholder="What should I change?" autocomplete="off"></textarea>
+      <textarea id="rfInput" aria-label="Describe the change you want" placeholder="What should I change?" autocomplete="off"></textarea>
       <div class="rf-actions">
         <button class="rf-send" id="rfSend">Rewrite it</button>
         <button class="rf-undo" id="rfUndo" title="Go back to the previous version">Undo</button>
@@ -1277,6 +1286,17 @@ function handleLocked(d){
    run one was pure friction in front of the best thing here. An employer will not do extra
    steps to see a demo. Paste a website, get the report. */
 function needsBrand(t){ return !!(t && t.system); }
+/* The dropdowns are filled from whoever is loaded, which is the whole point of the brand
+   engine, but on screen that just looks like a hardcoded list for one industry: load a
+   musician and every menu says albums, and a visitor reasonably concludes this is a music
+   tool. Naming the source turns a confusing list into the feature it actually is. */
+function brandSourceLine(t){
+  if(!BRAND||!BRAND.name) return "";
+  const adaptive=(t.fields||[]).some(f=>typeof f.options==="function"||typeof f.placeholder==="function");
+  if(!adaptive) return "";
+  return `<p class="brand-src">The choices below are written for <b>${esc(BRAND.name)}</b>, read from your website.
+    <button type="button" class="brand-src-a" id="brandSrcSwap">Use a different business</button></p>`;
+}
 function renderTool(){
   try{window.scrollTo(0,0);}catch(e){}
   /* The sidebar follows whatever we are about to render, always. It used to be set only by
@@ -1290,13 +1310,13 @@ function renderTool(){
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
     if(f.type==="select"){
-      return `<div class="field"><label>${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
+      return `<div class="field"><label for="f_${f.id}">${f.label}</label><select id="f_${f.id}">${optsOf(f).map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__custom__">Custom (type your own)…</option></select><input id="c_${f.id}" class="custom-input" type="text" placeholder="Type your own ${f.label.toLowerCase()}…" autocomplete="off" hidden/></div>`;
     }
     if(f.type==="textarea"){
-      return `<div class="field span2"><label>${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}"></textarea></div>`;
+      return `<div class="field span2"><label for="f_${f.id}">${f.label}</label><textarea id="f_${f.id}" class="ta" rows="7" placeholder="${esc(phOf(f))}"></textarea></div>`;
     }
     const fl=listOf(f); if(fl.length){dl=`<datalist id="dl_${f.id}">${fl.map(o=>`<option value="${esc(o)}">`).join("")}</datalist>`;}
-    return `<div class="field"><label>${f.label}</label><input id="f_${f.id}" type="text" placeholder="${esc(phOf(f))}" ${listOf(f).length?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
+    return `<div class="field"><label for="f_${f.id}">${f.label}</label><input id="f_${f.id}" type="text" placeholder="${esc(phOf(f))}" ${listOf(f).length?`list="dl_${f.id}"`:""} autocomplete="off"/></div>`;
   }).join("");
 
   const title=t.title.replace(t.hl,`<span class="hl">${t.hl}</span>`);
@@ -1304,6 +1324,7 @@ function renderTool(){
     <div class="tool-head">
       <h1>${title}</h1>
       <p>${t.blurb}</p>
+      ${brandSourceLine(t)}
     </div>
     <div class="card">
       <div class="grid">${fieldsHtml}</div>
@@ -1314,12 +1335,14 @@ function renderTool(){
         <span class="gen-hint"><kbd>${MODKEY}</kbd> + <kbd>Enter</kbd></span>
       </div>
     </div>
-    <div id="outArea"></div>
+    <div id="outArea" aria-live="polite" aria-atomic="false"></div>
   `;
   document.getElementById("genBtn").addEventListener("click",generate);
   // Switching tools abandons the draft, so the dock must not offer to edit a stale one.
   REFINE=null; refineOpen(false);
   document.getElementById("refineBtn").addEventListener("click",()=>refineOpen(true));
+  const bsw=document.getElementById("brandSrcSwap");
+  if(bsw) bsw.addEventListener("click",()=>renderBrandSetup());
   restoreOutput();   // put this tool's last result back, rather than losing it to a sidebar click
   // Custom-dropdown: reveal a text box when "Custom (type your own)" is selected
   t.fields.forEach(f=>{
@@ -1388,7 +1411,7 @@ function renderBrandSetup(msg){
         <span class="gen-hint"><kbd>${MODKEY}</kbd> + <kbd>Enter</kbd></span>
       </div>
     </div>
-    <div id="outArea"></div>`;
+    <div id="outArea" aria-live="polite" aria-atomic="false"></div>`;
   const go=document.getElementById("bwGo");
   go.addEventListener("click",runBrandSetup);
   const u=document.getElementById("bwUrl");
