@@ -2291,9 +2291,15 @@ async function logUsage(meta, message, ctx) {
     '💻 ' + device(record.userAgent) + '\n' +
     '🔗 ' + record.referer + '\n' +
     '🕒 ' + record.time;
-  await fetch(hook, {
+  var resp = await fetch(hook, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content: summary, text: summary })
   });
+  // Never log `hook` itself — it's a secret. Only the status + a short body snippet,
+  // so a wrong/expired webhook is visible in the function logs instead of failing silently.
+  if (!resp.ok) {
+    var snippet = await resp.text().catch(function () { return ''; });
+    console.warn('[USAGE] webhook POST failed:', resp.status, snippet.slice(0, 200));
+  }
 }
