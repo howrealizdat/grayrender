@@ -1,6 +1,13 @@
+# Publish ONLY the page, never the repo. With publish = "." every file here went to the
+# web — the test suite, DOCUMENTATION.md, README.md, package.json were all fetchable on a
+# site whose whole premise is that it is by invitation. It also put test fixtures in the
+# deployable output, which is how a hardcoded passcode in a test once reached the secret
+# scanner. The page is self-contained (one index.html, data: favicon, functions called over
+# /.netlify/functions), so staging it alone costs nothing and removes the whole surface.
 [build]
+  command = "rm -rf _site && mkdir -p _site && cp index.html _site/"
   functions = "netlify/functions"
-  publish = "."
+  publish = "_site"
 
 [build.environment]
   NODE_VERSION = "20"
