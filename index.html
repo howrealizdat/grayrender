@@ -1232,6 +1232,30 @@
     .fe-when{margin-left:0}
     .fe-plan-items li{padding-left:32px}
   }
+  /* where a real stack takes over */
+  .fe-ho .wk-head h2{font-size:19px}
+  .fe-hox{padding:16px 0;border-top:1px solid var(--border)}
+  .fe-hox:first-child{border-top:0;padding-top:0}
+  .fe-hoh{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:11px}
+  .fe-hoh b{font-family:var(--display);font-size:20px;font-weight:500}
+  .fe-hoh span{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+  .fe-hor{margin-bottom:10px}
+  .fe-hor>span{display:block;font-size:10px;font-weight:700;letter-spacing:1.3px;
+    text-transform:uppercase;color:var(--ink-2);margin-bottom:4px}
+  .fe-hor>p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+  .fe-hocue{margin-top:12px;padding:14px 17px;border-radius:10px;background:rgba(138,109,59,.09);
+    border:1px solid rgba(138,109,59,.32);border-left:3px solid var(--accent);
+    font-size:15px;line-height:1.58;font-weight:600;color:var(--ink)}
+  .fe-hocue span{display:block;font-size:9.5px;font-weight:700;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+  .fe-holink{display:inline-flex;align-items:center;gap:7px;margin-top:8px;min-height:44px;
+    font-size:12.5px;font-weight:600;color:var(--accent-dark);text-decoration:none}
+  .fe-holink:hover{text-decoration:underline}
+  .fe-holink svg{flex-shrink:0}
+  .fe-hostep{margin-left:auto;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+    color:var(--ink-2);font-weight:600;white-space:nowrap}
+  .fe-honest{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
+    font-size:12.5px;line-height:1.6;color:var(--amber)}
 </style>
 </head>
 <body>
@@ -6826,6 +6850,8 @@ function renderFanReq(){
         be simulated honestly, and pretending otherwise would be the one thing worse than not building it.</p>
       </div>
     </div>`;
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fanreq"));
 }
 
 /* ------------------------------------------------------------------ SEGMENT --- */
@@ -6889,6 +6915,8 @@ function renderFanSeg(){
       </div>
     </div>`;
   feWireSeg();
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fanseg"));
 }
 function feRuleRow(r,i){
   const f=FAN_FIELDS[r.field]||{label:r.field,type:"text"};
@@ -6977,6 +7005,8 @@ function renderFanBuild(){
   document.querySelectorAll("[data-fever]").forEach(b=>b.addEventListener("click",()=>{FE.ver=+b.dataset.fever;feSave();renderFanBuild();}));
   const fs=document.getElementById("feFan");
   if(fs) fs.addEventListener("change",()=>{FE.fanId=fs.value;renderFanBuild();});
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fanbuild"));
 }
 function fePreview(tpl,f,seg){
   const risk=tokenRisk((tpl.subject||"")+" "+(tpl.html||"")+" "+(tpl.text||"")+" "+(tpl.title||"")+" "+(tpl.body||""),seg.people);
@@ -7078,6 +7108,8 @@ function renderFanQa(){
   document.querySelectorAll("[data-feqav]").forEach(b=>b.addEventListener("click",()=>{FE.ver=+b.dataset.feqav;feSave();renderFanQa();}));
   const fb=document.getElementById("feFile");
   if(fb) fb.addEventListener("click",()=>feFileFindings(seg));
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fanqa"));
 }
 /* The findings become ordinary tracked work, through the same door audit findings use.
    That is the seam that turns this from a demo screen into part of the product. */
@@ -7155,6 +7187,8 @@ function renderFanDeploy(){
   document.querySelectorAll("[data-febirg]").forEach(b=>b.addEventListener("click",()=>{
     FE.birg=b.dataset.febirg; feSave(); renderFanDeploy();
   }));
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fandeploy"));
 }
 
 /* ------------------------------------------------------------------ MEASURE --- */
@@ -7262,6 +7296,8 @@ function renderFanMeasure(){
   const ex=document.getElementById("feAbExp");
   if(ex) ex.addEventListener("input",()=>{FE.ab.exposedPct=Number(ex.value)/100;renderFanMeasure();
     const el=document.getElementById("feAbExp"); if(el){el.focus();}});
+  /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  main.insertAdjacentHTML("beforeend",feHandoff("fanmeasure"));
 }
 
 /* ------------------------------------------------- how to read each screen ---
@@ -7623,6 +7659,21 @@ function renderFanPlan(){
     </div>
 
     <div class="card wk-card">
+      <div class="wk-head"><h2>Where a real stack takes over</h2><span class="wk-count">${allHandoffs().length} handovers</span></div>
+      <div class="fe-body">
+        <p class="fe-note">The job description names tools this build does not attempt. Leaving them unmentioned would be the
+        wrong kind of quiet, because the question worth answering is not whether somebody has built one of these, it is whether
+        they know what each is FOR and where in this process it takes over. Each is listed against the step it would take over from.</p>
+        ${allHandoffs().map(x=>`<div class="fe-hox">
+          <div class="fe-hoh"><b>${esc(x.tool)}</b><span>${esc(x.role)}</span><span class="fe-hostep">from step ${Object.keys(FAN_GUIDE).indexOf(x.step)+1}</span></div>
+          <div class="fe-hocue"><span>Use it here</span>${esc(x.cue)}</div>
+          ${x.url?`<a class="fe-holink" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.urlLabel)}</a>`:""}
+        </div>`).join("")}
+        <div class="fe-honest">${esc(HANDOFF_HONESTY)}</div>
+      </div>
+    </div>
+
+    <div class="card wk-card">
       <div class="wk-head"><h2>What this cannot tell you</h2></div>
       <div class="fe-body">
         <ul class="fe-unknowns">
@@ -7689,12 +7740,111 @@ function planText(P){
   L.push("  "+P.penetration.verdict);
   L.push("");
   if(P.feasibility){ L.push("EXPERIMENT FEASIBILITY (Kohavi)"); L.push("  "+P.feasibility.verdict); L.push(""); }
+  L.push("WHERE A REAL STACK TAKES OVER");
+  allHandoffs().forEach(x=>{
+    L.push("  " + x.tool + " (" + x.role + ")");
+    L.push("     " + x.cue);
+    if(x.url) L.push("     " + x.url);
+  });
+  L.push("  " + HANDOFF_HONESTY);
+  L.push("");
   L.push("WHAT THIS CANNOT TELL YOU");
   P.unknowns.forEach(u=>L.push("  - "+u[0]+". "+u[1]));
   L.push("");
   L.push("HELD TO");
   FAN_STANDARDS.forEach(s=>L.push("  - "+s.who+". "+s.work));
   return L.join("\n");
+}
+
+/* --------------------------------------------- where a real stack takes over ---
+   The job description names tools this build does not attempt: a customer data
+   platform, a journey orchestrator, a cross-channel analytics product, an enterprise
+   send platform, an open-time personalization service and an SMS platform. Leaving them
+   unmentioned would be the wrong kind of quiet, because the interesting question is not
+   "did you build one of these" but "do you know what each of them is actually FOR, and
+   where in this process it would take over".
+
+   SO EACH SCREEN NAMES ITS OWN SUCCESSOR. What the platform owns, what this build does
+   not do, and the specific point at which the work would hand over.
+
+   THE LINE THAT MATTERS: knowing where a tool belongs is not the same as having operated
+   it, and this section says so on every screen it appears on. Edmund has not run any of
+   these in production. That was volunteered in writing before he was submitted, and it
+   stays volunteered here. */
+const HANDOFF_HONESTY =
+  "Naming where a tool belongs is not a claim to have operated it. I have not run this in "
++ "production. This is a map of the landscape and of what this build deliberately stops short of.";
+
+const FAN_HANDOFFS={
+  fanreq:[{
+    tool:"Adobe Experience Platform", url:"https://developer.adobe.com/experience-platform-apis/", urlLabel:"Experience Platform APIs", vendor:"Adobe", role:"Customer data platform",
+    owns:"Collects and standardises customer data from every system into one schema, resolves identities across them, and holds the unified profile the rest of the stack reads from.",
+    gap:"This build has one fan per record because it generates them that way. A real fan base has the same person three times over, across ticketing, retail and the app, and merging them is most of the work.",
+    cue:"This is where Experience Platform would take over: before any of this is trustworthy, the audience of record has to be built from an identity graph rather than assumed to be one."
+  }],
+  fanseg:[{
+    tool:"Adobe Real-Time CDP", url:"https://developer.adobe.com/experience-platform-apis/", urlLabel:"Segmentation and profile APIs", vendor:"Adobe", role:"Audience building on the unified profile",
+    owns:"Builds and activates audiences from the unified profile, keeps them current as behaviour arrives, and pushes them to the channels that will use them.",
+    gap:"The segment here evaluates rules against a static snapshot. It has no streaming behaviour, no membership that changes as somebody buys a ticket at half time, and nowhere to publish an audience to.",
+    cue:"This would be the point to move segmentation into Real-Time CDP, and to break the audience down further by attributes this dataset does not carry at all: web and app behaviour, offline purchases, and consent captured somewhere other than the CRM."
+  }],
+  fanbuild:[{
+    tool:"Movable Ink", url:"https://movableink.com/", urlLabel:"movableink.com", vendor:"Movable Ink", role:"Open-time personalization",
+    owns:"Resolves content at the moment the message is opened rather than when it is sent, so a countdown, a price or a remaining-seat figure is true when it is read.",
+    gap:"This build demonstrates the difference between send-time and open-time resolution, and computes both. It does not actually serve content at open, which needs a rendering service sitting behind the image request.",
+    cue:"This is exactly where Movable Ink earns its place: the two panels on this screen show why open-time matters, and a real deployment would hand that resolution to it rather than freezing the value into the send."
+  }],
+  fanqa:[{
+    tool:"Litmus or Email on Acid", url:"https://docs.litmus.com/", urlLabel:"Litmus docs", vendor:"", role:"Client rendering preview",
+    owns:"Renders a template across dozens of real mail clients and screenshots each one, catching the layout failures that only appear in a specific version of a specific client.",
+    gap:"This harness reads the code. It can tell you the contrast ratio is 2.81:1 and that a layout table is announced as data, and it cannot tell you that the padding collapses in one desktop client.",
+    cue:"Worth pairing rather than replacing. The code checks here are the ones a rendering service does not do, and the rendering checks are the ones no static analysis can do."
+  }],
+  fandeploy:[{
+    tool:"Adobe Journey Optimizer", url:"https://developer.adobe.com/journey-optimizer-apis/", urlLabel:"Journey Optimizer APIs", vendor:"Adobe", role:"Journey orchestration and decisioning",
+    owns:"Runs journeys across email, SMS, push, in-app and web from one canvas, with decisioning choosing the next best offer per person in real time rather than a fixed sequence.",
+    gap:"The journey here is a fixed sequence with one audience filter per node. It cannot react to something that happens between steps, and it chooses nothing: every fan gets the same message at the same point.",
+    cue:"This is where Journey Optimizer would take over, and where the interesting break-down starts: the same four sends, but branched on real-time behaviour and with the offer itself decided per person instead of written into the node."
+  },{
+    tool:"Epsilon PeopleCloud Messaging", url:"https://www.epsilon.com/us/products-and-services/epsilon-peoplecloud", urlLabel:"Epsilon PeopleCloud", vendor:"Epsilon", role:"Enterprise send platform",
+    owns:"Actually delivers across email, SMS, push and in-app at volume, with identity resolution, throttling, sending reputation and inbox placement behind it.",
+    gap:"Nothing here sends anything. There is no ESP, no sending reputation, no IP warmup and no deliverability. A campaign that is perfect on these screens can still land in spam.",
+    cue:"This is the handover point for execution. Everything up to here is who, what and when; from here it is whether it arrives, which is a different discipline entirely."
+  },{
+    tool:"Attentive", url:"https://docs.attentive.com/", urlLabel:"Attentive API docs", vendor:"Attentive", role:"SMS growth and two-way messaging",
+    owns:"Runs SMS as its own programme: subscriber acquisition, compliant opt-in capture, two-way conversation and carrier relationships.",
+    gap:"SMS is modelled here as a channel with consent, quiet hours and a segment cap. It has no way to GROW the subscriber list, and on this audience 721 of 1,253 cannot be reached for exactly that reason.",
+    cue:"The largest single suppression reason on this campaign is missing SMS consent. That is not a targeting problem, it is a subscriber acquisition problem, and it is the problem Attentive exists to solve."
+  }],
+  fanmeasure:[{
+    tool:"Adobe Customer Journey Analytics", url:"https://developer.adobe.com/cja-apis/docs/", urlLabel:"Customer Journey Analytics APIs", vendor:"Adobe", role:"Cross-channel analysis",
+    owns:"Analyses the whole journey across channels including offline ones, joining web, app, CRM, call centre and point-of-sale into one view, with attribution across them.",
+    gap:"Measurement here stops at what the campaign itself did. It cannot see a fan who ignored the email, walked up to the box office and renewed in person, which on a season ticket is a very common way to convert.",
+    cue:"This is where Customer Journey Analytics would take over, and it is the answer to the gap EXL names on its own site: limited visibility into campaign effectiveness. The holdout in the plan is the cheap version of this; CJA is the real one."
+  }]
+};
+function feHandoff(key){
+  const list=FAN_HANDOFFS[key]; if(!list||!list.length) return "";
+  return `<div class="card wk-card fe-ho">
+    <div class="wk-head"><h2>Where a real stack takes over</h2>
+      <span class="wk-count">${list.length===1?"1 handover":list.length+" handovers"}</span></div>
+    <div class="fe-body">
+      ${list.map(x=>`<div class="fe-hox">
+        <div class="fe-hoh"><b>${esc(x.tool)}</b><span>${esc(x.role)}</span></div>
+        <div class="fe-hor"><span>What it owns</span><p>${esc(x.owns)}</p></div>
+        <div class="fe-hor"><span>What this build does not do</span><p>${esc(x.gap)}</p></div>
+        <div class="fe-hocue"><span>Use it here</span>${esc(x.cue)}</div>
+        ${x.url?`<a class="fe-holink" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.urlLabel)}<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>`:""}
+      </div>`).join("")}
+      <div class="fe-honest">${esc(HANDOFF_HONESTY)}</div>
+    </div>
+  </div>`;
+}
+/* Every handover in one list, for the plan. */
+function allHandoffs(){
+  const out=[];
+  Object.keys(FAN_HANDOFFS).forEach(k=>FAN_HANDOFFS[k].forEach(x=>out.push(Object.assign({step:k},x))));
+  return out;
 }
 
 const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure,fanplan:renderFanPlan};

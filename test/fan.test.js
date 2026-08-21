@@ -43,7 +43,7 @@ const win = dom.window;
    through the page's own scope rather than guessed at from the outside. */
 win.eval('window.__fx={FAN_N,FREQ_CAP,FAN_TODAY,FAN_CLUB,FAN_SEED,FAN_SEGMENT_RULES,FAN_JOURNEY,'
        + 'FAN_TOKENS,SEG_OPS,FAN_FIELDS,EMAIL_V1,EMAIL_V2,SMS_V1,SMS_V2,PUSH_V1,PUSH_V2,FAN_BRIEF,'
-       + 'FAN_FOCUS,FAN_STANDARDS,FAN_GUIDE,BIRG};');
+       + 'FAN_FOCUS,FAN_STANDARDS,FAN_GUIDE,BIRG,FAN_HANDOFFS,HANDOFF_HONESTY};');
 const FX = win.__fx;
 
 /* The cheapest assertion in the file, and it catches the worst failure. A throw anywhere
@@ -665,6 +665,56 @@ check('it carries the counterweight and the boundary',
 check('it names the thinking it was held to', /HELD TO/.test(txt) && /Mullin/.test(txt) && /Kohavi/.test(txt));
 check('it is long enough to be a real document (' + txt.length + ' chars)', txt.length > 4000);
 
+/* --------------------------------------------------- where a stack takes over */
+console.log('\nEACH STEP NAMES ITS OWN SUCCESSOR');
+const HO = win.eval('allHandoffs()');
+check('eight handovers are carried', HO.length === 8, String(HO.length));
+check('each names a tool, its role, what it owns, the gap, and where to use it',
+  HO.every(x => x.tool && x.role && x.owns.length > 60 && x.gap.length > 60 && x.cue.length > 60));
+check('every handover is attached to a step that exists',
+  HO.every(x => !!FX.FAN_GUIDE[x.step]), HO.filter(x => !FX.FAN_GUIDE[x.step]).map(x => x.step).join(','));
+check('the tools the job description actually names are all covered',
+  ['Adobe Experience Platform', 'Adobe Journey Optimizer', 'Adobe Customer Journey Analytics',
+   'Epsilon PeopleCloud Messaging', 'Movable Ink', 'Attentive']
+    .every(n => HO.some(x => x.tool === n)));
+check('deployment carries three, because execution is where the stack is thickest',
+  HO.filter(x => x.step === 'fandeploy').length === 3);
+/* A link that 404s is worse than no link, so only URLs that answered from here went in.
+   developers.movableink.com does not resolve at all, which is why it is absent. */
+check('every link is https and points somewhere that was checked',
+  HO.filter(x => x.url).every(x => /^https:\/\//.test(x.url)));
+check('and every one carries a label rather than a bare URL',
+  HO.filter(x => x.url).every(x => x.urlLabel && x.urlLabel.length > 3));
+check('no link points at a host that does not resolve',
+  !HO.some(x => /developers\.movableink\.com/.test(x.url || '')));
+['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure'].forEach(id => {
+  win.goTool(id);
+  const m = win.document.getElementById('main');
+  check(id + ' shows its successor, with the honesty line',
+    m.querySelectorAll('.fe-hox').length === FX.FAN_HANDOFFS[id].length && !!m.querySelector('.fe-honest'));
+  check(id + ' opens outbound links safely',
+    Array.prototype.slice.call(m.querySelectorAll('.fe-holink'))
+      .every(a => a.target === '_blank' && /noopener/.test(a.rel)));
+});
+/* The segment screen re-renders itself on every rule change; the card must survive that. */
+win.goTool('fanseg');
+win.document.querySelector('.fe-rop').dispatchEvent(new win.Event('change', { bubbles: true }));
+check('and it survives a screen re-rendering itself',
+  win.document.querySelectorAll('#main .fe-hox').length === 1);
+win.goTool('fanplan');
+check('the plan collects all eight in one place',
+  win.document.querySelectorAll('#main .fe-hox').length === 8);
+const ptxt = win.planText(win.eval('operatingPlan()'));
+check('and the plain-text export carries them, since that is what reaches a ticket',
+  /WHERE A REAL STACK TAKES OVER/.test(ptxt) && HO.every(x => ptxt.indexOf(x.tool) >= 0));
+check('with the honesty line in the export too', /not a claim to have operated it/.test(ptxt));
+
+/* The email template contains its own <style> block, so a blind replace on </style> put the
+   app's stylesheet inside the creative. Caught by counting; asserted so it cannot return. */
+console.log('\nAND THE APP STYLESHEET STAYS OUT OF THE EMAIL');
+check('the creative carries no app CSS', !/fe-hocue|fe-hox|wk-card/.test(FX.EMAIL_V2.html));
+check('it carries only its own two blocks', (FX.EMAIL_V2.html.match(/<style>/g) || []).length === 1);
+
 /* ---------------------------------------------------------------- hygiene */
 console.log('\nNOTHING IN HERE SHOULD EMBARRASS A PUBLIC REPO');
 /* The real passcode is never written down here. This asserts against a decoy, and then
@@ -677,10 +727,24 @@ check('and no live-looking API key', !/sk-[A-Za-z0-9_-]{16,}/.test(fanBlock));
 check('the club in the data is fictional', FX.FAN_CLUB === 'Harborline FC');
 /* Adobe IS named in this block, and must be: the honesty statement says plainly that this
    is not their platform. What must never appear is a vendor named as if it were experience. */
-check('no martech vendor is named except in the statement of what this is not',
-  !/epsilon|movable ink|attentive|braze|salesforce marketing cloud/i.test(fanBlock));
-check('and the one vendor named is named only to disclaim it',
+check('the honesty statement is still there, in those words',
   /not Adobe Experience Platform/.test(fanBlock));
+/* Vendors ARE named now, on purpose. The rule that has to hold is that naming one is never
+   allowed to read as having operated it. */
+/* Asserted against the VALUE, not the source: the constant is concatenated across two
+   lines, so the sentence is never contiguous in the file even though it always is on screen. */
+check('every handover carries the line separating knowing from having operated',
+  /not a claim to have operated it/.test(FX.HANDOFF_HONESTY)
+  && /have not run this in production/.test(FX.HANDOFF_HONESTY));
+check('and that line is on every screen that names a tool',
+  ['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure', 'fanplan'].every(id => {
+    win.goTool(id);
+    const txt = win.document.getElementById('main').textContent || '';
+    return win.document.querySelectorAll('#main .fe-hox').length === 0
+      || /not a claim to have operated it/.test(txt);
+  }));
+check('and no handover claims experience of the tool it names',
+  win.eval('allHandoffs()').every(x => !/\bI (have )?(ran|run|operated|managed|built) (it|this)\b/i.test(x.cue + x.owns + x.gap)));
 check('sample email addresses use the reserved example.com', A.slice(0, 200).every(f => /@example\.com$/.test(f.email)));
 check('every guardrail in the brief is a sentence somebody could audit',
   FX.FAN_BRIEF.guardrails.length >= 4 && FX.FAN_BRIEF.guardrails.every(g => g.length > 40));

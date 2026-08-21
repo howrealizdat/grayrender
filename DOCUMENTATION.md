@@ -653,7 +653,7 @@ anything needing a model call must be tested against the deployment.
 npm test
 ```
 
-855 assertions across five suites. The rule they enforce is not "the output looks right" but
+883 assertions across five suites. The rule they enforce is not "the output looks right" but
 **"the product cannot make a claim it did not earn."**
 
 | Suite | What it proves |
@@ -790,7 +790,32 @@ At a fixed horizon it sits on its nominal 5%; stopping at the first significant 
 about 15% at five looks and 21% at ten — the textbook sequential-testing result, reproduced in
 the browser from a fixed seed.
 
-### 15.8 The operating plan
+### 15.8 Where a real stack takes over
+
+The job description names tools this build does not attempt. Leaving them unmentioned would be the
+wrong kind of quiet: the question worth answering is not whether somebody has built a CDP, it is
+whether they know what one is *for* and where in the process it takes over. So `FAN_HANDOFFS` puts
+a successor at the foot of the screen it would take over from, each with what it owns, what this
+build does not do, and the specific point of handover.
+
+| Step | Takes over | Because |
+|------|-----------|---------|
+| 1. Request | Adobe Experience Platform | One fan is one record here. A real fan base has the same person across ticketing, retail and the app, and the identity graph is the foundation everything else reads from |
+| 2. Segment | Adobe Real-Time CDP | Rules here run against a static snapshot, with no streaming behaviour and nowhere to publish an audience to |
+| 3. Build | Movable Ink | The two panels show why open-time resolution matters; actually serving content at open needs a rendering service behind the image request |
+| 4. QA | Litmus or Email on Acid | Pairs rather than replaces: code checks are what a rendering service does not do, and client screenshots are what no static analysis can do |
+| 5. Deploy | Journey Optimizer, Epsilon PeopleCloud Messaging, Attentive | Orchestration with real decisioning; actual delivery and deliverability; and SMS subscriber growth, which is the largest single suppression reason on this campaign |
+| 6. Measure | Adobe Customer Journey Analytics | Measurement stops at what the campaign did. It cannot see the fan who ignored the email and renewed at the box office |
+
+Links point at API documentation rather than marketing pages, since the reason to record them is to
+wire them up later. Every URL was checked; `developers.movableink.com` is deliberately absent
+because it does not resolve at all.
+
+**The line that makes this safe to say** rides on every one of them: *naming where a tool belongs is
+not a claim to have operated it.* That is enforced by `HANDOFF_HONESTY`, rendered on every screen
+that names a tool and asserted in the suite.
+
+### 15.9 The operating plan
 
 The seventh screen, and the reason the other six are worth walking through. `operatingPlan()`
 returns six phases — day one, week one, 30, 60, 90 and continuous — of 22 items, each with what to
