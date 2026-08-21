@@ -291,6 +291,62 @@ check('so the corrected draft is cleared to send', win.qaBlocks(v2) === false);
 check('a token that IS covered by a fallback is reported as a pass, not silence',
   v2.some(x => x.severity === 'pass' && /fallback covers/.test(x.what)));
 
+/* The creative itself. An image-built email is the commonest accessibility failure there
+   is, so the corrected draft is built entirely from live text and table cells: nothing to
+   export, nothing to 404, and it reads the same with images switched off. */
+console.log('\nTHE CORRECTED CREATIVE IS BUILT FROM TEXT, NOT PICTURES');
+check('it carries no bitmap at all', (FX.EMAIL_V2.html.match(/<img/gi) || []).length === 0);
+check('so it cannot break when images are blocked, and there is nothing to re-cut',
+  !/cdn\.|\.png|\.jpg|\.gif/i.test(FX.EMAIL_V2.html));
+check('the offer, the price and the call to action are all live text',
+  /Renew my season ticket/.test(FX.EMAIL_V2.html) && /renewal_price/.test(FX.EMAIL_V2.html));
+check('the button is a table cell with a background, not an image of a button',
+  /bgcolor="#1B5E4B"/.test(FX.EMAIL_V2.html) && /<a href="https:\/\/harborlinefc/.test(FX.EMAIL_V2.html));
+check('every layout table declares itself presentational',
+  (FX.EMAIL_V2.html.match(/<table/gi) || []).length === (FX.EMAIL_V2.html.match(/role="presentation"/gi) || []).length);
+check('and there is enough live text that the image-only rule could never fire',
+  (win.qaEmail(FX.EMAIL_V2, people)).every(x => !/carried almost entirely by images/.test(x.what)));
+
+/* A 600px table does not shrink on its own: in auto table layout the stated width acts as a
+   floor, so this email sat at 632px at every viewport and overflowed on every phone. jsdom
+   has no layout engine, so the widths themselves are checked in a real browser; what is
+   asserted here is that the rules which make it responsive have not been deleted. */
+check('the creative carries the media query that lets it shrink',
+  /@media only screen and \(max-width:620px\)/.test(FX.EMAIL_V2.html));
+check('and overrides the stated width, which inline styles would otherwise win',
+  /\.shell\{ width:100% !important/.test(FX.EMAIL_V2.html));
+check('the two-up offer panel stacks rather than forcing its own floor',
+  /\.stack\{[^}]*display:block !important/.test(FX.EMAIL_V2.html));
+check('and stacks with border-box, or its padding lands outside the 100% and scrolls sideways',
+  /\.stack\{[^}]*box-sizing:border-box !important/.test(FX.EMAIL_V2.html));
+check('the body margin every client supplies is reset',
+  /html,body\{ margin:0 !important/.test(FX.EMAIL_V2.html));
+check('the hooks the media query targets are actually on the markup',
+  (FX.EMAIL_V2.html.match(/class="pad"/g) || []).length >= 5
+  && (FX.EMAIL_V2.html.match(/class="stack"/g) || []).length === 2
+  && /class="shell"/.test(FX.EMAIL_V2.html));
+
+/* A preheader built the standard way is display:none. Measuring its contrast reported a
+   1:1 failure on correct technique, and a harness that cries wolf is one people stop
+   reading. Text that is not rendered is also not in the accessibility tree. */
+console.log('\nBUT IT DOES NOT CRY WOLF ON CORRECT TECHNIQUE');
+check('a display:none preheader is not reported as a contrast failure',
+  win.qaCounts(win.qaEmail(FX.EMAIL_V2, people)).fail === 0,
+  JSON.stringify(win.qaEmail(FX.EMAIL_V2, people).filter(x => x.severity === 'fail')));
+check('hiddenFromRender sees a hidden element', win.hiddenFromRender(
+  new win.DOMParser().parseFromString('<div style="display:none"><p>x</p></div>', 'text/html').querySelector('p')) === true);
+check('and does not hide a visible one', win.hiddenFromRender(
+  new win.DOMParser().parseFromString('<div><p>x</p></div>', 'text/html').querySelector('p')) === false);
+/* The important half: this must not become a way to smuggle invisible text past the check. */
+const sneaky = { channel: 'email', subject: 'x', preheader: 'y', html:
+  '<table role="presentation" lang="en"><tr><td style="background-color:#ffffff">'
+  + '<h1 style="color:#111111">A real heading with enough live text in it to matter</h1>'
+  + '<p style="color:#fefefe">text hidden from the reader by colour alone</p>'
+  + '<a href="https://x.example.com/?utm_source=e">Renew now</a>'
+  + '<p>Unsubscribe. 1200 Riverside Way</p></td></tr></table>' };
+check('white-on-white text that IS rendered is still caught',
+  win.qaEmail(sneaky, people).some(x => /Contrast is/.test(x.what)));
+
 console.log('\nAND CATCHES THE CHANNEL-SPECIFIC ONES');
 const sms1 = win.qaSms(FX.SMS_V1, people), sms2 = win.qaSms(FX.SMS_V2, people);
 check('SMS without a STOP instruction fails on TCPA', has(sms1, /TCPA.*STOP/));

@@ -6031,6 +6031,15 @@ function styleProp(el,prop){
   const m=s.match(new RegExp("(?:^|;)\\s*"+prop+"\\s*:\\s*([^;]+)","i"));
   return m?m[1].trim():null;
 }
+function hiddenFromRender(el){
+  let n=el;
+  while(n&&n.getAttribute){
+    const d=styleProp(n,"display");
+    if(d&&/^\s*none\b/i.test(d)) return true;
+    n=n.parentElement;
+  }
+  return false;
+}
 function inheritedBg(el){
   let n=el;
   while(n&&n.getAttribute){
@@ -6135,6 +6144,11 @@ function qaEmail(tpl,people){
   Array.prototype.slice.call(body.querySelectorAll("*")).forEach(el=>{
     const fg=styleProp(el,"color"); if(!fg||!hexOf(fg)) return;
     const own=(el.textContent||"").trim(); if(!own) return;
+    /* Text that is not rendered has no contrast to measure, and display:none also removes it
+       from the accessibility tree, so no screen reader announces it either. Without this, a
+       preheader built the standard way is reported as a 1:1 failure on every email anybody
+       writes, and a harness that cries wolf on correct technique is one people stop reading. */
+    if(hiddenFromRender(el)) return;
     const bg=inheritedBg(el);
     const ratio=contrastRatio(hexOf(fg),bg); if(ratio===null) return;
     const sizeStr=styleProp(el,"font-size")||"";
@@ -6490,88 +6504,139 @@ const EMAIL_V1={
   </td></tr>
 </table>`
 };
-/* What QA turns it into. Same message, same offer, every finding closed. */
+/* What QA turns it into. Same message, same offer, every finding closed.
+
+   AND BUILT AS A REAL CREATIVE, WITH NO BITMAP AT ALL. The instinct is usually to lay an
+   email out in Photoshop and slice it, and that instinct is exactly what the harness
+   catches: an image-only email is invisible to a screen reader, invisible with images
+   blocked (the default in several clients), unsearchable, and it cannot reflow on a phone.
+   So the crest, the hero and the fixture list here are type and table cells. Nothing to
+   export, nothing to 404, nothing to re-cut when the price changes, and it renders
+   identically with images switched off. That is not the cheap version of an email
+   template. It is the correct one, and it is the reason a Photoshop step is not needed. */
 const EMAIL_V2={
   channel:"email", version:"Draft 2, after QA",
   subject:"{{first_name}}, your seat is still here",
   preheader:"Renew before 21 September and your price does not move.",
   html:
-`<table role="presentation" lang="en" width="100%" style="background-color:#ffffff">
-  <tr><td align="center">
-    <img src="https://cdn.example.com/hero-renew-2026.png" width="600"
-         alt="Harborline FC supporters in the north stand at the 2026 home opener" />
-    <h1 style="font-family:Georgia,serif;font-size:28px;color:#111111">Come back for 2026</h1>
-    <h2 style="font-size:15px;color:#4a4a4a">Your seat in {{seat_section | your usual block}} is still yours</h2>
-    <p style="font-size:15px;color:#3d3d3d">
-      {{first_name}}, it has been {{seasons_held | a few}} seasons since you were with us, and
-      {{favorite_player | the squad}} is having the season of a career. Renew before
-      21 September and your price stays at {{renewal_price | last season's price}}.
-    </p>
-    <p><a href="https://harborlinefc.example.com/renew?utm_source=email&utm_medium=crm&utm_campaign=reactivation_2026"
-          style="color:#6e5530">Renew my season ticket</a></p>
-    <p style="font-size:12px;color:#4a4a4a">
-      Harborline FC, 1200 Riverside Way, Riverton.
-      <a href="https://harborlinefc.example.com/unsubscribe?utm_source=email&utm_medium=crm&utm_campaign=reactivation_2026"
-         style="color:#4a4a4a">Unsubscribe from Harborline FC marketing</a>
-    </p>
-  </td></tr>
+`<table role="presentation" lang="en" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#EEF0EF;margin:0;padding:0">
+ <tr><td align="center" style="padding:26px 12px">
+
+  <!-- preheader, present for the inbox preview and hidden in the body -->
+  <div style="display:none;max-height:0;overflow:hidden">Renew before 21 September and your price does not move.</div>
+
+  <table role="presentation" class="shell" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background-color:#FFFFFF;border-collapse:collapse">
+
+   <!-- masthead. The crest is set in type, so it survives images being blocked. -->
+   <tr><td class="pad" bgcolor="#14181A" style="background-color:#14181A;padding:20px 32px">
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+       <td width="46" valign="middle">
+         <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+           <td width="40" height="40" align="center" valign="middle" bgcolor="#1B5E4B"
+               style="background-color:#1B5E4B;width:40px;height:40px;border-radius:4px;
+                      font-family:Georgia,serif;font-size:17px;color:#FFFFFF">HF</td>
+         </tr></table>
+       </td>
+       <td valign="middle" style="font-family:Helvetica,Arial,sans-serif;font-size:12px;
+           letter-spacing:2.4px;color:#FFFFFF;padding-left:14px">HARBORLINE FC</td>
+       <td align="right" valign="middle" style="font-family:Helvetica,Arial,sans-serif;
+           font-size:11px;letter-spacing:1.4px;color:#FFFFFF">2026/27 SEASON</td>
+     </tr></table>
+   </td></tr>
+
+   <!-- hero, set entirely in live text -->
+   <tr><td class="pad" style="background-color:#FFFFFF;padding:38px 32px 8px">
+     <p style="margin:0 0 14px;font-family:Helvetica,Arial,sans-serif;font-size:11px;
+        letter-spacing:2px;color:#1B5E4B">EARLY RENEWAL CLOSES 21 SEPTEMBER</p>
+     <h1 style="margin:0;font-family:Georgia,serif;font-weight:normal;font-size:34px;
+        line-height:1.16;color:#14181A">We kept your seat,<br/>{{first_name}}.</h1>
+     <p style="margin:16px 0 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;
+        line-height:1.6;color:#4A5450">
+       It has been {{seasons_held | a few}} seasons since you were in the ground with us, and
+       {{favorite_player | the squad}} is having the season of a career. Your seat has not been
+       resold and your price has not moved.</p>
+   </td></tr>
+
+   <!-- the offer, as data rather than a picture of data -->
+   <tr><td class="pad" style="background-color:#FFFFFF;padding:26px 32px 6px">
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+            bgcolor="#F2F4F3" style="background-color:#F2F4F3;border-collapse:collapse">
+       <tr>
+         <td class="stack" width="50%" style="padding:18px 20px;background-color:#F2F4F3">
+           <p style="margin:0 0 5px;font-family:Helvetica,Arial,sans-serif;font-size:10px;
+              letter-spacing:1.6px;color:#4A5450">YOUR BLOCK</p>
+           <p style="margin:0;font-family:Georgia,serif;font-size:25px;color:#14181A">{{seat_section | your usual block}}</p>
+         </td>
+         <td class="stack" width="50%" style="padding:18px 20px;background-color:#F2F4F3">
+           <p style="margin:0 0 5px;font-family:Helvetica,Arial,sans-serif;font-size:10px;
+              letter-spacing:1.6px;color:#4A5450">YOUR RENEWAL PRICE</p>
+           <p style="margin:0;font-family:Georgia,serif;font-size:25px;color:#14181A">{{renewal_price | last season\'s price}}</p>
+         </td>
+       </tr>
+     </table>
+   </td></tr>
+
+   <!-- bulletproof button: a table cell with a background, not an image of a button -->
+   <tr><td class="pad" style="background-color:#FFFFFF;padding:24px 32px 8px">
+     <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+       <td align="center" bgcolor="#1B5E4B" style="background-color:#1B5E4B;border-radius:4px">
+         <a href="https://harborlinefc.example.com/renew?utm_source=email&amp;utm_medium=crm&amp;utm_campaign=reactivation_2026"
+            style="display:inline-block;padding:15px 30px;font-family:Helvetica,Arial,sans-serif;
+                   font-size:15px;color:#FFFFFF;text-decoration:none">Renew my season ticket</a>
+       </td>
+     </tr></table>
+   </td></tr>
+
+   <!-- what they are coming back to -->
+   <tr><td class="pad" style="background-color:#FFFFFF;padding:22px 32px 6px">
+     <h2 style="margin:0 0 12px;font-family:Helvetica,Arial,sans-serif;font-size:12px;
+        letter-spacing:1.8px;color:#4A5450">FIRST THREE AT HOME</h2>
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
+       <tr><td style="padding:9px 0;border-bottom:1px solid #E2E6E4;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#14181A">Sat 12 Sep</td>
+           <td style="padding:9px 0;border-bottom:1px solid #E2E6E4;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#4A5450" align="right">Northgate Rovers</td></tr>
+       <tr><td style="padding:9px 0;border-bottom:1px solid #E2E6E4;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#14181A">Sat 19 Sep</td>
+           <td style="padding:9px 0;border-bottom:1px solid #E2E6E4;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#4A5450" align="right">Cedar Point Athletic</td></tr>
+       <tr><td style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#14181A">Wed 23 Sep</td>
+           <td style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#4A5450" align="right">Ashland City</td></tr>
+     </table>
+   </td></tr>
+
+   <!-- footer -->
+   <tr><td class="pad" style="background-color:#FFFFFF;padding:24px 32px 32px">
+     <p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:#5A6560">
+       Harborline FC, 1200 Riverside Way, Riverton.<br/>
+       You are receiving this because you held a season ticket with us.<br/>
+       <a href="https://harborlinefc.example.com/preferences?utm_source=email&amp;utm_medium=crm&amp;utm_campaign=reactivation_2026"
+          style="color:#1B5E4B">Choose which emails you get</a> &nbsp;or&nbsp;
+       <a href="https://harborlinefc.example.com/unsubscribe?utm_source=email&amp;utm_medium=crm&amp;utm_campaign=reactivation_2026"
+          style="color:#1B5E4B">Unsubscribe from Harborline FC marketing</a>
+     </p>
+   </td></tr>
+
+  </table>
+ </td></tr>
 </table>
-<style>@media (prefers-color-scheme: dark){ body,table{background-color:#141210 !important;} p,h1,h2{color:#F2EFEA !important;} }  /* how-to-read panel */
-  .fe-guide{border:1px solid var(--border);border-radius:16px;background:var(--surface-2);margin-bottom:18px;overflow:hidden}
-  .fe-guide summary{list-style:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:10px;min-height:44px}
-  .fe-guide summary::-webkit-details-marker{display:none}
-  .fe-gi{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
-  .fe-guide summary:after{content:"";margin-left:auto;width:7px;height:7px;border-right:1.5px solid var(--ink-2);
-    border-bottom:1.5px solid var(--ink-2);transform:rotate(45deg);transition:transform .18s var(--ease)}
-  .fe-guide[open] summary:after{transform:rotate(225deg)}
-  .fe-gbody{padding:0 20px 20px;display:grid;gap:16px}
-  .fe-grow>span{display:block;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
-  .fe-grow>p{font-size:13.5px;line-height:1.62;color:var(--ink)}
-  .fe-glist{list-style:none;display:grid;gap:9px}
-  .fe-glist li{font-size:13px;line-height:1.6;color:var(--ink-2);padding-left:15px;position:relative}
-  .fe-glist li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
-  .fe-glist b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
-  .fe-gcite{list-style:none;display:grid;gap:12px}
-  .fe-gcite li{padding:13px 15px;border:1px solid var(--border);border-radius:11px;background:var(--surface-solid)}
-  .fe-gcite b{display:block;font-size:13.5px;font-weight:600}
-  .fe-gcite span{display:block;font-size:11.5px;color:var(--ink-2);margin:3px 0 7px;font-style:italic}
-  .fe-gcite em{display:block;font-style:normal;font-size:13px;line-height:1.6;color:var(--ink-2)}
-  .fe-cite-here{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12.5px;line-height:1.6;color:var(--accent-dark)}
-  /* focus */
-  .fe-focus{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
-  .fe-focus-mark{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:var(--ink);color:#fff;
-    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:23px}
-  .fe-focus-main{flex:1;min-width:230px}
-  .fe-focus-main h3{font-family:var(--display);font-size:23px;font-weight:400;line-height:1.2}
-  .fe-focus-main p{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:5px}
-  .fe-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-  .fe-split>div{padding:14px 16px;border:1px solid var(--border);border-radius:12px}
-  .fe-split h4{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);margin-bottom:9px}
-  .fe-split ul{list-style:none;display:grid;gap:6px}
-  .fe-split li{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding-left:14px;position:relative}
-  .fe-split li:before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
-  /* plan */
-  .fe-when{font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
-  .fe-plan-items{list-style:none;counter-reset:pi;display:grid;gap:16px}
-  .fe-plan-items li{counter-increment:pi;position:relative;padding-left:38px}
-  .fe-plan-items li:before{content:counter(pi);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;
-    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
-    font-size:11.5px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
-  .fe-plan-items b{display:block;font-size:14.5px;font-weight:600;line-height:1.45}
-  .fe-plan-items p{font-size:13.5px;line-height:1.62;color:var(--ink-2);margin-top:5px}
-  .fe-ev{margin-top:8px;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--accent-dark)}
-  .fe-ev span{display:inline-block;font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:1.2px;
-    text-transform:uppercase;color:var(--ink-2);margin-right:8px}
-  .fe-unknowns{list-style:none;display:grid;gap:12px}
-  .fe-unknowns li{padding:13px 15px;border:1px solid var(--border);border-left:2px solid var(--amber);border-radius:0 11px 11px 0}
-  .fe-unknowns b{display:block;font-size:13.5px;font-weight:600;margin-bottom:4px}
-  .fe-unknowns span{font-size:13px;line-height:1.6;color:var(--ink-2)}
-  .fe-birg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-  .fe-birg-note{width:100%;font-size:12.5px;line-height:1.55;color:var(--amber);margin-top:2px}
-  @media (max-width:860px){
-    .fe-split{grid-template-columns:1fr}
-    .fe-when{margin-left:0}
-    .fe-plan-items li{padding-left:32px}
+<style>
+  /* Clients supply their own body margin, and a 100%-width table sitting inside it
+     overflows by exactly that margin. Two pixels is nothing to look at and enough to put a
+     horizontal scrollbar on a phone. */
+  html,body{ margin:0 !important; padding:0 !important; }
+  /* A 600px table does not shrink on its own: in auto table layout the stated width acts as
+     a floor, so this email sat at 632px at EVERY viewport and overflowed on every phone.
+     The fix is the one every email developer ends up writing, and it needs !important
+     because it is overriding inline styles. */
+  @media only screen and (max-width:620px){
+    .shell{ width:100% !important; }
+    .pad{ padding-left:18px !important; padding-right:18px !important; }
+    /* width:100% on a content-box cell puts its own padding OUTSIDE the 100%, which is
+       where the ten pixels of horizontal scroll came from. */
+    .stack{ display:block !important; width:100% !important; box-sizing:border-box !important; }
+  }
+  /* Clients that force dark mode recolour the background and leave the text where it was,
+     which is where black-on-black comes from. Both are set together, on the same elements. */
+  @media (prefers-color-scheme: dark){
+    table[lang], td, p, h1, h2 { background-color:#0F1413 !important; color:#E9EEEC !important; }
+    a[style] { color:#6FCBA9 !important; }
   }
 </style>`
 };
