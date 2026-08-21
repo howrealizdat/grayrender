@@ -822,6 +822,76 @@ check('there is a campaign status note to make from it',
 check('which is told never to tidy the numbers',
   /never round them into something tidier/.test(win.eval('MEET_MAKE').campaign.spec));
 
+/* --------------------------------------------------- what the room can be told */
+/* The live answer used to be handed a summary: six hundred characters of the audit, none of
+   the competitive read, none of the campaign. Fine for "what should I say", useless for
+   "hang on, what did the audit actually find", which is the question people really ask. */
+console.log('\nMEETING MODE CAN DISCUSS EVERYTHING THAT WAS PULLED');
+win.eval('clearBrand(); PLAN = blankPlan();');
+win.saveBrand({ name: 'EXL', what: 'Data and AI.', industry: 'Data',
+  offerings: ['a','b','c','d','e','f'], audiences: ['u','v','w','x','y','z'], goals: ['Leads'], proof: [] });
+win.setBrandFocus('Sports, gaming and entertainment', 'fan engagement CRM', '');
+win.eval('hydratePlan();');
+win.goTool('fanplan');
+const inv = win.contextInventory();
+check('the inventory covers every source the suite can pull', inv.length === 10, String(inv.length));
+check('each says whether it is loaded and how much of it there is',
+  inv.every(x => x.label && typeof x.have === 'boolean' && typeof x.text === 'string'));
+check('what is not loaded is shown as not loaded rather than hidden',
+  inv.some(x => !x.have), inv.filter(x => !x.have).map(x => x.label).join(','));
+const full = win.meetingContextFull();
+check('the full context carries the business and the campaign', /EXL/.test(full) && /FAN ENGAGEMENT CAMPAIGN/.test(full));
+/* brandContext DESCRIBES a business without ever naming it. The old summary prefixed the
+   name separately, so assembling from brandContext alone dropped it and the room was being
+   briefed on a company whose name had not been supplied. */
+check('and it actually names the business, not just describes it',
+  /BUSINESS: EXL\./.test(full));
+check('and it leads with the focus, so the room is not told about the wrong half of the business',
+  full.indexOf('ONE PART OF THE BUSINESS') >= 0 && full.indexOf('ONE PART OF THE BUSINESS') < 400);
+check('nothing empty is padded in', !/\n\n[A-Z ]+:\n\n/.test(full));
+
+/* The cut has to be stated, not silent: a prompt that quietly lost the audit is a meeting
+   answer that quietly does not know about it. */
+win.eval('LAST_OUT.intel = { raw: "x".repeat(40000) }; LAST_OUT.campaign = { raw: "y".repeat(40000) };');
+const big = win.meetingContextFull();
+check('an oversized context is cut to the stated budget',
+  big.length < win.eval('CTX_BUDGET') + 3000, String(big.length));
+check('and it SAYS what was cut rather than dropping it silently',
+  /NOT INCLUDED, the context budget ran out|cut here to stay inside the context budget/.test(big));
+check('the highest-priority sources survive the cut',
+  /EXL/.test(big) && /FAN ENGAGEMENT CAMPAIGN/.test(big));
+win.eval('LAST_OUT.intel = null; LAST_OUT.campaign = null;');
+
+console.log('\nAND IT CAN HAND BACK WHAT YOU ARE LOOKING AT');
+check('brief targets are only things that are actually loaded',
+  win.briefTargets().every(t => (win.contextInventory().filter(x => x.key === t.key)[0] || {}).have));
+check('the briefing prompt refuses to tidy a figure',
+  /never round them into something tidier/.test(win.eval('MEET_BRIEF_SYSTEM')));
+check('and refuses to present a modelled figure as measured',
+  /modelled or synthetic, say so/.test(win.eval('MEET_BRIEF_SYSTEM')));
+check('the likely-questions prompt asks for the uncomfortable ones',
+  /what the work does NOT cover/.test(win.eval('MEET_LIKELY_SYSTEM'))
+  && /hardest first/.test(win.eval('MEET_LIKELY_SYSTEM')));
+check('and prefers an honest "not built" to a confident guess',
+  /obviously honest answer is recoverable/.test(win.eval('MEET_LIKELY_SYSTEM')));
+/* Same rule as the content calendar and the meeting actions: a line that does not parse is
+   dropped rather than half-read into something that looks like an answer. */
+check('a well-formed pair parses',
+  win.parseQA('Q: How real is this\nA: The data is synthetic.').length === 1);
+check('two pairs parse', win.parseQA('Q: a\nA: 1\nQ: b\nA: 2').length === 2);
+check('junk between them is ignored', win.parseQA('Q: a\nrubbish\nA: 1').length === 1);
+check('an answer with no question is dropped rather than guessed at',
+  win.parseQA('A: an answer nobody asked for').length === 0);
+check('and an empty response yields nothing rather than throwing',
+  win.parseQA('').length === 0 && win.parseQA(null).length === 0);
+win.eval('localStorage.setItem("wai_owner","1");');
+win.goTool('meeting');
+const mm = win.document.getElementById('main');
+check('the meeting screen offers both new actions',
+  !!mm.querySelector('#mtLikely') && !!mm.querySelector('#mtBrief'));
+check('and shows what it can talk about, with sizes',
+  mm.querySelectorAll('.mt-inv li').length === 10 && /characters/.test((mm.querySelector('.mt-budget') || {}).textContent || ''));
+
 /* ---------------------------------------------------------------- hygiene */
 console.log('\nNOTHING IN HERE SHOULD EMBARRASS A PUBLIC REPO');
 /* The real passcode is never written down here. This asserts against a decoy, and then

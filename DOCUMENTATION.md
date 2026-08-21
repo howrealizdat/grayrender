@@ -653,7 +653,7 @@ anything needing a model call must be tested against the deployment.
 npm test
 ```
 
-917 assertions across five suites. The rule they enforce is not "the output looks right" but
+939 assertions across five suites. The rule they enforce is not "the output looks right" but
 **"the product cannot make a claim it did not earn."**
 
 | Suite | What it proves |

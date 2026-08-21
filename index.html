@@ -272,6 +272,9 @@
     background:var(--surface);border:1px solid var(--border);color:var(--ink);
     padding:12px 13px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:500;
     outline:none;transition:border-color .15s,box-shadow .15s;
+    /* These measured 43px, which fails the 44px target this suite grades other people's
+       sites against. Being one pixel short of your own standard is worse than being ten. */
+    min-height:44px;
   }
   .field input::placeholder{color:#9fb0c2}
   .field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,109,59,.16)}
@@ -936,8 +939,28 @@
   @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(180,66,63,0)}100%{box-shadow:0 0 0 0 rgba(180,66,63,0)}}
   .mt-privacy{margin:16px 24px 0;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
     font-size:11.5px;line-height:1.55;color:var(--ink-2);background:var(--surface)}
-  .mt-live{margin:14px 24px 0;padding:16px 18px;border:1px solid var(--border);border-radius:12px;
-    background:var(--surface);height:230px;overflow-y:auto;font-size:13.6px;line-height:1.62}
+  /* A meeting is not a preview. 230px showed about eight lines, which meant scrolling back
+     to read what was said ninety seconds ago, in a room, while somebody waited. */
+  .mt-live{margin:14px 24px 0;padding:18px 20px;border:1px solid var(--border);border-radius:12px;
+    background:var(--surface);height:clamp(300px,52vh,620px);overflow-y:auto;font-size:14.5px;line-height:1.7;
+    resize:vertical}
+  .mt-out-big #mtOut{max-height:none}
+  .mt-qa{margin:18px 24px 24px;display:grid;gap:14px}
+  .mt-qa-x{padding:15px 17px;border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:0 12px 12px 0}
+  .mt-qa-q{display:flex;gap:10px;font-size:15px;font-weight:600;line-height:1.5}
+  .mt-qa-q span{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:2px}
+  .mt-qa-a{margin-top:8px;padding-left:32px;font-size:14px;line-height:1.62;color:var(--ink-2)}
+  .mt-inv{list-style:none;margin:0 24px}
+  .mt-inv li{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:11px 0;
+    border-bottom:1px solid var(--border);font-size:13.5px}
+  .mt-inv li:last-child{border-bottom:0}
+  .mt-inv .mi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--accent)}
+  .mt-inv .mi-dot.off{background:rgba(17,17,17,.16)}
+  .mt-inv b{font-weight:600;min-width:min(180px,100%)}
+  .mt-inv em{font-style:normal;color:var(--ink-2)}
+  .mt-inv .mi-size{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap}
+  .mt-budget{margin:14px 24px 0;font-size:12.5px;line-height:1.6;color:var(--ink-2)}
   .mt-live p{margin:0 0 7px}
   .mt-live p:last-child{margin-bottom:0}
   .mt-interim{color:var(--ink-2);font-style:italic}
@@ -1261,7 +1284,8 @@
     border-radius:10px;background:rgba(138,109,59,.08);margin-bottom:16px}
   .fo-now b{display:block;font-family:var(--display);font-size:20px;font-weight:500}
   .fo-now span{display:block;font-size:13.5px;color:var(--ink-2);margin-top:3px}
-  .fo-now a{display:inline-block;margin-top:7px;font-family:var(--mono);font-size:11.5px;color:var(--accent-dark)}
+  .fo-now a{display:inline-flex;align-items:center;min-height:44px;margin-top:2px;
+    font-family:var(--mono);font-size:11.5px;color:var(--accent-dark)}
   .fo-grid{display:grid;gap:13px;margin-top:14px}
   .fo-grid label{display:flex;flex-direction:column;gap:6px;font-size:10.5px;font-weight:700;
     letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2)}
@@ -3825,6 +3849,11 @@ function renderMeeting(){
       <div class="mt-live" id="mtLive" aria-live="off"><div class="mt-empty">Press start, and what is said appears here.</div></div>
       <div class="mt-bar">
         <button type="button" class="btn-mini solid" id="mtAnswer">Answer that</button>
+        <button type="button" class="btn-mini" id="mtLikely">What will they ask</button>
+        <select id="mtBriefWhat" aria-label="What to brief the room on">
+          ${briefTargets().map(t=>`<option value="${esc(t.key)}">${esc(t.label)}</option>`).join("")}
+        </select>
+        <button type="button" class="btn-mini" id="mtBrief">Brief the room</button>
         <select id="mtKind" aria-label="What to make from this meeting">
           ${Object.keys(MEET_MAKE).map(k=>`<option value="${esc(k)}">${esc(MEET_MAKE[k].label)}</option>`).join("")}
         </select>
@@ -3849,20 +3878,29 @@ function renderMeeting(){
     </div>
     <div class="card wk-card">
       <div class="wk-head"><h2>What it answers from</h2></div>
-      <ul class="mt-ctx">
-        ${[["The business",BRAND?brandName():"nothing saved yet"],
-           ["The site audit",LAST_OUT.audit?("graded "+(LAST_OUT.audit.mark||"ungraded")):"not run yet"],
-           ["The positioning",LAST_OUT.brand?"locked in":"not written yet"],
-           ["The program",programDone()+" of "+PROGRAM.length+" steps done"],
-           ["Open work",openItems().length+(openItems().length===1?" item":" items")]]
-          .map(r=>`<li><span>${esc(r[0])}</span><b>${esc(r[1])}</b></li>`).join("")}
+      <ul class="mt-inv">
+        ${contextInventory().map(x=>`<li>
+          <span class="mi-dot ${x.have?"":"off"}"></span>
+          <b>${esc(x.label)}</b><em>${esc(x.detail)}</em>
+          <span class="mi-size">${x.have&&x.text?(x.text.length>1000?Math.round(x.text.length/1000)+"k chars":x.text.length+" chars"):"--"}</span>
+        </li>`).join("")}
       </ul>
-      <div class="mt-ctx-foot">This is what makes it worth having in the room. Any notetaker can transcribe. This one has read the site, graded it, and knows what is still open.</div>
+      <div class="mt-budget">${(function(){
+        const inv=contextInventory().filter(x=>x.have&&x.text);
+        const total=inv.reduce((a,x)=>a+x.text.length,0);
+        return "Everything ticked above goes into the answer, in full, up to a stated budget of "+CTX_BUDGET.toLocaleString()
+          +" characters. Currently "+total.toLocaleString()+", so "+(total>CTX_BUDGET
+            ?"the lowest-priority sources are being cut and the prompt says which."
+            :"nothing is being cut.");
+      })()}</div>
+      <div class="mt-ctx-foot">This is what makes it worth having in the room. Any notetaker can transcribe. This one has read the site, graded it, run the campaign and knows what is still open, and it will tell you what it cannot see rather than filling the gap.</div>
     </div>`;
   document.getElementById("mtToggle").addEventListener("click",()=>{ MEET.on?meetStop():meetStart(); });
   document.getElementById("mtClear").addEventListener("click",()=>{ meetStop(); meetReset(); paintTranscript(); mtOut(""); });
   document.getElementById("mtAnswer").addEventListener("click",meetingAnswer);
   document.getElementById("mtMake").addEventListener("click",meetingMake);
+  const lk=document.getElementById("mtLikely"); if(lk) lk.addEventListener("click",meetingLikely);
+  const br=document.getElementById("mtBrief"); if(br) br.addEventListener("click",meetingBrief);
   paintMeetControls(); paintTranscript();
   const fs=document.getElementById("fnSend");
   if(fs) fs.addEventListener("click",()=>{
@@ -3930,7 +3968,7 @@ async function meetingAnswer(){
   if(!heard) return mtOut(`<div class="wk-note">Nothing has been heard yet. Press start listening first.</div>`);
   if(btn){ btn.disabled=true; btn.textContent="Thinking"; }
   mtOut(`<div class="wk-note wk-wait">Working out the answer</div>`);
-  const msg=`WHAT THIS SUITE KNOWS:\n${meetingContext()}\n\nTHE MEETING SO FAR (the end is the most recent):\n${heard}\n\nAnswer the latest question now.`;
+  const msg=`WHAT THIS SUITE KNOWS:\n${meetingContextFull()}\n\nTHE MEETING SO FAR (the end is the most recent):\n${heard}\n\nAnswer the latest question now.`;
   let text=await askModel(MEET_ANSWER_SYSTEM,msg,"meeting-answer",400);
   if(btn){ btn.disabled=false; btn.textContent="Answer that"; }
   if(!text) return mtOut(`<div class="wk-note">That did not come back. Try again.</div>`);
@@ -8235,6 +8273,149 @@ function fanContextBlock(){
     "  HONESTY: this is an analogue built to reason about the primitives. It is NOT Adobe Experience Platform, Journey Optimizer or Customer Journey Analytics, and no figure above describes a real organisation."
   ];
   return bits.filter(Boolean).join("\n");
+}
+
+/* ================= WHAT MEETING MODE CAN ACTUALLY TALK ABOUT =================
+   The context handed to a live answer used to be a summary: six hundred characters of the
+   audit, six hundred of the positioning, and nothing at all from the competitive read, the
+   campaign or the calendar. That is fine for "what should I say" and useless for "hang on,
+   what did the audit actually find on the booking page", which is the question people
+   really ask in a meeting.
+
+   Input tokens are prefilled and cheap; wall clock is driven by OUTPUT. So the context can
+   be generous, and the only real budget is keeping the prompt sane. Everything the suite
+   has pulled goes in, in order of how likely it is to be asked about, and the cap is stated
+   rather than silently applied. */
+const CTX_BUDGET=26000;
+
+function ctxOut(o){ return String((o&&o.raw)||"").replace(/\s+/g," ").trim(); }
+/* Everything pulled, with a label, so the screen can show what it is able to discuss
+   instead of the human guessing. */
+function contextInventory(){
+  const L=[];
+  /* brandContext describes the business but never NAMES it: the old summary prefixed the
+     name separately, and assembling from brandContext alone quietly dropped it. Meeting
+     Mode was being asked to talk about a company whose name it had not been told. */
+  L.push({key:"brand", label:"The business", have:!!BRAND,
+    detail:BRAND?brandName()+(brandFocus()?", focused on "+brandFocus().label:""):"nothing loaded",
+    text:BRAND?("BUSINESS: "+brandName()+".\n"+brandContext()):""});
+  const a=LAST_OUT.audit;
+  L.push({key:"audit", label:"The site audit", have:!!a,
+    detail:a?("graded "+(a.mark||"ungraded")+" at "+cleanHost((a.vals&&a.vals.url)||"")):"not run",
+    text:a?String(a.body||"").replace(/\s+/g," "):""});
+  L.push({key:"brandv", label:"Positioning and voice", have:!!LAST_OUT.brand,
+    detail:LAST_OUT.brand?"written":"not written", text:ctxOut(LAST_OUT.brand)});
+  L.push({key:"intel", label:"The competitive read", have:!!LAST_OUT.intel,
+    detail:LAST_OUT.intel?"done":"not done", text:ctxOut(LAST_OUT.intel)});
+  L.push({key:"campaign", label:"The campaign brief", have:!!LAST_OUT.campaign,
+    detail:LAST_OUT.campaign?"built":"not built", text:ctxOut(LAST_OUT.campaign)});
+  L.push({key:"calendar", label:"The content calendar", have:!!LAST_OUT.calendar,
+    detail:LAST_OUT.calendar?"built":"not built", text:ctxOut(LAST_OUT.calendar)});
+  L.push({key:"report", label:"Social performance", have:!!LAST_OUT.report,
+    detail:LAST_OUT.report?"read":"not read", text:ctxOut(LAST_OUT.report)});
+  const fan=fanContextBlock();
+  L.push({key:"fan", label:"The fan engagement campaign", have:!!fan,
+    detail:fan?FAN_BRIEF.name:"not configured", text:fan});
+  const open=openItems();
+  L.push({key:"work", label:"Open work", have:open.length>0,
+    detail:open.length+(open.length===1?" item":" items"), text:open.length?itemLines(open.slice(0,25)):""});
+  L.push({key:"strategy", label:"The written strategy", have:!!(PLAN.strategyDoc||PLAN.strategy),
+    detail:(PLAN.strategyDoc||PLAN.strategy)?"written":"not written",
+    text:String((PLAN.strategyDoc&&PLAN.strategyDoc.text)||(PLAN.strategy&&PLAN.strategy.text)||"").replace(/\s+/g," ")});
+  return L;
+}
+/* The full context, assembled in priority order and cut only when it has to be. */
+function meetingContextFull(){
+  const inv=contextInventory().filter(x=>x.have&&x.text);
+  const order=["brand","fan","audit","work","brandv","intel","campaign","calendar","report","strategy"];
+  inv.sort((a,b)=>order.indexOf(a.key)-order.indexOf(b.key));
+  let used=0; const out=[]; const dropped=[];
+  inv.forEach(x=>{
+    const room=CTX_BUDGET-used;
+    if(room<400){ dropped.push(x.label); return; }
+    const body=x.text.length>room ? x.text.slice(0,room)+" [cut here to stay inside the context budget]" : x.text;
+    used+=body.length;
+    out.push(x.label.toUpperCase()+":\n"+body);
+  });
+  if(dropped.length) out.push("NOT INCLUDED, the context budget ran out: "+dropped.join(", ")+".");
+  return out.join("\n\n");
+}
+
+/* --------------------------------------------------- brief the room ---
+   You are looking at a screen and somebody asks what it says. This turns whatever you have
+   open into something you can say out loud, rather than reading numbers off a dashboard. */
+const MEET_BRIEF_SYSTEM=`You are feeding somebody the words to brief a room on something they have open in front of them. ${NODASH}
+Write 90 to 140 words, to be said out loud: no headings, no bullets, no preamble.
+Open with the single most important thing on it, then the two or three figures that matter and what each one MEANS, then the one decision or risk it points at.
+HARD RULES: use only the figures you were given, exactly as given, and never round them into something tidier. Never invent a number, a date, a name or a commitment. If something is not in what you were given, do not mention it. Where a figure is modelled or synthetic, say so in passing rather than presenting it as measured.`;
+
+const MEET_LIKELY_SYSTEM=`You prepare somebody for the questions a room is about to ask them. ${NODASH}
+Given everything their suite knows and the meeting so far, write the FIVE questions this particular room is most likely to ask next, hardest first, and a short answer to each.
+Format each as exactly two lines and nothing else:
+Q: the question, in the words somebody would actually use
+A: the answer, under forty words, leading with the answer itself
+HARD RULES: only use facts you were given. Never invent a number, a date, a name or a commitment. Where the honest answer is that something is not known or not built, say that plainly and name what it would take, because an obviously honest answer is recoverable in a meeting and a confidently wrong one is not. Prefer the uncomfortable questions: the ones about what the work does NOT cover, what a figure is really based on, and what would have to be true for it to be wrong.`;
+
+function briefTargets(){
+  const t=[];
+  contextInventory().forEach(x=>{ if(x.have&&x.text) t.push({key:x.key,label:x.label}); });
+  return t;
+}
+async function meetingBrief(){
+  const btn=document.getElementById("mtBrief");
+  const key=(document.getElementById("mtBriefWhat")||{}).value||"fan";
+  const item=contextInventory().filter(x=>x.key===key)[0];
+  if(!item||!item.text) return mtOut(`<div class="wk-note">There is nothing loaded for that yet.</div>`);
+  if(btn){ btn.disabled=true; btn.textContent="Writing"; }
+  mtOut(`<div class="wk-note wk-wait">Turning ${esc(item.label.toLowerCase())} into something you can say</div>`);
+  const msg=`WHAT YOU ARE BRIEFING THE ROOM ON, ${item.label.toUpperCase()}:\n${item.text.slice(0,9000)}\n\n`
+    +`SURROUNDING CONTEXT:\n${brandContext()}\n\nWrite the briefing now.`;
+  let text=await askModel(MEET_BRIEF_SYSTEM,msg,"meeting-brief",420);
+  if(btn){ btn.disabled=false; btn.textContent="Brief the room"; }
+  if(!text) return mtOut(`<div class="wk-note">That did not come back. Try again.</div>`);
+  text=dropUnbackedFigures(text,msg);
+  logEvent("meeting","Briefed the room on "+item.label.toLowerCase());
+  mtOut(`<div class="mt-answer"><div class="mt-a-lbl">Say this about ${esc(item.label.toLowerCase())}</div>
+    <div class="mt-a-t">${escMd(text)}</div>
+    <div class="wm-row"><button type="button" class="btn-mini" id="mtACopy">Copy</button></div></div>`);
+  wireAnswerCopy(text);
+}
+async function meetingLikely(){
+  const btn=document.getElementById("mtLikely");
+  if(btn){ btn.disabled=true; btn.textContent="Preparing"; }
+  mtOut(`<div class="wk-note wk-wait">Working out what they are going to ask</div>`);
+  const heard=meetText(5000);
+  const msg=`WHAT THIS SUITE KNOWS:\n${meetingContextFull()}\n\n`
+    +(heard?`THE MEETING SO FAR (the end is the most recent):\n${heard}\n\n`:`The meeting has not started yet, so work from what the suite knows.\n\n`)
+    +`Write the five questions and answers now.`;
+  let text=await askModel(MEET_LIKELY_SYSTEM,msg,"meeting-likely",900);
+  if(btn){ btn.disabled=false; btn.textContent="What will they ask"; }
+  if(!text) return mtOut(`<div class="wk-note">That did not come back. Try again.</div>`);
+  text=dropUnbackedFigures(text,msg);
+  const pairs=parseQA(text);
+  if(!pairs.length) return mtOut(`<div class="wk-note">That came back in a shape I could not read. Try again.</div>`);
+  logEvent("meeting","Prepared "+pairs.length+" likely questions");
+  mtOut(`<div class="mt-qa">${pairs.map((p,i)=>`<div class="mt-qa-x">
+      <div class="mt-qa-q"><span>${i+1}</span>${escMd(p.q)}</div>
+      <div class="mt-qa-a">${escMd(p.a)}</div></div>`).join("")}
+    <div class="wm-row"><button type="button" class="btn-mini" id="mtACopy">Copy all</button></div></div>`);
+  wireAnswerCopy(pairs.map(p=>"Q: "+p.q+"\nA: "+p.a).join("\n\n"));
+}
+/* Same rule the content calendar and the meeting actions already use: a line that does not
+   parse is dropped rather than half-read into something that looks like an answer. */
+function parseQA(text){
+  const out=[]; let q=null;
+  String(text||"").split(/\n/).forEach(line=>{
+    const mq=/^\s*Q:\s*(.+)$/i.exec(line); const ma=/^\s*A:\s*(.+)$/i.exec(line);
+    if(mq){ q=mq[1].trim(); return; }
+    if(ma&&q){ out.push({q:q,a:ma[1].trim()}); q=null; }
+  });
+  return out;
+}
+function wireAnswerCopy(text){
+  const c=document.getElementById("mtACopy");
+  if(c) c.addEventListener("click",()=>{ navigator.clipboard.writeText(cleanCopy(text)).catch(()=>{});
+    c.textContent="Copied"; setTimeout(()=>c.textContent="Copy",1400); });
 }
 
 const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure,fanplan:renderFanPlan};
