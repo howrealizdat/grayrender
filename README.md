@@ -130,13 +130,16 @@ npm install
 npm test
 ```
 
-`npm test` runs 569 assertions across four suites: `passcode.test.js` (an unauthenticated
+`npm test` runs 749 assertions across five suites: `passcode.test.js` (an unauthenticated
 caller can never reach a paid API), `audit-guards.test.js` (every known false claim is blocked,
 every real finding survives), `report-render.test.js` (the report renders, the print document
 builds, the evidence is in both, and every guard holds on the thing a human actually receives)
 and `workspace.test.js` (findings become tracked work and only the ones the report actually
 showed, dates are local rather than UTC, the calendar file parses in somebody else's app, and the
-Finesse handoff never carries the passcode).
+Finesse handoff never carries the passcode) and `fan.test.js` (the seeded fan dataset reproduces
+exactly, every suppression count adds up and names a reason, consent is checked per channel, the
+frequency cap counts a journey's own sends, the QA harness catches a template that is genuinely
+broken, the contrast maths is the real WCAG maths, and the A/B guard refuses to be peeked at).
 
 Full technical reference, including the workspace, the program, Meeting Mode and the handoff, is
 in [DOCUMENTATION.md](DOCUMENTATION.md).

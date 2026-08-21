@@ -50,9 +50,10 @@ lives in the `:root` token block. No emojis in the UI.
 
 ## 2. The screens
 
-Fourteen entries in `TOOLS`, grouped in the sidebar by **when you use them** rather than by what
-they are. Two are screens rather than generators (`workspace: true` / `meeting: true`); the rest
-take fields and produce an asset plus a strategist's briefing.
+Twenty entries in `TOOLS`, grouped in the sidebar by **when you use them** rather than by what
+they are. Eight are bespoke screens rather than generators (`workspace: true`, `meeting: true`,
+and the six carrying `fan: true`); the rest take fields and produce an asset plus a strategist's
+briefing.
 
 ### Workspace
 
@@ -82,6 +83,21 @@ take fields and produce an asset plus a strategist's briefing.
 | Multi-Channel Studio | One brief → LinkedIn, Instagram, YouTube title and description, short-form script, hashtags |
 | Comms & PR Kit | Press release, newsletter, one-pager, case study, webinar or white-paper outline |
 | Copy Editor | Edited version, what changed and why, claims to verify, readability |
+
+### Fan Engagement
+
+Six bespoke screens (`fan: true`), named with the vocabulary of the process they model. They run
+without a business loaded, because they carry their own audience of record. Full detail in
+section 15.
+
+| Screen | What it does |
+|--------|--------------|
+| 1. Request | The campaign brief, the 24,000-record synthetic audience, and the guardrails enforced in code |
+| 2. Segment | A rule builder over the fan schema, with reachability and an itemised suppression breakdown per channel |
+| 3. Build | One offer as email, SMS and push, every token shown against how often it is empty, send time against open time |
+| 4. QA | Every template against WCAG, CAN-SPAM and TCPA, with the send blocked while anything fails |
+| 5. Deploy | The journey, and who the frequency cap removed at every send |
+| 6. Measure | Channel KPIs, fan LTV, and an A/B test that refuses to be stopped early |
 
 Every writing tool also returns a **briefing** — why it works (naming the practitioner standard
 applied), two or three complete paste-ready alternatives, what to test, and what to watch out for.
@@ -485,7 +501,7 @@ asserted in the test suite. `handoffWorth()` prevents offering to send an empty 
 ## 8. Architecture & files
 
 ```
-/index.html                       entire frontend: 14 screens, the workspace, the program,
+/index.html                       entire frontend: 20 screens, the workspace, the program,
                                   Meeting Mode, the audit orchestration, PDF export
 /netlify/functions/generate.js    Claude proxy for every writing tool + usage logging
 /netlify/functions/image.js       OpenAI image proxy for the LinkedIn tool
@@ -617,7 +633,7 @@ anything needing a model call must be tested against the deployment.
 npm test
 ```
 
-569 assertions across four suites. The rule they enforce is not "the output looks right" but
+749 assertions across five suites. The rule they enforce is not "the output looks right" but
 **"the product cannot make a claim it did not earn."**
 
 | Suite | What it proves |
@@ -626,15 +642,111 @@ npm test
 | `audit-guards.test.js` | Every false claim the audit ever shipped is blocked, and every real finding still survives. Both directions matter: a guard that over-fires deletes true findings. |
 | `report-render.test.js` | The report a human actually receives renders, prints, and leaks no scaffolding. |
 | `workspace.test.js` | Items, local dates, the `.ics` a stranger's calendar has to parse, the program, Meeting Mode, and the handoff payload. |
+| `fan.test.js` | The seeded dataset reproduces exactly, every suppression count adds up and names a reason, consent is per channel, the frequency cap counts the journey's own sends, the QA harness catches a template that is genuinely broken, the contrast maths is the real WCAG maths, and the A/B guard refuses to be peeked at. |
 
 **The house rule:** when a change turns a test red, fix the test only if the test was wrong.
 Never weaken the app to keep an old test happy.
 
 ---
 
-## 15. Roadmap / future work
+## 15. Fan Engagement
 
-### 15.1 Handling bot-protected and JavaScript-rendered sites (the main gap)
+Its own nav group and its own test file, sharing the design system, the guard philosophy and the
+passcode. Six screens carrying the **JD's own vocabulary** — Request, Segment, Build, QA, Deploy,
+Measure — so somebody who runs this process for a living recognises their own week in the sidebar.
+
+**What it is, stated on screen:** the analogue built to reason about the primitives an
+enterprise journey platform is made of. It is **not** Adobe Experience Platform, Journey
+Optimizer or Customer Journey Analytics, and the Request screen says so in those words, on
+screen, above every number it shows. Deliberately not attempted, and named as such: real ESP or SMS delivery, deliverability
+and IP warmup, suppression infrastructure, throttling, trained propensity models, cross-device
+identity. That is where the genuine production complexity lives and it cannot be simulated
+honestly.
+
+### 15.1 The audience of record
+
+`buildFans()` generates 24,000 records from a **fixed seed** (`FAN_SEED`), in two passes: everything
+a fan *is* is drawn independently, then tier is assigned by percentile, because a tier is a
+statement about where somebody sits relative to everyone else and cannot be known until the whole
+book exists. Drawing it from a dice roll instead lets a "Founder" sit below the median spend.
+
+Spend is **Pareto**, not uniform: the top 1% hold roughly 16% of lifetime spend and the top 10%
+hold about half. Attendance falls only inside real season windows. Consent is held **per channel**
+— email, SMS and push opt-in are separate flags, alongside quiet hours and a rolling frequency
+cap. `favoritePlayer` and `seatSection` are deliberately nullable, because a personalization token
+that is never null in your test data proves nothing.
+
+Determinism is the whole foundation: `Math.random` would make every segment size, LTV band and
+A/B result a different story on each reload. The UI labels the dataset synthetic on all six screens.
+
+### 15.2 Segmentation and reachability
+
+Rules are data, so a rule can be shown on screen exactly as it was evaluated, and `.fe-ruleline`
+restates them in English from the same objects the engine read. Every operator is total: an
+unknown field or an unparseable value returns `false` rather than throwing.
+
+`evalSegment()` returns matched, reachable, and an **itemised** suppression breakdown, because the
+number that matters is not how many people match but how many you are allowed to contact:
+
+> 1,253 match, 959 reachable, 294 suppressed: 187 no email consent; 44 frequency cap; 34
+> unsubscribed from all marketing; 29 email hard-bounced
+
+`suppressionOf()` is the single source of truth, called by the segment screen and the journey
+alike so the two can never disagree. A global unsubscribe is reported as an unsubscribe even when
+a channel flag is still set, because that is the reason that governs.
+
+### 15.3 Dynamic content, send time against open time
+
+Tokens are **declared** in `FAN_TOKENS`, not discovered, so QA can tell a typo from a field that
+is allowed to be empty. Syntax is `{{token}}` or `{{token | fallback}}`; the pipe is part of the
+syntax rather than a convention somebody has to remember. Each token carries a **scope**: a
+send-time token is frozen when the message is built, an open-time token resolves when the message
+is opened, which is why a countdown in an email is either impressive or a lie. The Build screen
+shows both, side by side, for the same fan.
+
+### 15.4 The QA harness
+
+Findings carry the **standard** they come from, so they are defects rather than opinions:
+WCAG 1.1.1, 1.3.1, 1.4.3, 2.4.4, 3.1.1, CAN-SPAM, TCPA. Contrast is **computed** — sRGB relative
+luminance per WCAG 2.1 and the (L1 + 0.05) / (L2 + 0.05) ratio, against 4.5:1 for body text and
+3:1 for large — not eyeballed. Accessible email is the part of this most CRM teams have nobody to
+check.
+
+**Draft 1 of every template is broken on purpose**: a mistyped merge field, a token with no
+fallback, a hero image carrying the offer with no alt text, grey on white at 2.81:1, a skipped
+heading level, a layout table announced as data, "Click here", an http link, and no unsubscribe.
+A harness demonstrated against a clean template has been proven of nothing. Draft 2 closes every
+one. The gate is `qaBlocks()`, a function, and the Deploy screen checks it too.
+
+Failures become **ordinary tracked work** through the same `addItem` door audit findings use. The
+location is part of the item's identity: two elements failing contrast are two jobs, and titling
+on the message alone collapsed them into one.
+
+### 15.5 The journey
+
+`journeySim()` carries the segment through send, wait and audience-filtered nodes. The frequency
+cap counts the journey's **own** earlier sends, which is visible in the numbers: it removes 44
+people at the first email and 223 by the last. A cap that ignores the messages it has just sent
+is not a cap.
+
+### 15.6 A/B, and the peeking guard
+
+`abSampleSize()` is a two-proportion two-sided calculation with alpha and power as real inputs
+(`probit()` is Acklam's inverse normal, accurate to ~1e-9). `abVerdict()` **refuses to name a
+winner** before the planned sample size and says why in words a marketer will accept. Calling no
+difference is treated as a real result.
+
+The cost of peeking is **measured rather than asserted**: `peekingCost()` runs 3,000 simulated
+A/A tests, where the two variants are identical by construction, so every winner found is false.
+At a fixed horizon it sits on its nominal 5%; stopping at the first significant look reaches
+about 15% at five looks and 21% at ten — the textbook sequential-testing result, reproduced in
+the browser from a fixed seed.
+
+---
+
+## 16. Roadmap / future work
+
+### 16.1 Handling bot-protected and JavaScript-rendered sites (the main gap)
 
 Today the audit fetches raw server HTML with a browser-like User-Agent. That works for most
 marketing sites but returns thin or blocked content for two cases: **(a) single-page apps** that
@@ -682,7 +794,7 @@ keep the existing "this page may be JS-rendered" note as the graceful fallback w
 return thin content. Add short-TTL caching of fetched pages to control cost. Respect `robots.txt`
 and reasonable rate limits when auditing sites you do not own.
 
-### 15.2 Other future ideas
+### 16.2 Other future ideas
 
 - **Choose-your-pages** discovery mode (show the found pages, let the user tick which to audit).
 - **Deeper crawls** for larger audits (opt-in, more pages, background-function architecture).

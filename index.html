@@ -1009,6 +1009,168 @@
     .wl-a{margin-left:0}
     .wk-log li{flex-wrap:wrap}
   }
+  /* ---------- fan engagement ---------- */
+  .fe-step{font-size:10.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:9px}
+  .fe-body{padding:20px 24px 24px}
+  .fe-obj{font-family:var(--display);font-size:21px;line-height:1.42;margin-bottom:18px}
+  .fe-sub{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-2);margin:22px 0 11px}
+  .fe-note{font-size:13.5px;line-height:1.62;color:var(--ink-2);margin-top:14px}
+  .fe-note b{color:var(--ink);font-weight:600}
+  .fe-note code,.fe-body code{font-family:var(--mono);font-size:12px;background:rgba(17,17,17,.05);padding:1px 5px;border-radius:4px}
+  .fe-red{color:var(--amber)}
+  .fe-synth{margin:16px 0 0;padding:12px 15px;border:1px solid var(--border);border-left:2px solid var(--accent);
+    border-radius:0 10px 10px 0;background:var(--surface-2);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  .fe-synth b{color:var(--ink)}
+  .fe-kv{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .fe-kv li{background:var(--surface-solid);padding:13px 15px;display:flex;flex-direction:column;gap:3px}
+  .fe-kv span{font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+  .fe-kv b{font-size:15px;font-weight:600}
+  .fe-guards{list-style:none;margin-top:4px}
+  .fe-guards li{position:relative;padding:9px 0 9px 26px;font-size:13.5px;line-height:1.55;border-bottom:1px solid var(--border)}
+  .fe-guards li:last-child{border-bottom:0}
+  .fe-guards li:before{content:"";position:absolute;left:6px;top:16px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  /* bars */
+  .fe-bars{display:flex;flex-direction:column;gap:7px}
+  .fe-bar{display:grid;grid-template-columns:170px 1fr 62px 48px;align-items:center;gap:12px;font-size:12.5px}
+  .fe-bl{color:var(--ink-2)}
+  .fe-bt{height:8px;background:rgba(17,17,17,.07);border-radius:980px;overflow:hidden}
+  .fe-bt i{display:block;height:100%;background:var(--accent);border-radius:980px}
+  .fe-bt i.warnbar{background:var(--amber)}
+  .fe-bar b{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .fe-bar em{text-align:right;font-style:normal;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  /* counts */
+  .fe-counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .fe-count{background:var(--surface-solid);padding:16px 15px;display:flex;flex-direction:column;gap:4px}
+  .fe-count b{font-family:var(--display);font-size:27px;line-height:1;font-variant-numeric:tabular-nums}
+  .fe-count span{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+  .fe-count.ok b{color:var(--accent)}
+  .fe-count.bad b{color:var(--amber)}
+  /* The rules restated as a sentence, from the same objects the engine evaluated. Reading
+     it back is how you notice the builder and the engine have drifted apart. */
+  .fe-ruleline{margin-top:16px;font-family:var(--mono);font-size:11.5px;line-height:1.65;color:var(--ink-2)}
+  .fe-sentence{margin:10px 0 4px;font-family:var(--display);font-size:17px;line-height:1.5}
+  /* tables */
+  .fe-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .fe-tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+  .fe-tbl th{text-align:left;font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);
+    font-weight:700;padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .fe-tbl td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  .fe-tbl tr:last-child td{border-bottom:0}
+  .fe-tbl td i{color:var(--amber);font-style:normal}
+  .fe-id{color:var(--ink-2);font-family:var(--mono);font-size:11px}
+  /* rules */
+  .fe-rules{display:flex;flex-direction:column;gap:9px}
+  .fe-rule{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2)}
+  .fe-rn{font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);font-weight:700;min-width:38px}
+  .fe-rf{font-size:13.5px;font-weight:600}
+  .fe-rule select,.fe-rule input{font-family:var(--font);font-size:13px;padding:9px 11px;min-height:44px;
+    border:1px solid var(--border);border-radius:9px;background:var(--surface-solid);color:var(--ink)}
+  .fe-rule input{width:130px}
+  .fe-rx{margin-left:auto;background:transparent;border:1px solid var(--border);border-radius:980px;
+    padding:0 15px;min-height:44px;font-family:var(--font);font-size:12px;color:var(--ink-2);cursor:pointer}
+  .fe-rx:hover{color:var(--amber);border-color:var(--amber)}
+  .wk-acts select{font-family:var(--font);font-size:12.5px;padding:0 11px;min-height:44px;
+    border:1px solid var(--border);border-radius:980px;background:var(--surface);color:var(--ink)}
+  /* build */
+  .fe-verrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+  .fe-ver{background:transparent;border:1px solid var(--border);border-radius:980px;padding:0 17px;min-height:44px;
+    font-family:var(--font);font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .fe-ver.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .fe-verrow select{font-family:var(--font);font-size:12.5px;padding:0 11px;min-height:44px;flex:1;min-width:200px;
+    border:1px solid var(--border);border-radius:980px;background:var(--surface-solid);color:var(--ink)}
+  .fe-vertag{font-size:11px;font-weight:500;color:var(--ink-2)}
+  .fe-mail{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .fe-mailhead{display:flex;gap:12px;padding:11px 15px;border-bottom:1px solid var(--border);background:var(--surface-2);font-size:13px}
+  .fe-mailhead span{min-width:78px;font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);font-weight:700;padding-top:2px}
+  .fe-mailhead b{font-weight:500}
+  .fe-frame{display:block;width:100%;height:330px;border:0;background:#fff}
+  .fe-phone{max-width:330px;margin:0 auto;padding:18px 0}
+  .fe-bubble{background:var(--ink);color:#fff;border-radius:19px 19px 19px 5px;padding:13px 16px;font-size:14px;line-height:1.45}
+  .fe-push{background:var(--surface-solid);border:1px solid var(--border);border-radius:15px;padding:13px 15px}
+  .fe-pushapp{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-bottom:5px}
+  .fe-pusht{font-size:14px;font-weight:600;line-height:1.35}
+  .fe-pushb{font-size:13.5px;color:var(--ink-2);line-height:1.45;margin-top:3px}
+  .fe-phmeta{margin-top:10px;font-size:12px;color:var(--ink-2);text-align:center}
+  .fe-vs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .fe-vslab{font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-bottom:9px}
+  .fe-vsout{padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);font-size:14px;line-height:1.5}
+  .fe-vsout.on{border-color:var(--accent);background:rgba(138,109,59,.06)}
+  .fe-vsnote{margin-top:9px;font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+  /* qa */
+  .fe-gate{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:6px 13px;border-radius:980px;white-space:nowrap}
+  .fe-gate.stop{background:rgba(168,83,27,.12);color:var(--amber)}
+  .fe-gate.go{background:rgba(138,109,59,.13);color:var(--accent-dark)}
+  .fe-gatebig{padding:15px 18px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.5}
+  .fe-gatebig.stop{background:rgba(168,83,27,.09);border:1px solid rgba(168,83,27,.3);color:var(--amber)}
+  .fe-gatebig.go{background:rgba(138,109,59,.09);border:1px solid rgba(138,109,59,.3);color:var(--accent-dark)}
+  .fe-finds{display:flex;flex-direction:column;gap:11px}
+  .fe-find{padding:14px 16px;border:1px solid var(--border);border-radius:12px;border-left:2px solid var(--ink-2)}
+  .fe-find.fail{border-left-color:var(--amber)}
+  .fe-find.warn{border-left-color:var(--accent)}
+  .fe-find.pass{border-left-color:rgba(17,17,17,.18);opacity:.82}
+  .fe-fh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .fe-fh b{font-size:14px;font-weight:600;line-height:1.4}
+  .fe-sev{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;padding:3px 9px;border-radius:980px;flex-shrink:0}
+  .fe-sev.fail{background:rgba(168,83,27,.13);color:var(--amber)}
+  .fe-sev.warn{background:rgba(138,109,59,.14);color:var(--accent-dark)}
+  .fe-sev.pass{background:rgba(17,17,17,.06);color:var(--ink-2)}
+  .fe-fm{margin-top:6px;font-size:11.5px;color:var(--ink-2);font-weight:600;letter-spacing:.2px}
+  .fe-fw{margin-top:7px;font-size:13px;line-height:1.55;color:var(--ink-2)}
+  .fe-ffix{margin-top:7px;font-size:13px;line-height:1.55;color:var(--accent-dark);font-weight:500}
+  /* journey */
+  .fe-jny{display:flex;flex-direction:column;gap:0;margin-top:18px}
+  .fe-jnode{border:1px solid var(--border);border-radius:14px;padding:15px 17px;background:var(--surface-2)}
+  .fe-jhead{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .fe-jhead b{font-size:14.5px;font-weight:600}
+  .fe-jchan{font-size:10px;font-weight:700;letter-spacing:.9px;padding:4px 9px;border-radius:980px;background:var(--ink);color:#fff}
+  .fe-jchan.sms{background:var(--accent)}
+  .fe-jchan.push{background:var(--amber)}
+  .fe-jday{margin-left:auto;font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .fe-jnums{display:flex;flex-wrap:wrap;gap:20px;margin-top:12px}
+  .fe-jnums span{display:flex;flex-direction:column;gap:2px;font-size:10.5px;letter-spacing:.9px;text-transform:uppercase;color:var(--ink-2);font-weight:600}
+  .fe-jnums b{font-family:var(--display);font-size:20px;letter-spacing:0;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
+  .fe-jnums .ok b{color:var(--accent)}
+  .fe-jnums .bad b{color:var(--amber)}
+  .fe-jwhy{list-style:none;margin-top:11px;padding-top:11px;border-top:1px solid var(--border);
+    display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--ink-2)}
+  .fe-jwait{align-self:center;margin:4px 0;padding:5px 15px;font-size:11.5px;color:var(--ink-2);
+    border-left:1px dashed var(--border);border-right:0;position:relative}
+  .fe-jwait:before{content:"";position:absolute;left:-1px;top:0;bottom:0;border-left:1px dashed rgba(17,17,17,.22)}
+  .fe-jexit{align-self:flex-start;margin-top:10px;padding:9px 16px;border:1px dashed var(--border);border-radius:980px;font-size:12.5px;color:var(--ink-2)}
+  /* a/b */
+  .fe-abgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:18px}
+  .fe-abgrid label{display:flex;flex-direction:column;gap:7px;font-size:10.5px;letter-spacing:1.1px;
+    text-transform:uppercase;color:var(--ink-2);font-weight:700}
+  .fe-abgrid select{font-family:var(--font);font-size:13.5px;padding:0 12px;min-height:44px;text-transform:none;letter-spacing:0;
+    border:1px solid var(--border);border-radius:10px;background:var(--surface-solid);color:var(--ink);font-weight:500}
+  .fe-abgrid input[type=range]{width:100%;min-height:44px;accent-color:var(--accent)}
+  .fe-abpct{font-size:12.5px;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;margin-top:-8px}
+  .fe-plan{padding:13px 16px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2);font-size:13.5px;line-height:1.55}
+  .fe-arms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .fe-arm{padding:14px 16px;border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;gap:4px}
+  .fe-arm span{font-size:12px;color:var(--ink-2)}
+  .fe-arm b{font-family:var(--display);font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+  .fe-arm em{font-style:normal;font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .fe-prog{height:6px;background:rgba(17,17,17,.07);border-radius:980px;overflow:hidden;margin:16px 0 14px}
+  .fe-prog i{display:block;height:100%;background:var(--accent);border-radius:980px;transition:width .2s var(--ease)}
+  .fe-verdict{padding:16px 18px;border-radius:12px;border:1px solid var(--border)}
+  .fe-verdict.stop{background:rgba(168,83,27,.07);border-color:rgba(168,83,27,.28)}
+  .fe-verdict.go{background:rgba(138,109,59,.08);border-color:rgba(138,109,59,.3)}
+  .fe-verdict b{font-size:16px;font-weight:600;display:block;margin-bottom:7px}
+  .fe-verdict.stop b{color:var(--amber)}
+  .fe-verdict.go b{color:var(--accent-dark)}
+  .fe-verdict p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+  .fe-vstats{margin-top:11px;padding-top:11px;border-top:1px solid var(--border);font-family:var(--mono);
+    font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  @media (max-width:860px){
+    .fe-vs,.fe-arms{grid-template-columns:1fr}
+    .fe-bar{grid-template-columns:120px 1fr 56px 44px;gap:9px;font-size:12px}
+    .fe-body{padding:16px 18px 20px}
+    .fe-rule input{width:100%}
+    .fe-rx{margin-left:0}
+    .fe-jday{margin-left:0;width:100%}
+    .fe-jnums{gap:14px}
+  }
 </style>
 </head>
 <body>
@@ -1111,6 +1273,32 @@
     <div class="nav-item" data-tool="editor">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 20 4-1 10-10-3-3L5 16z"/><path d="m14.5 6.5 3 3"/></svg>
       Copy Editor
+    </div>
+
+    <div class="nav-label" style="margin-top:18px">Fan Engagement</div>
+    <div class="nav-item" data-tool="fanreq">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h7M9 17h5"/></svg>
+      1. Request
+    </div>
+    <div class="nav-item" data-tool="fanseg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="9.5" r="5.5"/><circle cx="15" cy="15" r="5.5"/></svg>
+      2. Segment
+    </div>
+    <div class="nav-item" data-tool="fanbuild">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 8 9 6 9-6"/></svg>
+      3. Build
+    </div>
+    <div class="nav-item" data-tool="fanqa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.7v5.1c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V5.7z"/><path d="m9 12 2 2 4-4"/></svg>
+      4. QA
+    </div>
+    <div class="nav-item" data-tool="fandeploy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="12" r="2.4"/><circle cx="6" cy="18" r="2.4"/><path d="M8.4 6H13a3 3 0 0 1 3 3v.6M15.6 12H11a3 3 0 0 0-3 3v.6"/></svg>
+      5. Deploy
+    </div>
+    <div class="nav-item" data-tool="fanmeasure">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20v-6M12 20V8M17 20v-9"/></svg>
+      6. Measure
     </div>
 
     <div class="nav-foot">Rendered, measured,<br/>then graded.</div>
@@ -1248,6 +1436,14 @@ function brandContext(){
 
 /* ---------------- tool definitions (demo client business) ---------------- */
 const TOOLS = {
+  /* FAN ENGAGEMENT. Six screens carrying the JD's own vocabulary. Each one is bespoke,
+     so like home and meeting they carry no fields and renderTool hands straight over. */
+  fanreq:{fan:true,title:"Request",hl:"Request",blurb:"The campaign request, the audience of record it runs against, and the guardrails the build is not allowed to break.",fields:[]},
+  fanseg:{fan:true,title:"Segment",hl:"Segment",blurb:"Who matches, who can lawfully be contacted on each channel, and exactly who was removed on the way.",fields:[]},
+  fanbuild:{fan:true,title:"Build",hl:"Build",blurb:"One offer rendered as email, SMS and push, with every personalization token shown against what happens when it is empty.",fields:[]},
+  fanqa:{fan:true,title:"QA",hl:"QA",blurb:"Every template checked against a written standard, with the send blocked while anything is still failing.",fields:[]},
+  fandeploy:{fan:true,title:"Deploy",hl:"Deploy",blurb:"The journey, the wait between each step, and who the frequency cap removed at every send.",fields:[]},
+  fanmeasure:{fan:true,title:"Measure",hl:"Measure",blurb:"What the journey returned, what a fan is worth, and an experiment that refuses to be stopped early.",fields:[]},
   /* Not a generator. The workspace is where the work already done lives, so it carries no
      fields and no prompt of its own, and renderTool hands straight over to renderHome. */
   home:{
@@ -1804,6 +2000,7 @@ function renderTool(){
   const t=TOOLS[current];
   if(t&&t.workspace) return renderHome();
   if(t&&t.meeting) return renderMeeting();
+  if(t&&t.fan) return FAN_SCREENS[current]();
   if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
@@ -5244,6 +5441,1458 @@ function bindCopy(id,text){
   });
 }
 
+
+/* ==================================================================================
+   FAN ENGAGEMENT
+   ==================================================================================
+   Built to reason about the primitives of a fan lifecycle platform: audience of
+   record, segmentation with consent, journeys with a frequency cap, dynamic content
+   with a fallback, template QA, and an A/B test that refuses to be peeked at.
+
+   It is NOT an Adobe stack and never claims to be. Every number on screen comes from
+   a seeded synthetic dataset generated in this file, and the UI says so on every
+   screen that shows a count.
+
+   THE LAW HERE IS THE SAME AS EVERYWHERE ELSE IN THIS APP: enforce in code, not in a
+   prompt. A frequency cap that is only a note in a brief is the thing that ships and
+   then messages somebody five times before lunch. So the cap is a function that
+   removes people, the consent check is a function that removes people, and every
+   count on screen shows who was removed and why.
+   ================================================================================== */
+
+/* ---------------------------------------------------------------- determinism ---
+   mulberry32. Seeded on purpose: the counts an interviewer sees today must be the
+   counts they see if they open it again next week. Math.random would make every
+   segment size, every LTV band and every A/B result a different story each reload,
+   and the first person to notice would rightly stop believing all of it. */
+function frng(seed){
+  let a=seed>>>0;
+  return function(){
+    a=(a+0x6D2B79F5)>>>0;
+    let t=a;
+    t=Math.imul(t^(t>>>15),t|1);
+    t^=t+Math.imul(t^(t>>>7),t|61);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+/* Pareto. Real fan spend is not uniform and it is not normal: a thin band of people
+   pay for most of it and a long tail barely shows up. Uniform random data is spotted
+   instantly by anyone who has looked at a real book of business, and it would quietly
+   break the segment counts, the LTV bands and the A/B module at the same time. */
+function pareto(u,xm,alpha){ return xm/Math.pow(1-u*0.999999,1/alpha); }
+function pick(r,arr){ return arr[Math.floor(r()*arr.length)]; }
+/* Box-Muller. The obvious shortcut, averaging a handful of uniforms, has BOUNDED support:
+   it cannot produce a tail event at all, which silently turned the peeking simulation into
+   a flat zero because no A/A test could ever reach significance by chance. A normal draw
+   has to have real tails or it is not modelling the thing that makes peeking dangerous. */
+function gauss(r){
+  let u=0,v=0;
+  while(u===0) u=r();
+  while(v===0) v=r();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+const FAN_SEED=20260821;
+const FAN_N=24000;
+const FAN_TODAY="2026-08-21";        // frozen: a demo whose numbers move with the clock cannot be re-run
+const FAN_SEASON=2026;
+const FAN_CLUB="Harborline FC";      // fictional on purpose. No real club, no real person, no real number.
+
+const FAN_FIRST=["Marcus","Danielle","Terrence","Priya","Jordan","Alicia","Devon","Rosa","Malik","Grace","Curtis","Yusuf","Nia","Owen","Tamara","Andre","Bianca","Hector","Simone","Reggie","Lena","Darnell","Ivy","Sasha","Colin","Fatima","Trevor","Maya","Elias","Bridget"];
+const FAN_LAST=["Whitfield","Okonkwo","Marchetti","Vasquez","Boone","Nakamura","Ellery","Duplessis","Farrow","Adeyemi","Kowalczyk","Sinclair","Brantley","Okafor","Rutherford","Delgado","Ashford","Petrov","Calloway","Njoroge","Hargrove","Silva","Winterbourne","Mbeki","Foster","Quintero","Ashworth","Larue"];
+const FAN_CITY=[["Riverton","ET"],["Northgate","ET"],["Lakeshore","ET"],["Bell Harbor","ET"],["Westbrook","CT"],["Ashland","CT"],["Fairmount","ET"],["Cedar Point","CT"]];
+const FAN_PLAYERS=["A. Okonjo","R. Vance","M. Delacroix","T. Bergstrom","K. Amari","J. Whitlock","S. Ferreira","D. Halloran"];
+const FAN_SECTIONS=["104","112","118","126","133","141","208","214","221","307","315","322"];
+
+/* The schedule. Attendance is seasonal or it is not attendance: a fan base that shows
+   up evenly across July and November has never been to a match. */
+function fanSeasonWindow(year){ return {start:new Date(year,8,5), end:new Date(year+1,0,18)}; }
+
+let FANS=null;
+
+/* Two passes on purpose. Everything a fan IS can be drawn independently; what TIER they
+   are in is a statement about where they sit relative to everybody else, so it cannot be
+   known until the whole book exists. Drawing a tier from a dice roll instead would let a
+   "Founder" sit below the median spend, which is the sort of thing that survives right up
+   until somebody sorts the table by spend in front of you. */
+function buildFans(){
+  const r=frng(FAN_SEED), out=new Array(FAN_N);
+  for(let i=0;i<FAN_N;i++){
+    const first=pick(r,FAN_FIRST), last=pick(r,FAN_LAST), city=pick(r,FAN_CITY);
+
+    const joinYear=2005+Math.floor(Math.pow(r(),0.55)*21);
+    const maxHeld=Math.max(1,FAN_SEASON-joinYear);
+
+    /* Most of a fan base has never held a season ticket. Modelling everyone as a season
+       ticket holder would make "lapsed season ticket holder" select the entire database,
+       and a segment that matches everyone is not a segment. */
+    const sthEver=r()<0.36;
+    let seasonsHeld=0, lastHeld=null, lapsed=false, seatPrice=0;
+    if(sthEver){
+      seasonsHeld=Math.max(1,Math.min(maxHeld,Math.round(pareto(r(),1,1.55))));
+      /* Premium inventory is a heavy tail of its own: most seats are ordinary, a few are
+         the halfway line. This is what puts real distance between the tiers. */
+      seatPrice=Math.round(620+pareto(r(),1,1.7)*380);
+      lapsed=r()<0.31;
+      lastHeld=lapsed ? Math.max(joinYear,FAN_SEASON-1-Math.floor(Math.pow(r(),1.7)*6)) : FAN_SEASON;
+    }
+
+    /* When they were last in the ground. Inside a real season window either way, so the
+       month histogram looks like a schedule and not like a rounding error. */
+    const attYear = sthEver ? (lastHeld===FAN_SEASON?FAN_SEASON-1:lastHeld)
+                            : Math.max(joinYear,FAN_SEASON-1-Math.floor(Math.pow(r(),1.5)*7));
+    const w=fanSeasonWindow(attYear);
+    const lastAtt=new Date(w.start.getTime()+Math.pow(r(),0.7)*(w.end.getTime()-w.start.getTime()));
+    const lastAttended=ymdLocal(lastAtt);
+    const dormantDays=Math.max(0,daysBetween(lastAttended,FAN_TODAY));
+    const dormantSeasons=Math.floor(dormantDays/365);
+
+    const games=sthEver ? Math.round(seasonsHeld*(9+r()*10)) : Math.round(pareto(r(),1,1.8)-1+r()*3);
+    const seasonSpend=seasonsHeld*seatPrice;
+    /* Single-game spend follows the number of games. Drawing it independently made a fan
+       who comes to six matches a year land on the same median as one who has never been,
+       which is visible the moment anyone groups the table by tier. */
+    const singleSpend=Math.round(pareto(r(),46,1.55)*(0.5+(sthEver?r()*1.4:games*0.55+r()*0.8)));
+    const spend=Math.round(Math.min(seasonSpend+singleSpend,240000));
+    const merch=Math.round(spend*(0.03+r()*0.11));
+    const avgTicket=sthEver&&seatPrice ? Math.round(seatPrice/17) : Math.max(22,Math.round(singleSpend/Math.max(1,games)));
+
+    /* Consent, per channel, held separately. This is the whole point: one opt-in flag for
+       "marketing" is how a club ends up texting somebody who only ever agreed to an email. */
+    const emailOptIn=r()<0.86;
+    const smsOptIn=r()<0.41;
+    const hasApp=r()<0.34;
+    const pushOptIn=hasApp && r()<0.86;
+    const emailValid=r()<0.968;
+    const unsub=r()<0.041;
+
+    /* Contact fatigue. Tuned so the frequency cap actually removes a visible slice during
+       a busy stretch of the season. A cap that never fires demonstrates nothing. */
+    const msgs7d=Math.min(7,Math.round(pareto(r(),0.8,2.15))-1);
+
+    const openRate=Math.max(0.02,Math.min(0.74,0.44-dormantSeasons*0.055+(sthEver?0.06:0)+gauss(r)*0.09));
+
+    out[i]={
+      id:"F"+String(100000+i),
+      first:first, last:last,
+      email:(first[0]+last).toLowerCase().replace(/[^a-z]/g,"")+(i%97)+"@example.com",
+      phone:"+1555"+String(1000000+((i*7919)%9000000)).slice(0,7),
+      city:city[0], tz:city[1],
+      joinYear:joinYear,
+      sthEver:sthEver, seasonsHeld:seasonsHeld, lastSeasonHeld:lastHeld,
+      lapsed:lapsed, seatPrice:seatPrice,
+      lastAttended:lastAttended, dormantDays:dormantDays, dormantSeasons:dormantSeasons,
+      gamesAttended:Math.max(0,games),
+      spend:spend, merchSpend:merch, avgTicket:avgTicket,
+      emailOptIn:emailOptIn, smsOptIn:smsOptIn, pushOptIn:pushOptIn,
+      emailValid:emailValid, unsub:unsub, hasApp:hasApp,
+      /* A per-fan preference, not a house rule. Held identically for everyone it stops
+         being a model of consent and becomes a constant that either blocks all SMS or
+         none of it, which teaches an interviewer nothing about the guard. */
+      quietStart:20+Math.floor(r()*3), quietEnd:8+Math.floor(r()*3),
+      msgs7d:Math.max(0,msgs7d), openRate:Math.round(openRate*1000)/1000,
+      /* Deliberately nullable. A personalization token that is never null in the test data
+         proves nothing, because the bug being hunted is the email that goes out reading
+         "your favourite player is ". */
+      favoritePlayer: r()<0.78 ? pick(r,FAN_PLAYERS) : null,
+      seatSection: (sthEver && lastHeld!=null && lastHeld>=FAN_SEASON-3) ? pick(r,FAN_SECTIONS) : null
+    };
+  }
+
+  /* Second pass: tier is a percentile, so it needs the finished book. */
+  const bySpend=out.slice().sort((a,b)=>a.spend-b.spend);
+  const cut=p=>bySpend[Math.floor(p*(bySpend.length-1))].spend;
+  const p99=cut(.99), p90=cut(.90);
+  out.forEach(f=>{
+    f.tier = f.spend>=p99 ? "Founders Circle"
+           : f.spend>=p90 ? "Premium"
+           : f.sthEver    ? "Season"
+           : f.gamesAttended>=4 ? "Regular" : "Casual";
+  });
+  return out;
+}
+function fans(){ if(!FANS) FANS=buildFans(); return FANS; }
+function ymdLocal(d){ const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function fanName(f){ return f.first+" "+f.last; }
+function daysBetween(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000); }
+
+/* ------------------------------------------------------------------------ LTV ---
+   A stated formula, not a model. The JD asks about fan LTV and the honest thing to
+   show is arithmetic somebody can argue with, printed on the screen beside the
+   number. A trained propensity score is exactly the kind of thing that cannot be
+   faked convincingly, so this does not pretend to be one. */
+const LTV_HORIZON=3;
+function fanLTV(f){
+  /* Years they have actually been a customer, never zero, and never dependent on a field
+     that is null for the majority of the book. */
+  const lastYear=f.lastSeasonHeld||Number(f.lastAttended.slice(0,4))||f.joinYear;
+  const yrs=Math.max(1,lastYear-f.joinYear+1);
+  const annual=f.spend/yrs;
+  /* Retention falls with dormancy and rises with tenure. Bounded so nobody scores zero and
+     nobody scores certainty. */
+  const retention=Math.max(0.08,Math.min(0.93,0.78-f.dormantSeasons*0.14+Math.min(0.18,f.seasonsHeld*0.015)));
+  const forward=annual*retention*(1-Math.pow(retention,LTV_HORIZON))/(1-retention);
+  return Math.round(f.spend+forward);
+}
+function ltvFormula(){
+  return "LTV = lifetime spend + projected "+LTV_HORIZON+" seasons, where annual spend = lifetime / seasons held, "
+       + "and retention = 0.78 - 0.14 per dormant season + 0.015 per season held, bounded 0.08 to 0.93. "
+       + "It is arithmetic, not a trained model, and it is shown so it can be argued with.";
+}
+function ltvBands(list){
+  const v=list.map(fanLTV).sort((a,b)=>a-b);
+  const q=p=>v.length?v[Math.min(v.length-1,Math.floor(p*v.length))]:0;
+  return {p50:q(.5),p75:q(.75),p90:q(.9),p99:q(.99),total:v.reduce((s,x)=>s+x,0)};
+}
+
+/* ------------------------------------------------------------------ segments ---
+   Rules are data, not code, so a rule can be shown on screen exactly as it was
+   evaluated. Every operator is total: an unknown field or an unparseable value
+   returns false rather than throwing, because a segment builder that crashes on a
+   typo is a segment builder nobody trusts with a send. */
+const SEG_OPS={
+  gte:{label:"is at least", fn:(a,b)=>num(a)>=num(b)},
+  lte:{label:"is at most",  fn:(a,b)=>num(a)<=num(b)},
+  eq:{ label:"is",          fn:(a,b)=>String(a)===String(b)},
+  ne:{ label:"is not",      fn:(a,b)=>String(a)!==String(b)},
+  is_true:{label:"is true", fn:a=>a===true},
+  is_false:{label:"is false",fn:a=>a===false},
+  is_null:{label:"is missing",fn:a=>a===null||a===undefined||a===""},
+  not_null:{label:"is present",fn:a=>!(a===null||a===undefined||a==="")},
+  before:{label:"is before",fn:(a,b)=>!!a&&String(a)<String(b)},
+  after:{ label:"is after", fn:(a,b)=>!!a&&String(a)>String(b)},
+  dormant_days:{label:"days since, at least",fn:(a,b)=>!!a&&daysBetween(a,FAN_TODAY)>=num(b)}
+};
+function num(v){ const n=Number(v); return isFinite(n)?n:NaN; }
+function segMatch(f,rules){
+  return (rules||[]).every(rl=>{
+    const op=SEG_OPS[rl.op]; if(!op) return false;
+    try{ return !!op.fn(f[rl.field],rl.value); }catch(e){ return false; }
+  });
+}
+function ruleWords(rl){
+  const op=SEG_OPS[rl.op];
+  const f=FAN_FIELDS[rl.field];
+  const name=f?f.label:rl.field;
+  if(!op) return name+" (unknown rule)";
+  if(rl.op==="is_true"||rl.op==="is_false"||rl.op==="is_null"||rl.op==="not_null") return name+" "+op.label;
+  return name+" "+op.label+" "+rl.value;
+}
+const FAN_FIELDS={
+  lapsed:{label:"Lapsed season ticket holder",type:"bool"},
+  sthEver:{label:"Has ever held a season ticket",type:"bool"},
+  seasonsHeld:{label:"Seasons held",type:"num"},
+  dormantDays:{label:"Days since they last attended",type:"num"},
+  tier:{label:"Tier",type:"text"},
+  msgs7d:{label:"Messages sent in the last 7 days",type:"num"},
+  lastSeasonHeld:{label:"Last season held",type:"num"},
+  dormantSeasons:{label:"Seasons dormant",type:"num"},
+  gamesAttended:{label:"Games attended",type:"num"},
+  lastAttended:{label:"Last attended",type:"date"},
+  spend:{label:"Lifetime spend",type:"num"},
+  avgTicket:{label:"Average ticket",type:"num"},
+  merchSpend:{label:"Merch spend",type:"num"},
+  openRate:{label:"Email open rate",type:"num"},
+  city:{label:"City",type:"text"},
+  hasApp:{label:"Has the app",type:"bool"},
+  favoritePlayer:{label:"Favourite player",type:"text"},
+  seatSection:{label:"Seat section",type:"text"},
+  emailOptIn:{label:"Email opt-in",type:"bool"},
+  smsOptIn:{label:"SMS opt-in",type:"bool"},
+  pushOptIn:{label:"Push opt-in",type:"bool"}
+};
+
+/* --------------------------------------------------------------- reachability ---
+   The count that matters is not how many people match. It is how many you are
+   allowed to contact, and the difference has to be itemised or nobody can audit it.
+   Order matters: a global unsubscribe is reported as an unsubscribe even if the
+   person also has no SMS consent, because that is the reason that governs. */
+const FREQ_CAP=3;               // messages per rolling 7 days, per fan, all channels
+function suppressionOf(f,channel,opts){
+  opts=opts||{};
+  /* `== null` here would treat an explicit null as "not supplied" and quietly restore the
+     default, which makes cap:null mean the opposite of what it reads as. undefined is the
+     only value that means "use the house default". */
+  const cap=opts.cap===undefined?FREQ_CAP:opts.cap;
+  if(f.unsub) return "Unsubscribed from all marketing";
+  if(channel==="email"){
+    if(!f.emailOptIn) return "No email consent";
+    if(!f.emailValid) return "Email hard-bounced";
+  }
+  if(channel==="sms"){
+    if(!f.smsOptIn) return "No SMS consent";
+    if(opts.hour!=null && inQuietHours(f,opts.hour)) return "Quiet hours in their timezone";
+  }
+  if(channel==="push"){
+    if(!f.hasApp) return "No app installed";
+    if(!f.pushOptIn) return "No push consent";
+  }
+  if(cap!=null && f.msgs7d>=cap) return "Frequency cap: "+cap+" in 7 days already sent";
+  return null;
+}
+function inQuietHours(f,hour){
+  const h=((hour|0)%24+24)%24;
+  return f.quietStart>f.quietEnd ? (h>=f.quietStart||h<f.quietEnd) : (h>=f.quietStart&&h<f.quietEnd);
+}
+/* One pass, one object, every number on the segment screen. */
+function evalSegment(rules,channel,opts){
+  const matched=[], reachable=[], reasons={};
+  const all=fans();
+  for(let i=0;i<all.length;i++){
+    const f=all[i];
+    if(!segMatch(f,rules)) continue;
+    matched.push(f);
+    const why=suppressionOf(f,channel,opts);
+    if(why){ reasons[why]=(reasons[why]||0)+1; }
+    else reachable.push(f);
+  }
+  const supp=Object.keys(reasons).map(k=>({reason:k,count:reasons[k]})).sort((a,b)=>b.count-a.count);
+  return {
+    rules:rules, channel:channel,
+    matched:matched.length, reachable:reachable.length,
+    suppressed:matched.length-reachable.length,
+    reasons:supp, people:reachable, matchedPeople:matched,
+    ltv:ltvBands(matched)
+  };
+}
+function segSentence(s){
+  return s.matched.toLocaleString()+" match, "+s.reachable.toLocaleString()+" reachable, "
+    + s.suppressed.toLocaleString()+" suppressed"
+    + (s.reasons.length?": "+s.reasons.map(r=>r.count.toLocaleString()+" "+r.reason.toLowerCase()).join("; "):"");
+}
+
+/* ------------------------------------------------------- dynamic content ---
+   Tokens are declared, not discovered. A registry means the QA harness can tell the
+   difference between a token that is allowed to be empty and one that is a typo, which
+   is the entire difference between a warning and a broken send.
+
+   SCOPE is the interesting column. A send-time token is resolved once, when the message
+   is built, and is frozen from then on. An open-time token is resolved when the message
+   is actually opened, which may be four days later, and is the reason a countdown or a
+   seats-remaining figure in an email is either impressive or a lie. */
+const FAN_TOKENS={
+  first_name:     {scope:"send", label:"First name",        get:f=>f.first},
+  city:           {scope:"send", label:"City",              get:f=>f.city},
+  seasons_held:   {scope:"send", label:"Seasons held",      get:f=>f.seasonsHeld||null},
+  last_season:    {scope:"send", label:"Last season held",  get:f=>f.lastSeasonHeld},
+  favorite_player:{scope:"send", label:"Favourite player",  get:f=>f.favoritePlayer},
+  seat_section:   {scope:"send", label:"Seat section",      get:f=>f.seatSection},
+  renewal_price:  {scope:"send", label:"Renewal price",     get:f=>f.seatPrice?("$"+f.seatPrice.toLocaleString()):null},
+  next_home_game: {scope:"open", label:"Next home game",    get:(f,c)=>c.nextGame},
+  seats_left:     {scope:"open", label:"Seats left in their section", get:(f,c)=>c.seatsLeft},
+  countdown:      {scope:"open", label:"Time until kickoff",get:(f,c)=>c.countdown},
+  gate_weather:   {scope:"open", label:"Forecast at the gate", get:(f,c)=>c.weather}
+};
+
+/* What the world looks like at the moment the message is opened. Derived from the open
+   time so that opening on Tuesday and opening on Friday genuinely differ; seeded from
+   the same timestamp so the demo reproduces. */
+const FAN_FIXTURES=[["Sat 12 Sep","Northgate Rovers"],["Sat 19 Sep","Cedar Point Athletic"],["Wed 23 Sep","Ashland City"],["Sat 3 Oct","Westbrook United"]];
+function openContext(atISO){
+  const at=new Date(atISO+(atISO.length<=10?"T12:00:00":""));
+  const dayIdx=Math.floor(at.getTime()/86400000);
+  const r=frng(dayIdx*2654435761);
+  const fx=FAN_FIXTURES[dayIdx%FAN_FIXTURES.length];
+  const kickoff=new Date(at.getTime()+(1+r()*9)*86400000);
+  const hrs=Math.max(0,Math.round((kickoff-at)/3600000));
+  return {
+    at:atISO,
+    nextGame:fx[0]+" v "+fx[1],
+    seatsLeft:String(40+Math.floor(r()*260)),
+    countdown:hrs>48?(Math.round(hrs/24)+" days"):(hrs+" hours"),
+    weather:pick(r,["12C and clear","9C, light rain","15C and breezy","7C, cold and dry"])
+  };
+}
+
+/* {{token}} or {{token | fallback text}}. The pipe is the whole safety mechanism, so it
+   is part of the syntax rather than a convention somebody has to remember. */
+const TOKEN_RE=/\{\{\s*([a-z_][a-z0-9_]*)\s*(?:\|\s*([^}]*?)\s*)?\}\}/gi;
+function resolveTokens(text,fan,opts){
+  opts=opts||{};
+  const mode=opts.mode==="open"?"open":"send";
+  const ctx=opts.ctx||openContext(opts.at||FAN_TODAY);
+  const used=[],unknown=[],empty=[],fellBack=[],frozen=[];
+  const out=String(text||"").replace(TOKEN_RE,(m,name,fb)=>{
+    name=name.toLowerCase();
+    const def=FAN_TOKENS[name];
+    if(!def){ unknown.push(name); return m; }   // left visible on purpose: a typo must LOOK broken
+    used.push(name);
+    /* An open-time token rendered in send mode is frozen: this is what a normal ESP does,
+       and showing the two side by side is the point of the whole screen. */
+    if(def.scope==="open"&&mode==="send") frozen.push(name);
+    let v=null;
+    try{ v=def.get(fan,ctx); }catch(e){ v=null; }
+    if(v===null||v===undefined||v===""){
+      if(fb!=null&&fb!==""){ fellBack.push(name); return fb; }
+      empty.push(name);
+      return "";                                 // renders as the hole it actually is
+    }
+    return String(v);
+  });
+  return {out:out,used:used,unknown:unknown,empty:empty,fellBack:fellBack,frozen:frozen,mode:mode,ctx:ctx};
+}
+/* How often each token would be empty across a real audience. A token that is never null
+   in the sample you tested with is the one that breaks on the night. */
+function tokenRisk(text,people){
+  const names=[];
+  String(text||"").replace(TOKEN_RE,(m,n)=>{names.push(n.toLowerCase());return m;});
+  const uniq=names.filter((n,i)=>names.indexOf(n)===i);
+  const hasFb={};
+  String(text||"").replace(TOKEN_RE,(m,n,fb)=>{ if(fb) hasFb[n.toLowerCase()]=true; return m; });
+  return uniq.map(n=>{
+    const def=FAN_TOKENS[n];
+    if(!def) return {token:n,known:false,nulls:0,of:people.length,fallback:!!hasFb[n]};
+    let nulls=0;
+    for(let i=0;i<people.length;i++){
+      let v=null; try{ v=def.get(people[i],openContext(FAN_TODAY)); }catch(e){}
+      if(v===null||v===undefined||v==="") nulls++;
+    }
+    return {token:n,known:true,scope:def.scope,nulls:nulls,of:people.length,fallback:!!hasFb[n]};
+  });
+}
+
+/* -------------------------------------------------------------- contrast ---
+   Real WCAG maths, not a guess. sRGB relative luminance per WCAG 2.1, then the
+   (L1+0.05)/(L2+0.05) ratio. This app grades other people's sites on accessibility,
+   so getting its own contrast check wrong would be a credibility problem before it
+   was a bug. */
+function hexOf(c){
+  c=String(c||"").trim().toLowerCase();
+  let m=c.match(/^#([0-9a-f]{3})$/); if(m) return "#"+m[1].split("").map(x=>x+x).join("");
+  m=c.match(/^#([0-9a-f]{6})$/);     if(m) return c;
+  m=c.match(/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  if(m) return "#"+[1,2,3].map(i=>Number(m[i]).toString(16).padStart(2,"0")).join("");
+  const named={white:"#ffffff",black:"#000000",red:"#ff0000",grey:"#808080",gray:"#808080"};
+  return named[c]||null;
+}
+function srgbLum(hex){
+  const h=hexOf(hex); if(!h) return null;
+  const v=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255)
+    .map(u=>u<=0.03928?u/12.92:Math.pow((u+0.055)/1.055,2.4));
+  return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];
+}
+function contrastRatio(fg,bg){
+  const a=srgbLum(fg),b=srgbLum(bg);
+  if(a===null||b===null) return null;
+  const hi=Math.max(a,b),lo=Math.min(a,b);
+  return Math.round(((hi+0.05)/(lo+0.05))*100)/100;
+}
+function styleProp(el,prop){
+  const s=el.getAttribute&&el.getAttribute("style");
+  if(!s) return null;
+  const m=s.match(new RegExp("(?:^|;)\\s*"+prop+"\\s*:\\s*([^;]+)","i"));
+  return m?m[1].trim():null;
+}
+function inheritedBg(el){
+  let n=el;
+  while(n&&n.getAttribute){
+    const b=styleProp(n,"background-color")||styleProp(n,"background")||
+            (n.getAttribute("bgcolor")?n.getAttribute("bgcolor"):null);
+    if(b&&hexOf(b)) return hexOf(b);
+    n=n.parentElement;
+  }
+  return "#ffffff";   // an email with no stated background is white in most clients
+}
+
+/* ------------------------------------------------------------ the QA harness ---
+   Findings carry the STANDARD they come from. "This looks wrong" is an opinion; "this
+   fails WCAG 1.4.3 at 2.84:1 against a 4.5:1 threshold" is a defect somebody can fix
+   and re-test. Severity: fail blocks the send, warn does not. */
+const QA_SEV={fail:2,warn:1,pass:0};
+function qaFinding(sev,std,where,what,why,fix){
+  return {severity:sev,standard:std,where:where,what:what,why:why,fix:fix};
+}
+function qaEmail(tpl,people){
+  const F=[];
+  const doc=new DOMParser().parseFromString(tpl.html||"","text/html");
+  const body=doc.body;
+
+  /* --- tokens ------------------------------------------------------------- */
+  tokenRisk((tpl.subject||"")+" "+(tpl.preheader||"")+" "+(tpl.html||""),people||[]).forEach(t=>{
+    if(!t.known){
+      F.push(qaFinding("fail","Personalization","{{"+t.token+"}}",
+        "Unknown token, it is not in the registry",
+        "It will ship to the audience as the literal text {{"+t.token+"}}, because there is nothing to resolve it to.",
+        "Correct the spelling, or add the field to the token registry."));
+      return;
+    }
+    if(t.nulls>0&&!t.fallback){
+      const pct=t.of?Math.round(1000*t.nulls/t.of)/10:0;
+      F.push(qaFinding("fail","Personalization","{{"+t.token+"}}",
+        "Empty for "+t.nulls.toLocaleString()+" of "+t.of.toLocaleString()+" in this segment ("+pct+"%) and has no fallback",
+        "Those messages render with a hole in the sentence where the value should be.",
+        "Give it a fallback: {{"+t.token+" | your usual seat}}"));
+    } else if(t.nulls>0&&t.fallback){
+      F.push(qaFinding("pass","Personalization","{{"+t.token+"}}",
+        "Empty for "+t.nulls.toLocaleString()+" of "+t.of.toLocaleString()+", and the fallback covers them",
+        "","" ));
+    }
+  });
+
+  /* --- subject and preheader ---------------------------------------------- */
+  const sl=(tpl.subject||"").length;
+  if(!tpl.subject) F.push(qaFinding("fail","Deliverability","Subject","There is no subject line","An empty subject is filtered by most consumer mailboxes.","Write one."));
+  else if(sl>45) F.push(qaFinding("warn","Deliverability","Subject","Subject is "+sl+" characters",
+    "The iPhone list view truncates around 35 to 40 characters in portrait, so the end of this will not be read.","Cut it to 40 or fewer."));
+  if(!tpl.preheader) F.push(qaFinding("warn","Deliverability","Preheader","No preheader text",
+    "The client fills the preview line with the first text it finds in the body, which is usually the view-in-browser link.","Add a preheader, and hide it visually."));
+
+  /* --- accessibility ------------------------------------------------------- */
+  const imgs=Array.prototype.slice.call(body.querySelectorAll("img"));
+  imgs.forEach((im,i)=>{
+    const alt=im.getAttribute("alt");
+    const where="<img> "+(im.getAttribute("src")||"").split("/").pop().slice(0,32)||("image "+(i+1));
+    if(alt===null)
+      F.push(qaFinding("fail","WCAG 1.1.1 Non-text Content",where,"Image has no alt attribute",
+        "A screen reader announces the file name instead, and every client that blocks images by default shows nothing at all.",
+        'Add alt text describing what the image says, or alt="" if it is purely decorative.'));
+    else if(alt.trim()===""&&!/spacer|pixel|divider|decor/i.test(im.getAttribute("src")||""))
+      F.push(qaFinding("warn","WCAG 1.1.1 Non-text Content",where,'Image is marked decorative with alt=""',
+        "If it carries the offer, that offer is invisible to a screen reader and to anyone with images off.",
+        "Confirm it is decorative, otherwise describe it."));
+  });
+  /* Image-only creative. The single most common accessible-email failure there is. */
+  const textLen=(body.textContent||"").replace(/\s+/g,"").length;
+  if(imgs.length&&textLen<140)
+    F.push(qaFinding("fail","WCAG 1.1.1 Non-text Content","Whole email","The message is carried almost entirely by images ("+textLen+" characters of live text)",
+      "With images blocked, which is the default in several clients, the recipient gets a blank rectangle.",
+      "Set the offer, the price and the call to action as live HTML text."));
+
+  Array.prototype.slice.call(body.querySelectorAll("table")).forEach((t,i)=>{
+    const role=(t.getAttribute("role")||"").toLowerCase();
+    const isData=!!t.querySelector("th");
+    if(!isData&&role!=="presentation"&&role!=="none")
+      F.push(qaFinding("fail","WCAG 1.3.1 Info and Relationships","Layout table "+(i+1),'Layout table has no role="presentation"',
+        "A screen reader announces it as a data table and reads coordinates for a grid that carries no meaning.",
+        'Add role="presentation" to every table used for layout.'));
+    if(isData&&!t.querySelector("caption"))
+      F.push(qaFinding("warn","WCAG 1.3.1 Info and Relationships","Data table "+(i+1),"Data table has no caption","There is nothing to tell a screen reader user what the table is for.","Add a <caption>."));
+  });
+
+  /* Heading order. A jump from h1 to h3 tells assistive technology a level was skipped. */
+  let lastLevel=0;
+  Array.prototype.slice.call(body.querySelectorAll("h1,h2,h3,h4,h5,h6")).forEach(h=>{
+    const lvl=Number(h.tagName.slice(1));
+    if(lastLevel&&lvl>lastLevel+1)
+      F.push(qaFinding("fail","WCAG 1.3.1 Info and Relationships","<"+h.tagName.toLowerCase()+"> "+(h.textContent||"").trim().slice(0,34),
+        "Heading level jumps from h"+lastLevel+" to h"+lvl,
+        "Anyone navigating by headings is told a section is missing.",
+        "Use h"+(lastLevel+1)+" here, and style it to look however you like."));
+    lastLevel=lvl;
+  });
+  if(!body.querySelector("h1")&&textLen>140)
+    F.push(qaFinding("warn","WCAG 1.3.1 Info and Relationships","Whole email","No heading at all","There is no way to jump to the point of the message.","Give it one h1."));
+
+  /* Contrast, computed rather than eyeballed. */
+  Array.prototype.slice.call(body.querySelectorAll("*")).forEach(el=>{
+    const fg=styleProp(el,"color"); if(!fg||!hexOf(fg)) return;
+    const own=(el.textContent||"").trim(); if(!own) return;
+    const bg=inheritedBg(el);
+    const ratio=contrastRatio(hexOf(fg),bg); if(ratio===null) return;
+    const sizeStr=styleProp(el,"font-size")||"";
+    const px=Number((sizeStr.match(/([\d.]+)\s*px/)||[])[1]||16);
+    const bold=/bold|[7-9]00/.test(styleProp(el,"font-weight")||"");
+    const large=px>=24||(px>=18.66&&bold);
+    const need=large?3:4.5;
+    if(ratio<need)
+      F.push(qaFinding("fail","WCAG 1.4.3 Contrast (Minimum)","<"+el.tagName.toLowerCase()+"> "+own.slice(0,34),
+        "Contrast is "+ratio.toFixed(2)+":1 against "+bg+", below the "+need+":1 required for this text size",
+        "At this ratio the text is unreadable for many people with low vision, and hard for everyone in daylight on a phone.",
+        "Darken the text or lighten the background until it reaches "+need+":1."));
+  });
+
+  /* Dark mode. Clients invert; a hardcoded light background with dark text set only on
+     some elements is how an email ends up black text on a black card. */
+  const html=tpl.html||"";
+  if(/background(-color)?\s*:\s*#(f|e){2,}/i.test(html)&&!/prefers-color-scheme/i.test(html))
+    F.push(qaFinding("warn","Dark mode","Whole email","Light backgrounds are hardcoded with no prefers-color-scheme block",
+      "Clients that force dark mode will recolour the background and leave the text where it was, which is where black-on-black comes from.",
+      "Add a @media (prefers-color-scheme: dark) block, and set both colour and background on the same elements."));
+
+  /* --- links --------------------------------------------------------------- */
+  Array.prototype.slice.call(body.querySelectorAll("a")).forEach(a=>{
+    const href=a.getAttribute("href")||"";
+    const txt=(a.textContent||"").trim();
+    if(!href||href==="#")
+      F.push(qaFinding("fail","Link","\""+txt.slice(0,30)+"\"","Link has no destination",
+        "It is a dead control in a message asking somebody to act.","Point it at the landing page."));
+    else if(/^http:\/\//i.test(href))
+      F.push(qaFinding("fail","Link","\""+txt.slice(0,30)+"\"","Link is http, not https",
+        "Mailbox providers flag insecure links, and some clients warn the reader before opening it.","Serve the landing page over https and point the link at it."));
+    else if(/^https:\/\//i.test(href)&&!/utm_/i.test(href))
+      F.push(qaFinding("warn","Measurement","\""+txt.slice(0,30)+"\"","Link carries no campaign parameters",
+        "Anything it drives lands in analytics as direct traffic and the campaign gets no credit for it.","Add utm_source, utm_medium and utm_campaign."));
+    if(/^(click here|here|read more|learn more)$/i.test(txt))
+      F.push(qaFinding("fail","WCAG 2.4.4 Link Purpose","\""+txt+"\"","Link text does not say where it goes",
+        "Screen reader users commonly pull up a list of links out of context, where five links all reading click here are useless.",
+        "Write the destination into the link text, for example Renew my seat."));
+  });
+
+  /* --- compliance ---------------------------------------------------------- */
+  if(!/unsubscribe/i.test(body.textContent||""))
+    F.push(qaFinding("fail","CAN-SPAM","Footer","No unsubscribe link",
+      "Commercial email without a working opt-out is unlawful in the United States and will be reported as spam.","Add the unsubscribe link and the postal address."));
+  if(!/(\d{2,5}\s+\w+.*(street|st|road|rd|avenue|ave|way|drive|dr))/i.test(body.textContent||""))
+    F.push(qaFinding("warn","CAN-SPAM","Footer","No postal address found",
+      "CAN-SPAM requires a valid physical postal address in commercial email.","Add the club's registered address."));
+  if(!doc.documentElement.getAttribute("lang")&&!/\slang=/i.test(html))
+    F.push(qaFinding("warn","WCAG 3.1.1 Language of Page","<html>","No language declared",
+      "A screen reader reads the message in whatever voice it defaults to, which mispronounces everything.",'Add lang="en".'));
+  return qaSort(F);
+}
+
+function qaSms(tpl,people){
+  const F=[];
+  const body=tpl.text||"";
+  tokenRisk(body,people||[]).forEach(t=>{
+    if(!t.known) F.push(qaFinding("fail","Personalization","{{"+t.token+"}}","Unknown token","It sends as literal text.","Fix the spelling."));
+    else if(t.nulls>0&&!t.fallback) F.push(qaFinding("fail","Personalization","{{"+t.token+"}}",
+      "Empty for "+t.nulls.toLocaleString()+" of "+t.of.toLocaleString()+" and has no fallback","The message arrives with a gap mid-sentence.","Add a fallback."));
+  });
+  /* Length is measured on the LONGEST render across the audience, not on the template.
+     A template that fits in one segment and a message that does not is the standard way
+     an SMS budget doubles after launch. */
+  let worst=body,worstLen=body.length;
+  (people||[]).slice(0,4000).forEach(f=>{
+    const r=resolveTokens(body,f,{mode:"send"});
+    if(r.out.length>worstLen){worstLen=r.out.length;worst=r.out;}
+  });
+  const gsm=!/[^\x00-\x7F]/.test(worst);
+  const per=gsm?160:70, seg=Math.max(1,Math.ceil(worstLen/(worstLen>per?(gsm?153:67):per)));
+  F.push(qaFinding(seg>1?"warn":"pass","Cost","Longest render",
+    "Longest personalized render is "+worstLen+" characters, "+seg+" "+(gsm?"GSM-7":"UCS-2")+" segment"+(seg===1?"":"s"),
+    seg>1?"Every recipient is billed per segment, so this costs "+seg+" times the estimate a "+body.length+" character template implies.":"",
+    seg>1?"Cut it under "+per+" characters, or budget for "+seg+" segments.":""));
+  if(!gsm) F.push(qaFinding("warn","Cost","Encoding","A non-GSM character forces UCS-2",
+    "The segment length drops from 160 to 70 characters, so a curly quote or an emoji can double the bill.","Use straight quotes."));
+  if(!/\bSTOP\b/i.test(body)) F.push(qaFinding("fail","TCPA","Whole message","No STOP instruction",
+    "US marketing SMS must carry a working opt-out, and carriers filter senders that do not.","Append: Reply STOP to opt out."));
+  if(!/harborline|club/i.test(body)) F.push(qaFinding("warn","TCPA","Whole message","Sender is not identified",
+    "The recipient cannot tell who is texting them from an unknown short code.","Name the club in the first line."));
+  return qaSort(F);
+}
+
+function qaPush(tpl,people){
+  const F=[];
+  const t=tpl.title||"",b=tpl.body||"";
+  tokenRisk(t+" "+b,people||[]).forEach(x=>{
+    if(!x.known) F.push(qaFinding("fail","Personalization","{{"+x.token+"}}","Unknown token","It shows as literal text on the lock screen.","Fix the spelling."));
+    else if(x.nulls>0&&!x.fallback) F.push(qaFinding("fail","Personalization","{{"+x.token+"}}",
+      "Empty for "+x.nulls.toLocaleString()+" of "+x.of.toLocaleString()+" and has no fallback","The notification arrives with a gap.","Add a fallback."));
+  });
+  if(t.length>40) F.push(qaFinding("warn","Truncation","Title","Title is "+t.length+" characters",
+    "The iOS lock screen shows roughly 40 before it truncates, so the end of this is never read.","Cut to 40."));
+  if(b.length>110) F.push(qaFinding("warn","Truncation","Body","Body is "+b.length+" characters",
+    "Around 110 characters are shown on a collapsed notification.","Cut to 110, or move the detail into the app."));
+  if(!tpl.deepLink) F.push(qaFinding("fail","Journey","Deep link","The notification does not open anything",
+    "Tapping it lands on the app home screen and the fan has to find the offer themselves, which is where the conversion is lost.","Deep link straight to the renewal page."));
+  return qaSort(F);
+}
+function qaSort(F){ return F.sort((a,b)=>QA_SEV[b.severity]-QA_SEV[a.severity]); }
+function qaCounts(F){
+  return {fail:F.filter(x=>x.severity==="fail").length,
+          warn:F.filter(x=>x.severity==="warn").length,
+          pass:F.filter(x=>x.severity==="pass").length};
+}
+/* One rule decides whether this is allowed to send, and it is a function rather than a
+   judgement call in a meeting. */
+function qaBlocks(F){ return F.some(x=>x.severity==="fail"); }
+
+/* ------------------------------------------------------------ A/B testing ---
+   The calculator is the easy half. The half that matters is the guard: a test that
+   will happily tell you there is a winner on the second morning is worse than no test,
+   because it produces confident decisions that are wrong at a rate nobody is tracking.
+   So the sample size is computed BEFORE the test opens, stored with it, and the verdict
+   function refuses to name a winner until the test has actually got there. */
+function probit(p){
+  /* Acklam's inverse normal CDF. Accurate to about 1.15e-9, which is far beyond what a
+     sample size needs, but it means alpha and power are inputs rather than a lookup of
+     the two values everybody memorises. */
+  if(p<=0||p>=1) return NaN;
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425;
+  let q,r;
+  if(p<pl){ q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  if(p>1-pl){ q=Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1); }
+  q=p-0.5; r=q*q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+function normCdf(z){
+  /* Abramowitz and Stegun 7.1.26 on the error function. */
+  const s=z<0?-1:1; const x=Math.abs(z)/Math.SQRT2;
+  const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return 0.5*(1+s*y);
+}
+/* Two-proportion, two-sided, per arm. mde is RELATIVE: a 20% lift on a 4% baseline. */
+function abSampleSize(baseline,mdeRel,alpha,power){
+  alpha=alpha||0.05; power=power||0.8;
+  const p1=baseline, p2=baseline*(1+mdeRel);
+  if(!(p1>0&&p2>0&&p2<1&&p2!==p1)) return null;
+  const za=-probit(alpha/2), zb=-probit(1-power);
+  const pbar=(p1+p2)/2;
+  const n=Math.pow(za*Math.sqrt(2*pbar*(1-pbar))+zb*Math.sqrt(p1*(1-p1)+p2*(1-p2)),2)/Math.pow(p2-p1,2);
+  return {perArm:Math.ceil(n),total:Math.ceil(n)*2,baseline:p1,target:p2,mdeRel:mdeRel,alpha:alpha,power:power};
+}
+function abStats(a,b){
+  /* a and b are {n, conv}. */
+  const p1=a.n?a.conv/a.n:0, p2=b.n?b.conv/b.n:0;
+  const pool=(a.n+b.n)?(a.conv+b.conv)/(a.n+b.n):0;
+  const se=Math.sqrt(pool*(1-pool)*(1/(a.n||1)+1/(b.n||1)));
+  const z=se?(p2-p1)/se:0;
+  const p=2*(1-normCdf(Math.abs(z)));
+  return {rateA:p1,rateB:p2,lift:p1?(p2-p1)/p1:0,z:z,p:p,pooled:pool,se:se};
+}
+/* THE GUARD. It has one job: say no, and say why, in words a marketer will accept. */
+function abVerdict(a,b,plan){
+  const s=abStats(a,b);
+  const need=plan&&plan.perArm?plan.perArm:0;
+  const have=Math.min(a.n,b.n);
+  if(need&&have<need){
+    return Object.assign(s,{
+      decided:false,
+      reason:"Not enough data yet. This test needs "+need.toLocaleString()+" per arm to detect the "
+        +Math.round(plan.mdeRel*100)+"% lift it was designed for, and the smaller arm has "+have.toLocaleString()+"."
+        +" Calling it now is peeking: the p value moves around on its own early in a test, so stopping the moment it dips under 0.05 finds a winner far more often than "
+        +Math.round(plan.alpha*100)+"% of the time even when the two are identical.",
+      progress:need?have/need:0, need:need, have:have
+    });
+  }
+  return Object.assign(s,{
+    decided:true,
+    winner: s.p<((plan&&plan.alpha)||0.05) ? (s.rateB>s.rateA?"B":"A") : null,
+    reason: s.p<((plan&&plan.alpha)||0.05)
+      ? "Reached the planned sample size, and the difference is larger than chance explains (p = "+s.p.toFixed(4)+")."
+      : "Reached the planned sample size and the two are not distinguishable (p = "+s.p.toFixed(4)+"). That is a real result: ship whichever is cheaper.",
+    progress:1, need:need, have:have
+  });
+}
+/* Do not assert the cost of peeking, measure it. This runs A/A tests, where there is by
+   construction NO difference, and counts how often stopping at the first significant look
+   would have declared a winner anyway. */
+function peekingCost(opts){
+  opts=opts||{};
+  const trials=opts.trials||2000, looks=opts.looks||5, perArm=opts.perArm||2000, p=opts.baseline||0.04;
+  const r=frng(opts.seed||424242);
+  let falseAtEnd=0, falseIfPeeking=0;
+  const step=Math.max(1,Math.floor(perArm/looks));
+  for(let t=0;t<trials;t++){
+    let na=0,nb=0,ca=0,cb=0,peeked=false;
+    for(let k=0;k<looks;k++){
+      /* Normal approximation to the binomial increment. Both arms share one true rate. */
+      const inc=(n)=>Math.max(0,Math.round(n*p+gauss(r)*Math.sqrt(n*p*(1-p))));
+      ca+=inc(step); cb+=inc(step); na+=step; nb+=step;
+      const s=abStats({n:na,conv:ca},{n:nb,conv:cb});
+      if(s.p<0.05) peeked=true;
+      if(k===looks-1&&s.p<0.05) falseAtEnd++;
+    }
+    if(peeked) falseIfPeeking++;
+  }
+  return {trials:trials,looks:looks,perArm:perArm,baseline:p,
+    atPlannedEnd:falseAtEnd/trials, ifPeeking:falseIfPeeking/trials};
+}
+
+/* --------------------------------------------------------------- journeys ---
+   A journey is data. Simulating it uses the same suppression function the segment
+   screen uses, so the two can never disagree about who is contactable, and the
+   frequency cap counts messages THIS journey has already sent rather than only the
+   ones that were there when it started. That second part is the whole point: a cap
+   that ignores its own sends is not a cap. */
+function journeySim(journey,opts){
+  opts=opts||{};
+  /* `== null` here would treat an explicit null as "not supplied" and quietly restore the
+     default, which makes cap:null mean the opposite of what it reads as. undefined is the
+     only value that means "use the house default". */
+  const cap=opts.cap===undefined?FREQ_CAP:opts.cap;
+  const seg=evalSegment(journey.entry,"any",{cap:null});
+  const pop=seg.matchedPeople;
+  const state=new Map();
+  pop.forEach(f=>state.set(f.id,{fan:f,sent:f.msgs7d,live:true,opened:false,clicked:false,converted:false,r:frng(Number(f.id.slice(1))*2246822519)}));
+
+  const steps=[];
+  let dayCursor=0;
+  journey.nodes.forEach(node=>{
+    if(node.type==="wait"){ dayCursor+=node.days; steps.push({type:"wait",days:node.days,day:dayCursor}); return; }
+    if(node.type==="send"){
+      const reasons={}; let sent=0,opened=0,clicked=0,converted=0,eligible=0;
+      pop.forEach(f=>{
+        const st=state.get(f.id);
+        if(!st.live) return;
+        if(node.audience==="opened"&&!st.opened) return;
+        if(node.audience==="not_opened"&&st.opened) return;
+        if(node.audience==="not_converted"&&st.converted) return;
+        eligible++;
+        const why=suppressionOf(Object.assign({},f,{msgs7d:st.sent}),node.channel,{hour:node.hour,cap:cap});
+        if(why){ reasons[why]=(reasons[why]||0)+1; return; }
+        sent++; st.sent++;
+        /* Open and click drawn from the fan's own rate, seeded per fan, so the same
+           person behaves the same way every time the journey is run. */
+        const oR=node.channel==="email"?f.openRate:(node.channel==="sms"?0.92:0.38);
+        if(st.r()<oR){ opened=opened+1; st.opened=true;
+          if(st.r()<(node.channel==="sms"?0.14:0.19)){ clicked++; st.clicked=true;
+            /* Conversion leans on value: a fan with a high LTV and a recent lapse is a
+               likelier renewal than one who left five years ago. */
+            const pc=Math.max(0.03,Math.min(0.42,0.20-f.dormantSeasons*0.035+Math.min(0.12,f.seasonsHeld*0.012)));
+            if(st.r()<pc){ converted++; st.converted=true; }
+          }
+        }
+      });
+      steps.push({type:"send",name:node.name,channel:node.channel,day:dayCursor,hour:node.hour,
+        eligible:eligible,sent:sent,suppressed:eligible-sent,
+        reasons:Object.keys(reasons).map(k=>({reason:k,count:reasons[k]})).sort((a,b)=>b.count-a.count),
+        opened:opened,clicked:clicked,converted:converted});
+      return;
+    }
+    if(node.type==="exit"){ steps.push({type:"exit",day:dayCursor,name:node.name}); }
+  });
+
+  const converted=Array.from(state.values()).filter(s=>s.converted);
+  const revenue=converted.reduce((s,x)=>s+(x.fan.seatPrice||x.fan.avgTicket*17),0);
+  return {
+    entered:pop.length, steps:steps, days:dayCursor,
+    reached:Array.from(state.values()).filter(s=>s.sent>s.fan.msgs7d).length,
+    converted:converted.length,
+    revenue:Math.round(revenue),
+    ltvAtRisk:pop.reduce((s,f)=>s+fanLTV(f),0),
+    ltvRecovered:converted.reduce((s,x)=>s+fanLTV(x.fan),0)
+  };
+}
+
+/* ------------------------------------------------------------- the campaign ---
+   One campaign, built the whole way through, rather than six built halfway. This is the
+   season ticket reactivation: the brief, the segment it runs against, three channel
+   renders and the journey that sequences them.
+
+   THE DRAFT IS BROKEN ON PURPOSE. Every defect planted in it is one somebody has actually
+   shipped: a mistyped merge field, a personalization token with no fallback, a hero image
+   carrying the whole offer with no alt text, grey-on-white that fails contrast, a heading
+   level skipped, a layout table announced as data, "click here" as link text, an http
+   link, and no unsubscribe. A QA harness demonstrated against a clean template proves
+   nothing at all, so this one is demonstrated against a template that fails. */
+const FAN_BRIEF={
+  id:"REQ-2026-114",
+  name:"Season ticket reactivation",
+  requested:"2026-08-21",
+  owner:"Fan Engagement",
+  objective:"Bring lapsed season ticket holders back for the 2026 to 2027 season before the early renewal window closes.",
+  window:"2026-09-01 to 2026-09-21",
+  primaryKpi:"Renewals started",
+  guardrails:[
+    "No more than "+FREQ_CAP+" marketing messages to any fan in a rolling 7 days, counting sends from every campaign",
+    "No SMS outside 09:00 to 20:00 in the fan's own timezone",
+    "Consent is checked per channel at send, never inherited from another channel",
+    "Nothing sends while a QA finding is open at fail severity"
+  ]
+};
+const FAN_SEGMENT_RULES=[
+  {field:"lapsed",op:"is_true"},
+  {field:"seasonsHeld",op:"gte",value:2},
+  {field:"dormantDays",op:"gte",value:180}
+];
+
+const EMAIL_V1={
+  channel:"email", version:"Draft 1",
+  subject:"{{first_name}}, we have been holding your seat in section {{seat_section}} for you",
+  preheader:"",
+  html:
+`<table width="100%" style="background:#ffffff">
+  <tr><td align="center">
+    <img src="https://cdn.example.com/hero-renew-2026.png" width="600" />
+    <h1 style="font-family:Georgia,serif;font-size:28px;color:#111111">Come back for 2026</h1>
+    <h3 style="font-size:15px;color:#9a9a9a">Your seat in {{seat_section}} is still yours</h3>
+    <p style="font-size:15px;color:#9a9a9a">
+      {{first_name}}, it has been {{seasons_held}} seasons since you were with us, and
+      {{favorite_playr}} is having the season of his career. Renew before 21 September and
+      your price stays at {{renewal_price}}.
+    </p>
+    <p><a href="http://harborlinefc.example.com/renew" style="color:#8a6d3b">Click here</a></p>
+  </td></tr>
+</table>`
+};
+/* What QA turns it into. Same message, same offer, every finding closed. */
+const EMAIL_V2={
+  channel:"email", version:"Draft 2, after QA",
+  subject:"{{first_name}}, your seat is still here",
+  preheader:"Renew before 21 September and your price does not move.",
+  html:
+`<table role="presentation" lang="en" width="100%" style="background-color:#ffffff">
+  <tr><td align="center">
+    <img src="https://cdn.example.com/hero-renew-2026.png" width="600"
+         alt="Harborline FC supporters in the north stand at the 2026 home opener" />
+    <h1 style="font-family:Georgia,serif;font-size:28px;color:#111111">Come back for 2026</h1>
+    <h2 style="font-size:15px;color:#4a4a4a">Your seat in {{seat_section | your usual block}} is still yours</h2>
+    <p style="font-size:15px;color:#3d3d3d">
+      {{first_name}}, it has been {{seasons_held | a few}} seasons since you were with us, and
+      {{favorite_player | the squad}} is having the season of a career. Renew before
+      21 September and your price stays at {{renewal_price | last season's price}}.
+    </p>
+    <p><a href="https://harborlinefc.example.com/renew?utm_source=email&utm_medium=crm&utm_campaign=reactivation_2026"
+          style="color:#6e5530">Renew my season ticket</a></p>
+    <p style="font-size:12px;color:#4a4a4a">
+      Harborline FC, 1200 Riverside Way, Riverton.
+      <a href="https://harborlinefc.example.com/unsubscribe?utm_source=email&utm_medium=crm&utm_campaign=reactivation_2026"
+         style="color:#4a4a4a">Unsubscribe from Harborline FC marketing</a>
+    </p>
+  </td></tr>
+</table>
+<style>@media (prefers-color-scheme: dark){ body,table{background-color:#141210 !important;} p,h1,h2{color:#F2EFEA !important;} }</style>`
+};
+const SMS_V1={channel:"sms",version:"Draft 1",
+  text:"Hi {{first_name}}, your seat in section {{seat_section}} at Harborline FC is still open for 2026 and we would love to have you back for what is shaping up to be a real season. Renew now at harborlinefc.example.com/renew"};
+const SMS_V2={channel:"sms",version:"Draft 2, after QA",
+  text:"Harborline FC: {{first_name}}, your seat for 2026 is still open. Renew by 21 Sep: hbl.fc/r Reply STOP to opt out."};
+const PUSH_V1={channel:"push",version:"Draft 1",
+  title:"{{first_name}}, your seat in section {{seat_section}} is waiting for you",
+  body:"Renew your Harborline FC season ticket before the early window closes on 21 September and keep the price you paid last season.",
+  deepLink:""};
+const PUSH_V2={channel:"push",version:"Draft 2, after QA",
+  title:"{{first_name}}, your seat is still yours",
+  body:"Renew by 21 Sep and your price does not move.",
+  deepLink:"harborline://renew?campaign=reactivation_2026"};
+
+const FAN_JOURNEY={
+  id:"JNY-REACTIVATION-2026",
+  name:"Season ticket reactivation",
+  entry:FAN_SEGMENT_RULES,
+  nodes:[
+    {type:"send",name:"We kept your seat",channel:"email",hour:10,audience:"all"},
+    {type:"wait",days:3},
+    {type:"send",name:"Nudge, did not open",channel:"sms",hour:11,audience:"not_opened"},
+    {type:"wait",days:4},
+    {type:"send",name:"Last week of the early window",channel:"push",hour:18,audience:"not_converted"},
+    {type:"wait",days:3},
+    {type:"send",name:"Window closes Friday",channel:"email",hour:9,audience:"not_converted"},
+    {type:"exit",name:"Renewed, or held for the next campaign"}
+  ]
+};
+function fanTemplates(){
+  return {email:[EMAIL_V1,EMAIL_V2],sms:[SMS_V1,SMS_V2],push:[PUSH_V1,PUSH_V2]};
+}
+function qaRun(tpl,people){
+  if(tpl.channel==="email") return qaEmail(tpl,people);
+  if(tpl.channel==="sms")   return qaSms(tpl,people);
+  return qaPush(tpl,people);
+}
+
+/* ================================ THE SCREENS ================================
+   Six of them, named with the JD's own words: Request, Segment, Build, QA, Deploy,
+   Measure. Somebody who runs this process for a living should recognise their own
+   week in the sidebar. */
+let FE={rules:null,channel:"email",hour:10,fanId:null,ver:0,tab:"email",sim:null,ab:null};
+function feLoad(){
+  try{ const raw=localStorage.getItem("gr_fan"); if(raw) FE=Object.assign(FE,JSON.parse(raw)); }catch(e){}
+  if(!FE.rules||!FE.rules.length) FE.rules=FAN_SEGMENT_RULES.map(r=>Object.assign({},r));
+}
+function feSave(){ try{ localStorage.setItem("gr_fan",JSON.stringify({rules:FE.rules,channel:FE.channel,hour:FE.hour,ver:FE.ver,tab:FE.tab})); }catch(e){} }
+function feSeg(){ return evalSegment(FE.rules,FE.channel,{hour:FE.hour}); }
+function n(x){ return Number(x||0).toLocaleString(); }
+function money(x){ return "$"+Number(Math.round(x||0)).toLocaleString(); }
+function pct(a,b){ return b?Math.round(1000*a/b)/10+"%":"0%"; }
+
+/* The line that has to be on every screen carrying a number. Volunteering that the data
+   is invented costs nothing and buys the right to be believed about everything else. */
+function feSynth(extra){
+  return `<div class="fe-synth"><b>Synthetic data.</b> ${n(FAN_N)} fan records generated from a fixed seed, so every count here reproduces exactly. ${FAN_CLUB} is a fictional club and no figure on this screen describes a real organisation.${extra?" "+extra:""}</div>`;
+}
+function feHead(step,title,hlWord,blurb){
+  return `<div class="tool-head">
+    <div class="fe-step">Fan engagement, step ${step} of 6</div>
+    <h1>${title.replace(hlWord,`<span class="hl">${hlWord}</span>`)}</h1>
+    <p>${blurb}</p>
+  </div>`;
+}
+
+/* ------------------------------------------------------------------ REQUEST --- */
+function renderFanReq(){
+  const all=fans();
+  const tiers={}; all.forEach(f=>tiers[f.tier]=(tiers[f.tier]||0)+1);
+  const order=["Founders Circle","Premium","Season","Regular","Casual"];
+  const sp=all.map(f=>f.spend).sort((a,b)=>a-b), tot=sp.reduce((s,x)=>s+x,0);
+  const top1=sp.slice(Math.floor(.99*sp.length)).reduce((s,x)=>s+x,0);
+  const top10=sp.slice(Math.floor(.90*sp.length)).reduce((s,x)=>s+x,0);
+  const con=k=>all.filter(f=>f[k]).length;
+  main.innerHTML=
+    feHead(1,"The request","request",
+      "What was asked for, what it will be measured on, and the rules the build is not allowed to break.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>${esc(FAN_BRIEF.id)} &nbsp;${esc(FAN_BRIEF.name)}</h2><span class="wk-count">${esc(FAN_BRIEF.window)}</span></div>
+      <div class="fe-body">
+        <p class="fe-obj">${esc(FAN_BRIEF.objective)}</p>
+        <ul class="fe-kv">
+          <li><span>Requested by</span><b>${esc(FAN_BRIEF.owner)}</b></li>
+          <li><span>In market</span><b>${esc(FAN_BRIEF.window)}</b></li>
+          <li><span>Primary KPI</span><b>${esc(FAN_BRIEF.primaryKpi)}</b></li>
+          <li><span>Channels</span><b>Email, SMS, push</b></li>
+        </ul>
+        <div class="fe-sub">Guardrails, enforced in code rather than written in a brief</div>
+        <ul class="fe-guards">${FAN_BRIEF.guardrails.map(g=>`<li>${esc(g)}</li>`).join("")}</ul>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>The audience of record</h2><span class="wk-count">${n(FAN_N)} fans</span></div>
+      <div class="fe-body">
+        ${feSynth("")}
+        <div class="fe-sub">Value is concentrated, the way it is in life</div>
+        <div class="fe-bars">
+          ${order.map(t=>`<div class="fe-bar"><span class="fe-bl">${esc(t)}</span>
+            <span class="fe-bt"><i style="width:${Math.max(0.6,100*(tiers[t]||0)/all.length)}%"></i></span>
+            <b>${n(tiers[t]||0)}</b><em>${pct(tiers[t]||0,all.length)}</em></div>`).join("")}
+        </div>
+        <p class="fe-note">The top 1% of this book holds <b>${pct(top1,tot)}</b> of lifetime spend and the top 10% holds <b>${pct(top10,tot)}</b>.
+        That shape is deliberate: a uniformly random fan base is spotted immediately by anyone who has looked at a real one, and it would quietly
+        distort the segment counts, the lifetime value bands and the A/B module at the same time.</p>
+
+        <div class="fe-sub">Consent is held per channel, not once for "marketing"</div>
+        <div class="fe-bars">
+          ${[["Email opt-in","emailOptIn"],["SMS opt-in","smsOptIn"],["Push opt-in","pushOptIn"],["Has the app","hasApp"],["Unsubscribed from everything","unsub"]]
+            .map(c=>`<div class="fe-bar"><span class="fe-bl">${c[0]}</span>
+              <span class="fe-bt"><i class="${c[1]==="unsub"?"warnbar":""}" style="width:${100*con(c[1])/all.length}%"></i></span>
+              <b>${n(con(c[1]))}</b><em>${pct(con(c[1]),all.length)}</em></div>`).join("")}
+        </div>
+        <p class="fe-note">One opt-in flag covering every channel is how a club ends up texting somebody who only ever agreed to an email.
+        Quiet hours and a rolling frequency cap are held per fan as well, and all four are checked at send rather than at segment build.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>What this is, and what it is not</h2></div>
+      <div class="fe-body">
+        <p class="fe-note"><b>This is not Adobe Experience Platform, Journey Optimizer or Customer Journey Analytics, and nothing here should be read as experience operating them.</b>
+        It is the analogue built to reason about the primitives those platforms are made of: an audience of record, segmentation that respects consent,
+        a journey with a frequency cap, dynamic content with a fallback, template QA against a written standard, and an experiment that refuses to be
+        stopped early. Every rule visible on these screens is a function that removes people or blocks a send, not a line in a brief.</p>
+        <p class="fe-note"><b>Deliberately not attempted:</b> real ESP or SMS delivery, deliverability and IP warmup, suppression infrastructure,
+        throttling, trained propensity models, and cross-device identity. That is where the genuine production complexity of this job lives, it cannot
+        be simulated honestly, and pretending otherwise would be the one thing worse than not building it.</p>
+      </div>
+    </div>`;
+}
+
+/* ------------------------------------------------------------------ SEGMENT --- */
+function renderFanSeg(){
+  const s=feSeg();
+  const sample=s.people.slice(0,6);
+  main.innerHTML=
+    feHead(2,"Build the segment","segment",
+      "Who matches, who can lawfully be contacted, and exactly who was removed on the way.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>Rules</h2><div class="wk-acts">
+        <select id="feAddField" aria-label="Add a rule">${Object.keys(FAN_FIELDS).map(k=>`<option value="${k}">${esc(FAN_FIELDS[k].label)}</option>`).join("")}</select>
+        <button type="button" class="btn-mini" id="feAddRule">Add rule</button>
+        <button type="button" class="btn-mini" id="feReset">Reset</button>
+      </div></div>
+      <div class="fe-body">
+        <div class="fe-rules" id="feRules">${FE.rules.map((r,i)=>feRuleRow(r,i)).join("")}</div>
+        ${FE.rules.length?"":`<div class="wk-note">No rules. Every fan matches, which is not a segment.</div>`}
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Reach</h2><div class="wk-acts">
+        <select id="feChan" aria-label="Channel">${["email","sms","push"].map(c=>`<option value="${c}"${FE.channel===c?" selected":""}>${c.toUpperCase()}</option>`).join("")}</select>
+        <select id="feHour" aria-label="Send hour, fan local time">${Array.from({length:24},(_,h)=>`<option value="${h}"${FE.hour===h?" selected":""}>${String(h).padStart(2,"0")}:00 local</option>`).join("")}</select>
+      </div></div>
+      <div class="fe-body">
+        <div class="fe-counts">
+          <div class="fe-count"><b>${n(s.matched)}</b><span>match the rules</span></div>
+          <div class="fe-count ok"><b>${n(s.reachable)}</b><span>reachable on ${FE.channel.toUpperCase()}</span></div>
+          <div class="fe-count bad"><b>${n(s.suppressed)}</b><span>suppressed</span></div>
+        </div>
+        <div class="fe-ruleline">Evaluated: ${FE.rules.length?esc(FE.rules.map(ruleWords).join(" and ")):"no rules, so everybody matches"}</div>
+        <div class="fe-sentence">${esc(segSentence(s))}</div>
+        ${s.reasons.length?`<div class="fe-scroll"><table class="fe-tbl"><thead><tr><th>Why they were removed</th><th>Fans</th><th>Share of matched</th></tr></thead><tbody>
+          ${s.reasons.map(r=>`<tr><td>${esc(r.reason)}</td><td>${n(r.count)}</td><td>${pct(r.count,s.matched)}</td></tr>`).join("")}
+        </tbody></table></div>`:`<div class="wk-note">Nobody is suppressed on this channel at this hour.</div>`}
+        <p class="fe-note">The number that matters is not how many people match, it is how many you are allowed to contact, and the
+        difference has to be itemised or nobody can audit it. Change the hour above to ${FE.hour>=21||FE.hour<9?"a time inside the day":"22:00"} and watch the SMS quiet-hours guard move.</p>
+        ${feSynth("")}
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Value in this segment</h2><span class="wk-count">${money(s.ltv.total)} lifetime value</span></div>
+      <div class="fe-body">
+        <ul class="fe-kv">
+          <li><span>Median fan</span><b>${money(s.ltv.p50)}</b></li>
+          <li><span>Top quarter</span><b>${money(s.ltv.p75)}</b></li>
+          <li><span>Top tenth</span><b>${money(s.ltv.p90)}</b></li>
+          <li><span>Top 1%</span><b>${money(s.ltv.p99)}</b></li>
+        </ul>
+        <p class="fe-note">${esc(ltvFormula())}</p>
+        <div class="fe-sub">Six of them</div>
+        <div class="fe-scroll"><table class="fe-tbl"><thead><tr><th>Fan</th><th>Tier</th><th>Seasons</th><th>Dormant</th><th>Lifetime</th><th>LTV</th><th>Email</th><th>SMS</th><th>Push</th></tr></thead><tbody>
+          ${sample.map(f=>`<tr><td>${esc(fanName(f))} <span class="fe-id">${esc(f.id)}</span></td><td>${esc(f.tier)}</td><td>${f.seasonsHeld}</td>
+            <td>${f.dormantDays} days</td><td>${money(f.spend)}</td><td>${money(fanLTV(f))}</td>
+            <td>${f.emailOptIn?"yes":"<i>no</i>"}</td><td>${f.smsOptIn?"yes":"<i>no</i>"}</td><td>${f.pushOptIn?"yes":"<i>no</i>"}</td></tr>`).join("")}
+        </tbody></table></div>
+      </div>
+    </div>`;
+  feWireSeg();
+}
+function feRuleRow(r,i){
+  const f=FAN_FIELDS[r.field]||{label:r.field,type:"text"};
+  const ops=Object.keys(SEG_OPS).filter(o=>{
+    if(f.type==="bool") return ["is_true","is_false"].indexOf(o)>=0;
+    if(f.type==="num")  return ["gte","lte","eq","ne","is_null","not_null"].indexOf(o)>=0;
+    if(f.type==="date") return ["before","after","dormant_days","is_null","not_null"].indexOf(o)>=0;
+    return ["eq","ne","is_null","not_null"].indexOf(o)>=0;
+  });
+  /* Never let the select fall back to its first option. If the active operator is not in
+     the list this field type offers, it is still the operator being EVALUATED, so it has to
+     appear or the screen is describing a rule that did not run. */
+  if(ops.indexOf(r.op)<0 && SEG_OPS[r.op]) ops.unshift(r.op);
+  const needsVal=["is_true","is_false","is_null","not_null"].indexOf(r.op)<0;
+  return `<div class="fe-rule" data-i="${i}">
+    <span class="fe-rn">${i===0?"where":"and"}</span>
+    <b class="fe-rf">${esc(f.label)}</b>
+    <select class="fe-rop" data-i="${i}" aria-label="Rule ${i+1} operator">${ops.map(o=>`<option value="${o}"${r.op===o?" selected":""}>${esc(SEG_OPS[o].label)}</option>`).join("")}</select>
+    ${needsVal?`<input class="fe-rv" data-i="${i}" type="text" value="${esc(String(r.value==null?"":r.value))}" aria-label="Rule ${i+1} value"/>`:""}
+    <button type="button" class="fe-rx" data-i="${i}" aria-label="Remove rule ${i+1}">Remove</button>
+  </div>`;
+}
+function feWireSeg(){
+  const rerender=()=>{feSave();renderFanSeg();};
+  document.querySelectorAll(".fe-rop").forEach(el=>el.addEventListener("change",()=>{
+    FE.rules[+el.dataset.i].op=el.value; rerender();
+  }));
+  document.querySelectorAll(".fe-rv").forEach(el=>el.addEventListener("change",()=>{
+    FE.rules[+el.dataset.i].value=el.value; rerender();
+  }));
+  document.querySelectorAll(".fe-rx").forEach(el=>el.addEventListener("click",()=>{
+    FE.rules.splice(+el.dataset.i,1); rerender();
+  }));
+  const add=document.getElementById("feAddRule");
+  if(add) add.addEventListener("click",()=>{
+    const k=document.getElementById("feAddField").value, t=FAN_FIELDS[k].type;
+    FE.rules.push({field:k,op:t==="bool"?"is_true":t==="num"?"gte":t==="date"?"dormant_days":"eq",value:t==="num"||t==="date"?1:""});
+    rerender();
+  });
+  const rs=document.getElementById("feReset");
+  if(rs) rs.addEventListener("click",()=>{ FE.rules=FAN_SEGMENT_RULES.map(r=>Object.assign({},r)); rerender(); });
+  const ch=document.getElementById("feChan");
+  if(ch) ch.addEventListener("change",()=>{ FE.channel=ch.value; rerender(); });
+  const hr=document.getElementById("feHour");
+  if(hr) hr.addEventListener("change",()=>{ FE.hour=+hr.value; rerender(); });
+}
+
+/* -------------------------------------------------------------------- BUILD --- */
+function feFanFor(seg){
+  const list=seg.people;
+  if(!list.length) return null;
+  if(FE.fanId){ const hit=list.filter(f=>f.id===FE.fanId)[0]; if(hit) return hit; }
+  return list[0];
+}
+function feTpl(){
+  const T=fanTemplates();
+  return T[FE.tab][FE.ver]||T[FE.tab][0];
+}
+function renderFanBuild(){
+  const seg=evalSegment(FE.rules,FE.tab==="email"?"email":FE.tab,{hour:FE.hour});
+  const f=feFanFor(seg);
+  const tpl=feTpl();
+  const nulls=seg.people.filter(x=>!x.favoritePlayer||!x.seatSection).slice(0,4);
+  const picks=seg.people.slice(0,4).concat(nulls).filter((x,i,a)=>a.indexOf(x)===i).slice(0,8);
+  main.innerHTML=
+    feHead(3,"Build the message","message",
+      "One offer, three channels, and every personalization token shown with what happens when it is empty.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>Channel</h2><div class="wk-acts">
+        ${["email","sms","push"].map(c=>`<button type="button" class="btn-mini${FE.tab===c?" solid":""}" data-fetab="${c}">${c.toUpperCase()}</button>`).join("")}
+      </div></div>
+      <div class="fe-body">
+        <div class="fe-verrow">
+          ${fanTemplates()[FE.tab].map((t,i)=>`<button type="button" class="fe-ver${FE.ver===i?" on":""}" data-fever="${i}">${esc(t.version)}</button>`).join("")}
+          <select id="feFan" aria-label="Preview as which fan">
+            ${picks.map(p=>`<option value="${p.id}"${f&&f.id===p.id?" selected":""}>${esc(fanName(p))} (${esc(p.id)})${p.favoritePlayer?"":" - no favourite player"}${p.seatSection?"":" - no seat section"}</option>`).join("")}
+          </select>
+        </div>
+        ${f?fePreview(tpl,f,seg):`<div class="wk-note">No reachable fans in this segment.</div>`}
+      </div>
+    </div>
+    ${f?feDynamicCard(f):""}
+    ${feSynth("")}`;
+  document.querySelectorAll("[data-fetab]").forEach(b=>b.addEventListener("click",()=>{FE.tab=b.dataset.fetab;feSave();renderFanBuild();}));
+  document.querySelectorAll("[data-fever]").forEach(b=>b.addEventListener("click",()=>{FE.ver=+b.dataset.fever;feSave();renderFanBuild();}));
+  const fs=document.getElementById("feFan");
+  if(fs) fs.addEventListener("change",()=>{FE.fanId=fs.value;renderFanBuild();});
+}
+function fePreview(tpl,f,seg){
+  const risk=tokenRisk((tpl.subject||"")+" "+(tpl.html||"")+" "+(tpl.text||"")+" "+(tpl.title||"")+" "+(tpl.body||""),seg.people);
+  const riskRows=risk.map(t=>`<tr>
+      <td><code>{{${esc(t.token)}}}</code></td>
+      <td>${t.known?esc(FAN_TOKENS[t.token].scope==="open"?"open time":"send time"):"<i>unknown</i>"}</td>
+      <td>${t.known?(t.nulls?n(t.nulls)+" of "+n(t.of):"never empty"):"-"}</td>
+      <td>${t.known?(t.fallback?"has a fallback":(t.nulls?"<b class='fe-red'>no fallback</b>":"not needed")):"<b class='fe-red'>not a real token</b>"}</td>
+    </tr>`).join("");
+  let body="";
+  if(tpl.channel==="email"){
+    const sub=resolveTokens(tpl.subject,f,{mode:"send"});
+    const html=resolveTokens(tpl.html,f,{mode:"send"});
+    body=`<div class="fe-mail">
+        <div class="fe-mailhead"><span>Subject</span><b>${esc(sub.out)||"<i>empty</i>"}</b></div>
+        <div class="fe-mailhead"><span>Preheader</span><b>${esc(tpl.preheader)||"<i>none</i>"}</b></div>
+        <iframe class="fe-frame" title="Email preview for ${esc(fanName(f))}" sandbox="" srcdoc="${esc(html.out)}"></iframe>
+      </div>`;
+  } else if(tpl.channel==="sms"){
+    const r=resolveTokens(tpl.text,f,{mode:"send"});
+    body=`<div class="fe-phone"><div class="fe-bubble">${esc(r.out)}</div>
+      <div class="fe-phmeta">${r.out.length} characters, ${Math.max(1,Math.ceil(r.out.length/(r.out.length>160?153:160)))} segment${r.out.length>160?"s":""}</div></div>`;
+  } else {
+    const t=resolveTokens(tpl.title,f,{mode:"send"}), b=resolveTokens(tpl.body,f,{mode:"send"});
+    body=`<div class="fe-phone"><div class="fe-push">
+        <div class="fe-pushapp">${esc(FAN_CLUB)}</div>
+        <div class="fe-pusht">${esc(t.out)}</div><div class="fe-pushb">${esc(b.out)}</div>
+      </div><div class="fe-phmeta">${tpl.deepLink?"Opens "+esc(tpl.deepLink):"<b class='fe-red'>No deep link, it opens the app home screen</b>"}</div></div>`;
+  }
+  return body+`<div class="fe-sub">Every token in this template, against the whole segment</div>
+    <div class="fe-scroll"><table class="fe-tbl"><thead><tr><th>Token</th><th>Resolved</th><th>Empty for</th><th>Safety</th></tr></thead><tbody>${riskRows||"<tr><td colspan='4'>No tokens.</td></tr>"}</tbody></table></div>`;
+}
+/* Send time against open time, side by side, which is the only way the difference lands. */
+function feDynamicCard(f){
+  const line="Only {{seats_left}} left in {{seat_section | your usual block}} for {{next_home_game}}. {{countdown}} to kickoff, {{gate_weather}} at the gate.";
+  const sentOn="2026-09-01", opened="2026-09-05";
+  const frozen=resolveTokens(line,f,{mode:"send",at:sentOn});
+  const live=resolveTokens(line,f,{mode:"open",at:opened});
+  return `<div class="card wk-card">
+    <div class="wk-head"><h2>Send time against open time</h2><span class="wk-count">${esc(fanName(f))}</span></div>
+    <div class="fe-body">
+      <div class="fe-vs">
+        <div><div class="fe-vslab">Resolved when it was sent, 1 September</div><div class="fe-vsout">${esc(frozen.out)}</div>
+          <div class="fe-vsnote">Frozen. Four days later the countdown is wrong and the seat count is stale, and the fan is reading a number that was true once.</div></div>
+        <div><div class="fe-vslab">Resolved when it was opened, 5 September</div><div class="fe-vsout on">${esc(live.out)}</div>
+          <div class="fe-vsnote">Resolved at open. The countdown, the remaining seats and the forecast are computed from the moment the image is requested, not from the moment the send was queued.</div></div>
+      </div>
+      <p class="fe-note">Both carry the same fallback. ${f.seatSection?"This fan has a seat section on file":"This fan has no seat section on file, so the fallback is doing the work"}, and a token with no fallback is the defect the QA step is built to catch.</p>
+    </div>
+  </div>`;
+}
+
+/* ----------------------------------------------------------------------- QA --- */
+function renderFanQa(){
+  const seg=evalSegment(FE.rules,"email",{hour:FE.hour});
+  const T=fanTemplates();
+  const groups=[["Email",T.email],["SMS",T.sms],["Push",T.push]];
+  let blocked=0,cards="";
+  groups.forEach(g=>{
+    const tpl=g[1][FE.ver]||g[1][0];
+    const F=qaRun(tpl,seg.people), c=qaCounts(F);
+    if(qaBlocks(F)) blocked++;
+    cards+=`<div class="card wk-card">
+      <div class="wk-head"><h2>${g[0]} &nbsp;<span class="fe-vertag">${esc(tpl.version)}</span></h2>
+        <span class="fe-gate ${qaBlocks(F)?"stop":"go"}">${qaBlocks(F)?"Blocked, "+c.fail+" at fail":"Cleared to send"}</span></div>
+      <div class="fe-body">
+        ${F.length?`<div class="fe-finds">${F.map(x=>`
+          <div class="fe-find ${esc(x.severity)}">
+            <div class="fe-fh"><span class="fe-sev ${esc(x.severity)}">${x.severity}</span><b>${esc(x.what)}</b></div>
+            <div class="fe-fm">${esc(x.standard)} &nbsp;|&nbsp; ${esc(x.where)}</div>
+            ${x.why?`<div class="fe-fw">${esc(x.why)}</div>`:""}
+            ${x.fix?`<div class="fe-ffix">Fix: ${esc(x.fix)}</div>`:""}
+          </div>`).join("")}</div>`:`<div class="wk-note">Nothing found.</div>`}
+      </div>
+    </div>`;
+  });
+  main.innerHTML=
+    feHead(4,"QA the touchpoints","QA",
+      "Every template checked against a written standard, with the send blocked while anything is still failing.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>Gate</h2><div class="wk-acts">
+        ${fanTemplates().email.map((t,i)=>`<button type="button" class="btn-mini${FE.ver===i?" solid":""}" data-feqav="${i}">${esc(t.version)}</button>`).join("")}
+        <button type="button" class="btn-mini" id="feFile"${BRAND?"":" disabled"}>File the failures as work</button>
+      </div></div>
+      <div class="fe-body">
+        <div class="fe-gatebig ${blocked?"stop":"go"}">${blocked?"This campaign cannot deploy. "+blocked+" of 3 templates have a finding at fail severity.":"All three templates cleared. This campaign can deploy."}</div>
+        ${BRAND?"":`<div class="wk-note">These screens run without a business loaded, because they carry their own audience. Filing the findings as work does not: tracked work is kept per business, so there is nowhere for it to land yet. Set up a business on Today and the button turns on.</div>`}
+        <p class="fe-note">The gate is <code>qaBlocks()</code>, a function, not a judgement call in a meeting. Draft 1 is deliberately broken:
+        every defect in it is one that has been shipped by somebody, including a mistyped merge field, a personalization token with no fallback,
+        a hero image carrying the whole offer with no alt text, grey on white that fails contrast, a skipped heading level, a layout table
+        announced to a screen reader as data, and no unsubscribe. A QA harness demonstrated against a clean template proves nothing.</p>
+        <p class="fe-note"><b>Contrast is computed, not eyeballed</b>, using sRGB relative luminance from WCAG 2.1 and the
+        (L1 + 0.05) / (L2 + 0.05) ratio, against 4.5:1 for body text and 3:1 for large text. Accessible email is the part of this
+        most CRM teams have no one to check, and it is checked here alongside the tokens, the links and the compliance footer.</p>
+        ${feSynth("")}
+      </div>
+    </div>`+cards;
+  document.querySelectorAll("[data-feqav]").forEach(b=>b.addEventListener("click",()=>{FE.ver=+b.dataset.feqav;feSave();renderFanQa();}));
+  const fb=document.getElementById("feFile");
+  if(fb) fb.addEventListener("click",()=>feFileFindings(seg));
+}
+/* The findings become ordinary tracked work, through the same door audit findings use.
+   That is the seam that turns this from a demo screen into part of the product. */
+function feFileFindings(seg){
+  /* Counted from what actually landed, never from what was attempted. */
+  const T=fanTemplates(); let filed=0; const ids=[];
+  [["Email",T.email],["SMS",T.sms],["Push",T.push]].forEach(g=>{
+    const tpl=g[1][FE.ver]||g[1][0];
+    qaRun(tpl,seg.people).filter(x=>x.severity==="fail").forEach(x=>{
+      /* WHERE is part of the identity, not decoration. Two elements failing contrast produce
+         the same sentence, so titling on the sentence alone collapsed them into one item
+         through addItem's de-duplication: one real defect silently dropped, and a count that
+         said otherwise. Two places to fix are two jobs. */
+      const it=addItem({source:"fan",title:g[0]+" template, "+x.where+", "+x.what,
+        detail:x.standard+". "+x.why+" Fix: "+x.fix,priority:"Critical",foundAt:Date.now()});
+      if(it&&ids.indexOf(it.id)<0){ ids.push(it.id); filed++; }
+    });
+  });
+  logEvent("qa","Filed "+filed+" fan engagement QA findings as work");
+  const b=document.getElementById("feFile");
+  if(b){ b.textContent=filed?("Filed "+filed+" to Today"):"Nothing failing to file"; b.disabled=true; }
+}
+
+/* ------------------------------------------------------------------- DEPLOY --- */
+function renderFanDeploy(){
+  const seg=evalSegment(FE.rules,"email",{hour:FE.hour});
+  const T=fanTemplates();
+  const blocked=[T.email,T.sms,T.push].filter(v=>qaBlocks(qaRun(v[FE.ver]||v[0],seg.people))).length;
+  const sim=journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{});
+  FE.sim=sim;
+  main.innerHTML=
+    feHead(5,"Deploy the journey","journey",
+      "The sequence, the wait between each step, and who the frequency cap removed at every send.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>${esc(FAN_JOURNEY.name)}</h2><span class="wk-count">${n(sim.entered)} entered, ${sim.days} days</span></div>
+      <div class="fe-body">
+        <div class="fe-gatebig ${blocked?"stop":"go"}">${blocked
+          ? "Deployment held. "+blocked+" of 3 templates still have a finding at fail severity, and the gate is checked here, not only on the QA screen."
+          : "QA cleared all three templates. This journey is clear to deploy."}</div>
+        <div class="fe-jny">
+          ${sim.steps.map(s=>{
+            if(s.type==="wait") return `<div class="fe-jwait">wait ${s.days} day${s.days===1?"":"s"}</div>`;
+            if(s.type==="exit") return `<div class="fe-jexit">${esc(s.name)}</div>`;
+            return `<div class="fe-jnode">
+              <div class="fe-jhead"><span class="fe-jchan ${esc(s.channel)}">${s.channel.toUpperCase()}</span>
+                <b>${esc(s.name)}</b><span class="fe-jday">day ${s.day}, ${String(s.hour).padStart(2,"0")}:00 local</span></div>
+              <div class="fe-jnums">
+                <span><b>${n(s.eligible)}</b>eligible</span><span class="ok"><b>${n(s.sent)}</b>sent</span>
+                <span class="bad"><b>${n(s.suppressed)}</b>suppressed</span><span><b>${n(s.opened)}</b>opened</span>
+                <span><b>${n(s.clicked)}</b>clicked</span><span class="ok"><b>${n(s.converted)}</b>renewed</span>
+              </div>
+              ${s.reasons.length?`<ul class="fe-jwhy">${s.reasons.map(r=>`<li>${n(r.count)} ${esc(r.reason.toLowerCase())}</li>`).join("")}</ul>`:""}
+            </div>`;
+          }).join("")}
+        </div>
+        <p class="fe-note"><b>Watch the frequency cap climb.</b> At the first send it removes the people who were already near their limit from other
+        campaigns. By the final email it is the largest single reason anyone is held back, because the journey is now counting <em>its own</em> earlier
+        sends against the same ${FREQ_CAP} in 7 days. A cap that ignores the messages it has just sent is not a cap, and a journey without one is the
+        thing that ships and then messages somebody five times before lunch.</p>
+        <p class="fe-note">Suppression is decided by the same <code>suppressionOf()</code> the segment screen calls, so the two can never disagree
+        about who is contactable. Consent is re-checked at every send rather than inherited from the moment the segment was built.</p>
+        ${feSynth("")}
+      </div>
+    </div>`;
+}
+
+/* ------------------------------------------------------------------ MEASURE --- */
+function abObserved(perArm,pA,pB,seed){
+  const r=frng(seed||987654321);
+  let ca=0,cb=0;
+  const A=new Array(perArm),B=new Array(perArm);
+  for(let i=0;i<perArm;i++){ if(r()<pA) ca++; A[i]=ca; if(r()<pB) cb++; B[i]=cb; }
+  return {A:A,B:B};
+}
+let AB_CACHE=null;
+function renderFanMeasure(){
+  const sim=FE.sim||journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{});
+  const sends=sim.steps.filter(s=>s.type==="send");
+  const tot=k=>sends.reduce((s,x)=>s+x[k],0);
+
+  const ab=FE.ab||(FE.ab={baseline:0.04,mde:0.20,exposedPct:0.18});
+  const plan=abSampleSize(ab.baseline,ab.mde);
+  const maxN=Math.ceil(plan.perArm*1.2);
+  if(!AB_CACHE||AB_CACHE.n<maxN||AB_CACHE.pA!==ab.baseline) AB_CACHE={n:maxN,pA:ab.baseline,d:abObserved(maxN,ab.baseline,ab.baseline*1.18,20260821)};
+  const exposed=Math.max(50,Math.round(plan.perArm*ab.exposedPct));
+  const armA={n:exposed,conv:AB_CACHE.d.A[exposed-1]||0};
+  const armB={n:exposed,conv:AB_CACHE.d.B[exposed-1]||0};
+  const v=abVerdict(armA,armB,plan);
+  const peek=[3,5,10].map(L=>peekingCost({trials:3000,looks:L,perArm:2000,baseline:ab.baseline}));
+
+  main.innerHTML=
+    feHead(6,"Measure it","Measure",
+      "What the journey returned, what a fan is worth, and an experiment that will not let you stop it early.")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>Channel performance</h2><span class="wk-count">${n(sim.entered)} entered</span></div>
+      <div class="fe-body">
+        <div class="fe-counts">
+          <div class="fe-count"><b>${n(tot("sent"))}</b><span>messages sent</span></div>
+          <div class="fe-count bad"><b>${n(tot("suppressed"))}</b><span>held back by a guard</span></div>
+          <div class="fe-count"><b>${n(tot("opened"))}</b><span>opened</span></div>
+          <div class="fe-count ok"><b>${n(sim.converted)}</b><span>renewals started</span></div>
+        </div>
+        <div class="fe-scroll"><table class="fe-tbl"><thead><tr><th>Step</th><th>Channel</th><th>Sent</th><th>Suppressed</th><th>Open rate</th><th>Click rate</th><th>Renewals</th></tr></thead><tbody>
+          ${sends.map(s=>`<tr><td>${esc(s.name)}</td><td>${s.channel.toUpperCase()}</td><td>${n(s.sent)}</td><td>${n(s.suppressed)}</td>
+            <td>${pct(s.opened,s.sent)}</td><td>${pct(s.clicked,s.sent)}</td><td>${n(s.converted)}</td></tr>`).join("")}
+        </tbody></table></div>
+        <div class="fe-counts" style="margin-top:16px">
+          <div class="fe-count ok"><b>${money(sim.revenue)}</b><span>season ticket revenue</span></div>
+          <div class="fe-count"><b>${money(sim.ltvRecovered)}</b><span>lifetime value recovered</span></div>
+          <div class="fe-count"><b>${money(sim.ltvAtRisk)}</b><span>lifetime value in the segment</span></div>
+          <div class="fe-count"><b>${pct(sim.converted,sim.entered)}</b><span>reactivation rate</span></div>
+        </div>
+        <p class="fe-note">${esc(ltvFormula())}</p>
+        ${feSynth("")}
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Subject line test</h2><span class="wk-count">A against B, two-sided</span></div>
+      <div class="fe-body">
+        <div class="fe-abgrid">
+          <label>Baseline conversion
+            <select id="feAbBase" aria-label="Baseline conversion rate">${[0.02,0.03,0.04,0.06,0.08].map(x=>`<option value="${x}"${ab.baseline===x?" selected":""}>${(x*100).toFixed(0)}%</option>`).join("")}</select></label>
+          <label>Smallest lift worth detecting
+            <select id="feAbMde" aria-label="Minimum detectable effect">${[0.05,0.10,0.20,0.30,0.50].map(x=>`<option value="${x}"${ab.mde===x?" selected":""}>+${(x*100).toFixed(0)}% relative</option>`).join("")}</select></label>
+          <label>How much of the test has run
+            <input id="feAbExp" type="range" min="2" max="120" value="${Math.round(ab.exposedPct*100)}" aria-label="Percent of planned sample exposed"/>
+            <span class="fe-abpct">${Math.round(ab.exposedPct*100)}% of plan</span></label>
+        </div>
+        <div class="fe-plan">Planned before the test opened: <b>${n(plan.perArm)} per arm</b>, ${n(plan.total)} in total,
+          to detect a ${Math.round(ab.mde*100)}% relative lift on a ${(ab.baseline*100).toFixed(0)}% baseline at ${Math.round(plan.alpha*100)}% significance and ${Math.round(plan.power*100)}% power.</div>
+        <div class="fe-arms">
+          <div class="fe-arm"><span>A, "your seat is still here"</span><b>${pct(armA.conv,armA.n)}</b><em>${n(armA.conv)} of ${n(armA.n)}</em></div>
+          <div class="fe-arm"><span>B, "we kept your seat in {{seat_section}}"</span><b>${pct(armB.conv,armB.n)}</b><em>${n(armB.conv)} of ${n(armB.n)}</em></div>
+        </div>
+        <div class="fe-prog"><i style="width:${Math.min(100,Math.round(v.progress*100))}%"></i></div>
+        <div class="fe-verdict ${v.decided?(v.winner?"go":"neutral"):"stop"}">
+          <b>${v.decided?(v.winner?("Variant "+v.winner+" wins"):"No difference"):"No winner can be declared yet"}</b>
+          <p>${esc(v.reason)}</p>
+          <div class="fe-vstats">observed lift ${(v.lift*100).toFixed(1)}% &nbsp;|&nbsp; z = ${v.z.toFixed(2)} &nbsp;|&nbsp; p = ${v.p.toFixed(4)} &nbsp;|&nbsp; ${n(v.have)} of ${n(v.need)} per arm</div>
+        </div>
+        <p class="fe-note"><b>Notice what the guard does when p dips under 0.05 early.</b> It still refuses. That is the point: the p value wanders
+        on its own at low sample sizes, so a rule of "stop when it goes significant" finds a winner far more often than 5% of the time even when the
+        two variants are identical.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>What peeking actually costs</h2><span class="wk-count">measured, not asserted</span></div>
+      <div class="fe-body">
+        <p class="fe-note">Rather than claim peeking is dangerous, this runs the experiment. Each row is 3,000 simulated
+        <b>A/A tests</b>, where the two variants are identical by construction, so every winner found is a false one. The only difference between
+        the rows is how many times somebody looked at the results before the planned end.</p>
+        <div class="fe-scroll"><table class="fe-tbl"><thead><tr><th>Interim looks</th><th>False winners at the planned end</th><th>False winners if you stop at the first significant look</th></tr></thead><tbody>
+          ${peek.map(p=>`<tr><td>${p.looks}</td><td>${(p.atPlannedEnd*100).toFixed(1)}%</td><td><b class="fe-red">${(p.ifPeeking*100).toFixed(1)}%</b></td></tr>`).join("")}
+        </tbody></table></div>
+        <p class="fe-note">The middle column sits on the 5% it was designed for. The right hand column is what a team actually experiences when
+        they check the dashboard every morning and ship the moment it goes green. Everything above is simulated in the browser from a fixed seed,
+        so these numbers reproduce.</p>
+      </div>
+    </div>`;
+  const bs=document.getElementById("feAbBase");
+  if(bs) bs.addEventListener("change",()=>{FE.ab.baseline=Number(bs.value);AB_CACHE=null;renderFanMeasure();});
+  const md=document.getElementById("feAbMde");
+  if(md) md.addEventListener("change",()=>{FE.ab.mde=Number(md.value);renderFanMeasure();});
+  const ex=document.getElementById("feAbExp");
+  if(ex) ex.addEventListener("input",()=>{FE.ab.exposedPct=Number(ex.value)/100;renderFanMeasure();
+    const el=document.getElementById("feAbExp"); if(el){el.focus();}});
+}
+
+const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure};
+
 /* Refine dock wiring. Bound once against the static markup, since the dock lives outside
    main and therefore survives every tool re-render. */
 document.getElementById("rfClose").addEventListener("click",()=>refineOpen(false));
@@ -5256,6 +6905,7 @@ document.getElementById("rfInput").addEventListener("keydown",e=>{
 reflectBrand();
 hydrateWork();          // yesterday's work is still here
 hydratePlan();          // and so is what you meant to do with it
+feLoad();               // and the fan engagement segment you were last working on
 bootScreen();
 if(!isUnlocked()) showLock();
 </script>
