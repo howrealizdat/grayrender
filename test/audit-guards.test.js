@@ -697,6 +697,42 @@ check('no staffing-specific bonus survives',
   sp('/recruiting') === sp('/somethingelse') && sp('/ai-teams') === sp('/xy-teams'),
   `recruiting=${sp('/recruiting')} other=${sp('/somethingelse')} ai-teams=${sp('/ai-teams')} xy-teams=${sp('/xy-teams')}`);
 
+/* ------------------------------------------------------------ return shapes */
+/* fetchPage returns the HTML as a STRING. renderPage returns an OBJECT with an .html
+   property. Brand onboarding mixed the two: it read `.html` off fetchPage's string, which
+   is undefined, so the direct-fetch fallback silently produced nothing and onboarding
+   depended entirely on the renderer succeeding. When a site refused the headless browser,
+   the one path that could still have read it never ran and the screen blamed the site.
+   Nothing threw and nothing logged, which is why this is asserted against the source. */
+console.log('\nTHE TWO FETCHERS RETURN DIFFERENT SHAPES, AND CALLERS MUST KNOW WHICH');
+const srcPath = require('path').join(__dirname, '..', 'netlify', 'functions', 'audit.js');
+const src = require('fs').readFileSync(srcPath, 'utf8');
+
+const fpDef = src.slice(src.indexOf('async function fetchPage'));
+check('fetchPage still returns a bare string, not an object',
+  /return html;/.test(fpDef.slice(0, 400)) && !/return \{\s*html/.test(fpDef.slice(0, 400)));
+
+const callSites = [];
+let i = -1;
+while ((i = src.indexOf('fetchPage(', i + 1)) !== -1) {
+  if (/async function $/.test(src.slice(Math.max(0, i - 16), i))) continue;   // the definition
+  callSites.push(src.slice(i, i + 200));
+}
+check('every fetchPage call site was found (' + callSites.length + ')', callSites.length >= 4);
+const derefs = callSites.filter(s => /\.html\b/.test(s));
+check('no caller reads .html off what fetchPage returned',
+  derefs.length === 0, derefs.join('\n---\n'));
+
+/* Bounded to the function, not to a character count: renderPage's body carries the whole
+   injected browser script, so a fixed window stopped short of its return. */
+const rpStart = src.indexOf('async function renderPage');
+const rpNext = src.indexOf('\nasync function ', rpStart + 10);
+const rpDef = src.slice(rpStart, rpNext === -1 ? src.length : rpNext);
+check('renderPage still returns an object carrying html, so r.html stays correct',
+  /return \{ html:/.test(rpDef));
+check('and brand onboarding reads each of them the right way round',
+  /if \(r && r\.html\) html = r\.html;/.test(src) && /typeof f === 'string'/.test(src));
+
 console.log('\n' + '-'.repeat(62));
 console.log(pass + ' passed, ' + fail + ' failed');
 if (fail) { console.log('\nREGRESSION: a false claim the audit already shipped once can ship again.\n'); process.exit(1); }

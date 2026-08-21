@@ -67,8 +67,15 @@ const npw = function (s) { return String(s || '').replace(/\s+/g, '').toLowerCas
       const r = await renderPage(t0, false).catch(function () { return null; });
       if (r && r.html) html = r.html;
       if (!html) {
-        const f = await fetchPage(t0).catch(function () { return null; });
-        html = (f && f.html) || '';
+        /* fetchPage returns the HTML as a STRING. renderPage above returns an OBJECT with
+           an .html property, and this call site was reading .html off the string, so it
+           evaluated to undefined every time and the fallback silently produced nothing.
+           Brand onboarding therefore depended entirely on the renderer succeeding: when a
+           site refused the headless browser, the one path that could still have read it
+           never ran, and the screen blamed the site. The other three callers of fetchPage
+           already treat it as a string. */
+        const f = await fetchPage(t0).catch(function () { return ''; });
+        html = (typeof f === 'string' ? f : '') || '';
       }
       if (!html) return json(200, { error: 'That site could not be read. Check the URL, or fill the fields in by hand.' });
 
