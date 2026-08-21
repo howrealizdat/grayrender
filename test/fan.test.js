@@ -43,7 +43,7 @@ const win = dom.window;
    through the page's own scope rather than guessed at from the outside. */
 win.eval('window.__fx={FAN_N,FREQ_CAP,FAN_TODAY,FAN_CLUB,FAN_SEED,FAN_SEGMENT_RULES,FAN_JOURNEY,'
        + 'FAN_TOKENS,SEG_OPS,FAN_FIELDS,EMAIL_V1,EMAIL_V2,SMS_V1,SMS_V2,PUSH_V1,PUSH_V2,FAN_BRIEF,'
-       + 'FAN_FOCUS,FAN_STANDARDS,FAN_GUIDE,BIRG,FAN_HANDOFFS,HANDOFF_HONESTY};');
+       + 'FAN_FOCUS,FAN_STANDARDS,FAN_GUIDE,BIRG,FAN_HANDOFFS,HANDOFF_HONESTY,FAN_CADENCE};');
 const FX = win.__fx;
 
 /* The cheapest assertion in the file, and it catches the worst failure. A throw anywhere
@@ -714,6 +714,113 @@ check('with the honesty line in the export too', /not a claim to have operated i
 console.log('\nAND THE APP STYLESHEET STAYS OUT OF THE EMAIL');
 check('the creative carries no app CSS', !/fe-hocue|fe-hox|wk-card/.test(FX.EMAIL_V2.html));
 check('it carries only its own two blocks', (FX.EMAIL_V2.html.match(/<style>/g) || []).length === 1);
+
+/* ------------------------------------------------------------ the focus */
+/* The setup reads a homepage, and a homepage says the BIGGEST thing a company does rather
+   than the thing somebody was hired to work on. Without this, every tool writes for the
+   wrong half of the business with complete confidence. */
+console.log('\nA HOMEPAGE SCAN IS NOT THE SAME AS THE WORK');
+win.eval('clearBrand(); PLAN = blankPlan(); hydratePlan();');
+win.saveBrand({ name: 'Wide Co', what: 'Does a great many things.', industry: 'Conglomerate',
+  offerings: ['a','b','c','d','e','f'], audiences: ['u','v','w','x','y','z'], goals: ['Leads'], proof: [] });
+win.eval('hydratePlan();');
+check('a profile with six audiences and six offerings reads as broad', win.profileIsBroad() === true);
+check('and with no focus set, the app says so', win.focusNeeded() === true);
+const before = win.brandContext();
+check('before a focus, the context leads with the company', !/ONE PART OF THE BUSINESS/.test(before));
+win.setBrandFocus('Sports, gaming and entertainment', 'fan engagement CRM for a sports league', '');
+const after = win.brandContext();
+check('after a focus, it leads with the focus and outranks the scan',
+  /THIS WORK IS FOR ONE PART OF THE BUSINESS: Sports/.test(after));
+check('and tells the writer the rest is context, not the subject',
+  /context only and must not become the subject/.test(after));
+check('the nudge stops once a focus exists', win.focusNeeded() === false);
+/* A business can have a declared focus and no scanned blurb at all. Dropping the one thing
+   the human actually told us because the scan came back thin is the wrong way round. */
+win.eval('clearBrand();');
+win.saveBrand({ name: 'Thin Co' });
+win.setBrandFocus('Sports', 'fan engagement', '');
+check('a focus survives even when the scan found no description at all',
+  /This work is for one part of the business: Sports/.test(win.brandContext()));
+check('clearing it puts things back', (function () { win.setBrandFocus(''); return !win.brandFocus(); })());
+check('suggestions come from what the scan already found, never invented',
+  (function () {
+    win.eval('clearBrand();');
+    win.saveBrand({ name: 'S', audiences: ['Insurance', 'Healthcare'], offerings: ['Analytics'] });
+    const s = win.focusSuggestions();
+    return s.indexOf('Insurance') >= 0 && s.indexOf('Analytics') >= 0 && s.length === 3;
+  })());
+/* Two different things must not both be called Focus on the same screen. */
+win.eval('clearBrand();');
+win.saveBrand({ name: 'EXL', what: 'Data and AI.', industry: 'Data', offerings: ['a','b','c','d','e','f'],
+  audiences: ['u','v','w','x','y','z'], goals: ['Leads'], proof: [] });
+win.eval('hydratePlan();');
+win.goTool('fanreq');
+const reqText = win.document.getElementById('main').textContent || '';
+check('the request screen separates the vertical from the client focus',
+  /The vertical this models/.test(reqText) && /What part of EXL is this for/.test(reqText));
+
+/* --------------------------------------------------------- the day to day */
+console.log('\nTHE PLAN HAS A FRONT DOOR');
+/* Earlier blocks walk all seven screens, so the visited map has to be cleared or there is
+   no "not yet opened" left to find. */
+win.eval('PLAN = blankPlan(); FE.visited = {};');
+['fanreq', 'fanseg'].forEach(id => win.goTool(id));
+let day = win.fanToday();
+check('it remembers where you left off', day.lastStep === 'fanseg' && day.doneCount >= 2);
+check('and knows which step you have not opened', day.steps.indexOf(day.nextStep) > 0);
+check('with nothing scheduled, nothing is due', day.scheduled === 0 && day.today.length === 0);
+const filed = win.fileFanPlan();
+day = win.fanToday();
+check('scheduling the plan files every dated phase (' + filed + ' items)', filed === 18, String(filed));
+check('day one lands today', day.today.length === 5, String(day.today.length));
+check('week one lands inside the week', day.soon.length === 4, String(day.soon.length));
+check('nothing is late the moment it is scheduled', day.overdue.length === 0);
+check('every filed item carries a real date', win.eval('PLAN.items').filter(i => i.source === 'fan')
+  .every(i => /^\d{4}-\d{2}-\d{2}$/.test(i.due)));
+/* A recurring rhythm filed as thirty dated tickets is how a to-do list stops being read. */
+check('the continuous rhythm is deliberately NOT filed as tickets',
+  !win.eval('PLAN.items').some(i => /^Continuous,/.test(i.title)));
+check('it lives in the cadence instead', FX.FAN_CADENCE.daily.length >= 3 && FX.FAN_CADENCE.weekly.length >= 3);
+check('re-scheduling does not duplicate', (function () {
+  const n1 = win.eval('PLAN.items').filter(i => i.source === 'fan').length;
+  win.fileFanPlan();
+  return win.eval('PLAN.items').filter(i => i.source === 'fan').length === n1;
+})());
+check('the day of the week decides what the rhythm asks for',
+  win.fanDayKind(new Date(2026, 7, 24)) === 'weekly'      // a Monday
+  && win.fanDayKind(new Date(2026, 7, 22)) === 'matchday' // a Saturday
+  && win.fanDayKind(new Date(2026, 7, 26)) === 'daily');  // a Wednesday
+check('matchday asks for the things only matchday asks for',
+  win.fanCadenceFor(new Date(2026, 7, 22)).items.length > win.fanCadenceFor(new Date(2026, 7, 26)).items.length);
+/* Work a meeting put on you turns up without a second store to keep it in. */
+win.addItem({ source: 'meeting', title: 'Confirm the SMS consent capture with the ticketing team', detail: 'from the campaign standup' });
+check('anything a meeting filed about this campaign surfaces here',
+  win.fanToday().fromMeetings.length === 1);
+check('and unrelated meeting work does not', (function () {
+  win.addItem({ source: 'meeting', title: 'Book the offsite venue', detail: 'nothing to do with it' });
+  return win.fanToday().fromMeetings.length === 1;
+})());
+win.goTool('fanplan');
+check('the plan screen shows the day panel', win.document.querySelectorAll('#main .fd-cell').length === 4);
+
+/* ------------------------------------------------------- meeting mode */
+console.log('\nAND MEETING MODE CAN SPEAK TO THE CAMPAIGN');
+const mc = win.meetingContext();
+check('the campaign reaches the one place all live context is assembled',
+  /FAN ENGAGEMENT CAMPAIGN/.test(mc));
+check('it carries the segment sentence verbatim, so no figure is retold',
+  mc.indexOf(win.segSentence(win.evalSegment(FX.FAN_SEGMENT_RULES, 'email', {}))) >= 0);
+check('it says whether the QA gate is blocking', /QA gate: \d+ findings at fail severity|QA gate: all templates cleared/.test(mc));
+check('it says whether the experiment is even feasible', /does NOT fit a normal two to six week window|which fits the window/.test(mc));
+check('it reports progress in words a human would use, not a screen id',
+  /Progress: \d of 7 steps opened, last on \d\. /.test(mc), (mc.match(/Progress:[^\n]*/) || [''])[0]);
+check('and it carries the honesty statement into the room',
+  /NOT Adobe Experience Platform/.test(mc) && /analogue/.test(mc));
+check('there is a campaign status note to make from it',
+  !!win.eval('MEET_MAKE').campaign && /QA gate is blocking/.test(win.eval('MEET_MAKE').campaign.spec));
+check('which is told never to tidy the numbers',
+  /never round them into something tidier/.test(win.eval('MEET_MAKE').campaign.spec));
 
 /* ---------------------------------------------------------------- hygiene */
 console.log('\nNOTHING IN HERE SHOULD EMBARRASS A PUBLIC REPO');

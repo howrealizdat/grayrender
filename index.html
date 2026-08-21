@@ -1256,6 +1256,49 @@
     color:var(--ink-2);font-weight:600;white-space:nowrap}
   .fe-honest{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);
     font-size:12.5px;line-height:1.6;color:var(--amber)}
+  /* focus */
+  .fo-now{padding:14px 16px;border:1px solid var(--accent);border-left:3px solid var(--accent);
+    border-radius:10px;background:rgba(138,109,59,.08);margin-bottom:16px}
+  .fo-now b{display:block;font-family:var(--display);font-size:20px;font-weight:500}
+  .fo-now span{display:block;font-size:13.5px;color:var(--ink-2);margin-top:3px}
+  .fo-now a{display:inline-block;margin-top:7px;font-family:var(--mono);font-size:11.5px;color:var(--accent-dark)}
+  .fo-grid{display:grid;gap:13px;margin-top:14px}
+  .fo-grid label{display:flex;flex-direction:column;gap:6px;font-size:10.5px;font-weight:700;
+    letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2)}
+  .fo-grid input{font-family:var(--font);font-size:14px;padding:0 13px;min-height:44px;
+    text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink);
+    border:1px solid var(--border);border-radius:10px;background:var(--surface-solid)}
+  .fo-sug{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .fo-sug>span{width:100%;font-size:10px;font-weight:700;letter-spacing:1.3px;
+    text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+  .fo-chip{background:transparent;border:1px solid var(--border);border-radius:980px;
+    padding:0 14px;min-height:44px;font-family:var(--font);font-size:12.5px;color:var(--ink-2);cursor:pointer}
+  .fo-chip:hover{border-color:var(--accent);color:var(--accent-dark)}
+  .fo-notice{margin-top:16px;padding:15px 18px;border:1px solid var(--amber);
+    border-left:3px solid var(--amber);border-radius:0 12px 12px 0;
+    background:rgba(168,83,27,.06);font-size:13.5px;line-height:1.6;color:var(--ink)}
+  .fo-notice b{font-weight:600}
+  .fo-acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+  /* the day to day */
+  .fd-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+    background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .fd-cell{background:var(--surface-solid);padding:15px 16px}
+  .fd-cell span{display:block;font-size:10px;font-weight:700;letter-spacing:1.3px;
+    text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
+  .fd-cell b{font-family:var(--display);font-size:20px;font-weight:400;line-height:1.25;display:block}
+  .fd-cell em{font-style:normal;font-size:12.5px;color:var(--ink-2)}
+  .fd-cell.warn b{color:var(--amber)}
+  .fd-list{list-style:none;display:grid;gap:9px;margin-top:6px}
+  .fd-list li{display:flex;gap:11px;align-items:baseline;font-size:14px;line-height:1.55;
+    padding:11px 13px;border:1px solid var(--border);border-radius:10px}
+  .fd-list li.late{border-color:rgba(168,83,27,.4);background:rgba(168,83,27,.05)}
+  .fd-list .fd-when{font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap;flex-shrink:0}
+  .fd-cad{display:grid;gap:11px;margin-top:8px}
+  .fd-cad li{list-style:none;padding-left:19px;position:relative;font-size:14px;line-height:1.58}
+  .fd-cad li:before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;
+    border-radius:50%;background:var(--accent)}
+  .fd-cad b{display:block;font-weight:600}
+  .fd-cad span{color:var(--ink-2);font-size:13px}
 </style>
 </head>
 <body>
@@ -1431,6 +1474,9 @@ const DEFAULT_BRAND = {
   goals:["Brand Awareness","Lead Generation","Product Adoption","Community & Engagement","Event Or Launch Promotion","Thought Leadership"],
   buyers:["Founder / Owner","Operations Lead","Marketing Lead","Finance Lead","IT Lead"],
   proof:[], profile:"",
+  /* WHICH PART of this business the work is for. The scan reads a homepage, and a homepage
+     says the biggest thing a company does rather than the thing you were hired to do. */
+  focus:null,
   /* The site the profile was read FROM. It was thrown away for months, which is why the
      audit still asked you to type the address of the business it was already configured
      for. Anything the setup already knows, no tool should ask for twice. */
@@ -1515,8 +1561,27 @@ function brandName(){ return (B().name||"").trim() || "the company"; }
    and honest about it when nothing has been learned yet. */
 function brandContext(){
   const b=B();
-  if(!b.profile && !b.what) return "a business whose specifics have not been provided. Write for a general professional audience and never invent facts, numbers, or customer names about them.";
-  const bits=[b.profile||b.what];
+  const f0=brandFocus();
+  /* The focus is checked BEFORE this early return, not after it. A business can have a
+     declared focus and no scanned description at all, and discarding the one thing the
+     human actually told us because the scan came back thin is the wrong way round. */
+  if(!b.profile && !b.what){
+    return (f0 ? "This work is for one part of the business: "+f0.label+
+      (f0.note?", specifically "+f0.note:"")+". Write for that. " : "")
+      + "The rest of the company's specifics have not been provided, so write for a general "
+      + "professional audience and never invent facts, numbers, or customer names about them.";
+  }
+  const bits=[];
+  const f=brandFocus();
+  if(f){
+    /* First, and stated as an override. A profile read from a homepage will happily pull a
+       writer back toward the company's headline business unless something says not to. */
+    bits.push("THIS WORK IS FOR ONE PART OF THE BUSINESS: "+f.label+
+      (f.note?", specifically "+f.note:"")+
+      ". Write for that. Where the company profile below describes other parts of the business, "+
+      "they are context only and must not become the subject.");
+  }
+  bits.push(b.profile||b.what);
   if(b.industry) bits.push("Industry: "+b.industry+".");
   if(b.proof&&b.proof.length) bits.push("Evidenced proof points: "+b.proof.join("; ")+".");
   bits.push("Never invent a statistic, customer name, or claim beyond what is stated here.");
@@ -2090,7 +2155,12 @@ function renderTool(){
   const t=TOOLS[current];
   if(t&&t.workspace) return renderHome();
   if(t&&t.meeting) return renderMeeting();
-  if(t&&t.fan) return FAN_SCREENS[current]();
+  if(t&&t.fan){
+    /* Where you left off. Seven steps is more than one sitting, so the plan screen can say
+       what you were last on and what you have not opened yet. */
+    try{ FE.visited=FE.visited||{}; FE.visited[current]=Date.now(); feSave(); }catch(e){}
+    return FAN_SCREENS[current]();
+  }
   if(!BRAND && needsBrand(t)) return renderBrandSetup();
   let dl="";
   const fieldsHtml=t.fields.map(f=>{
@@ -2111,6 +2181,7 @@ function renderTool(){
       <p>${t.blurb}</p>
       ${brandSourceLine(t)}
       ${pickUpLine(t)}
+      ${focusNotice()}
     </div>
     <div class="card">
       <div class="grid">${fieldsHtml}</div>
@@ -2123,6 +2194,7 @@ function renderTool(){
     </div>
     <div id="outArea" aria-live="polite" aria-atomic="false"></div>
   `;
+  wireFocusNotice();
   document.getElementById("genBtn").addEventListener("click",generate);
   // Switching tools abandons the draft, so the dock must not offer to edit a stale one.
   REFINE=null; refineOpen(false);
@@ -3482,6 +3554,10 @@ function meetingContext(){
   bits.push("MARKETING PROGRAM: "+st.map(s=>s.n+" "+s.label+" ("+(s.status==="done"?"done":s.status==="now"?"current":"not started")+")").join(", ")+".");
   const open=openItems().slice(0,8);
   if(open.length) bits.push("WORK CURRENTLY OPEN:\n"+itemLines(open));
+  /* The campaign reaches BOTH the answer-that path and the make-it path, because both read
+     this one function. */
+  const fanBits=fanContextBlock();
+  if(fanBits) bits.push(fanBits);
   if(PLAN.strategy&&PLAN.strategy.text&&daysSince(PLAN.strategy.at)<14)
     bits.push("THE AGREED FOCUS: "+String(PLAN.strategy.text).replace(/\s+/g," ").replace(/\[\d+\]/g,"").slice(0,300));
   return bits.filter(Boolean).join("\n");
@@ -3499,6 +3575,9 @@ The ACTION ITEMS section must be one item per line in exactly this shape, pipe s
     spec:`Write the follow up email body only. One line of thanks and context, what was agreed, what happens next and by when if a date was actually stated, and one closing line naming what you need from them. Between 120 and 200 words. No subject line, no invented greeting name, no signature block.`},
   onepager:{label:"One-pager",hint:"What you just talked through, on a page they can forward",
     spec:`Write a one page brief for the people who were not in the room: THE SITUATION, WHAT WE ARE PROPOSING, WHY THIS AND NOT SOMETHING ELSE, WHAT IT TAKES, WHAT HAPPENS NEXT. Tight and concrete, no filler.`},
+  campaign:{label:"Campaign status note",hint:"Where the campaign stands, for somebody who was not in it",
+    spec:`Write a status note on the fan engagement campaign in these sections: WHERE IT STANDS (three or four lines), THE NUMBERS THAT MATTER (only figures you were given, each with what it means), WHAT IS BLOCKING IT, WHAT HAPPENS NEXT, WHAT I NEED A DECISION ON.
+Use the campaign figures you were given verbatim and never round them into something tidier. If the QA gate is blocking, say so first and say nothing can deploy until it clears. Close with one line stating that the dataset is synthetic and the build is an analogue rather than an Adobe platform.`},
   proposal:{label:"Proposal outline",hint:"The shape of the work, ready to price up later",
     spec:`Write a proposal outline: THE PROBLEM IN THEIR WORDS, SCOPE (what is included, as a list), APPROACH (the phases in order), WHAT WE NEED FROM YOU, WHAT SUCCESS LOOKS LIKE. Never state a price, a rate or a total, because none was agreed.`}
 };
@@ -6710,7 +6789,7 @@ function feLoad(){
   try{ const raw=localStorage.getItem("gr_fan"); if(raw) FE=Object.assign(FE,JSON.parse(raw)); }catch(e){}
   if(!FE.rules||!FE.rules.length) FE.rules=FAN_SEGMENT_RULES.map(r=>Object.assign({},r));
 }
-function feSave(){ try{ localStorage.setItem("gr_fan",JSON.stringify({rules:FE.rules,channel:FE.channel,hour:FE.hour,ver:FE.ver,tab:FE.tab,birg:FE.birg})); }catch(e){} }
+function feSave(){ try{ localStorage.setItem("gr_fan",JSON.stringify({rules:FE.rules,channel:FE.channel,hour:FE.hour,ver:FE.ver,tab:FE.tab,birg:FE.birg,visited:FE.visited})); }catch(e){} }
 function feSeg(){ return evalSegment(FE.rules,FE.channel,{hour:FE.hour}); }
 function n(x){ return Number(x||0).toLocaleString(); }
 function money(x){ return "$"+Number(Math.round(x||0)).toLocaleString(); }
@@ -6752,7 +6831,7 @@ function renderFanReq(){
       "What was asked for, what it will be measured on, and the rules the build is not allowed to break.")
     +feHowTo("fanreq")
     +`<div class="card wk-card">
-      <div class="wk-head"><h2>Focus</h2><span class="wk-count">${esc(FAN_FOCUS.label)}</span></div>
+      <div class="wk-head"><h2>The vertical this models</h2><span class="wk-count">${esc(FAN_FOCUS.label)}</span></div>
       <div class="fe-body">
         <div class="fe-focus">
           <div class="fe-focus-mark" aria-hidden="true">${esc(FAN_FOCUS.label.slice(0,2))}</div>
@@ -6771,6 +6850,8 @@ function renderFanReq(){
         that is built here; the schema, the progression models and the campaign are all shaped by it.</p>
       </div>
     </div>
+
+    ${renderFocusCard()}
 
     <div class="card wk-card">
       <div class="wk-head"><h2>${esc(FAN_BRIEF.id)} &nbsp;${esc(FAN_BRIEF.name)}</h2><span class="wk-count">${esc(FAN_BRIEF.window)}</span></div>
@@ -6851,6 +6932,7 @@ function renderFanReq(){
       </div>
     </div>`;
   /* The successor named at the foot of the screen it belongs to. Appended after the render rather than spliced into the template, so a screen that re-renders itself (the segment builder does, on every rule change) cannot lose it. */
+  wireFocusCard(renderFanReq);
   main.insertAdjacentHTML("beforeend",feHandoff("fanreq"));
 }
 
@@ -7590,6 +7672,57 @@ function operatingPlan(){
   };
 }
 
+/* The front door to the plan: what you left half done, what is due, and what this
+   particular day of the week asks for. */
+function fanStepLabel(k){
+  return ({fanreq:"1. Request",fanseg:"2. Segment",fanbuild:"3. Build",fanqa:"4. QA",
+           fandeploy:"5. Deploy",fanmeasure:"6. Measure",fanplan:"7. Operating plan"})[k]||k;
+}
+function renderFanDay(){
+  const t=fanToday();
+  const nm=fanStepLabel;
+  const row=(i,late)=>`<li class="${late?"late":""}"><span class="fd-when">${esc(i.due?dueWords(i.due)||i.due:"no date")}</span><span>${esc(i.title)}</span></li>`;
+  const nothingScheduled=!t.scheduled;
+  return `<div class="card wk-card">
+    <div class="wk-head"><h2>Today, on this campaign</h2>
+      <div class="wk-acts">
+        <button type="button" class="btn-mini solid" id="fdFile"${BRAND?"":" disabled"}>${t.scheduled?"Re-schedule the plan":"Schedule the whole plan"}</button>
+        ${t.nextStep?`<button type="button" class="btn-mini" id="fdResume">Resume at ${esc(nm(t.nextStep))}</button>`:""}
+      </div></div>
+    <div class="fe-body">
+      <div class="fd-top">
+        <div class="fd-cell"><span>Where you left off</span>
+          <b>${t.lastStep?esc(nm(t.lastStep)):"Not started"}</b>
+          <em>${t.doneCount} of ${t.steps.length} steps opened${t.lastAt?", last "+esc(dueWords(ymd(new Date(t.lastAt)))||"today"):""}</em></div>
+        <div class="fd-cell ${t.overdue.length?"warn":""}"><span>Overdue</span>
+          <b>${n(t.overdue.length)}</b><em>${t.overdue.length?"oldest "+esc(t.overdue[0].due):"nothing late"}</em></div>
+        <div class="fd-cell"><span>Due today</span><b>${n(t.today.length)}</b><em>${t.soon.length} more inside a week</em></div>
+        <div class="fd-cell"><span>Today is</span><b>${esc(t.cadence.label)}</b><em>${t.cadence.items.length} things the rhythm asks for</em></div>
+      </div>
+
+      ${nothingScheduled?`<div class="wk-note">The plan below is not scheduled yet. Press <b>Schedule the whole plan</b> and its ${n(operatingPlan().phases.filter(x=>x.when!=="Continuous").reduce((a,x)=>a+x.items.length,0))} dated items land in Today with real due dates, day one through ninety. The continuous rhythm deliberately stays out of the list and lives below instead, because a recurring cadence filed as thirty tickets is how a to-do list stops being read.</div>`:""}
+
+      ${t.overdue.length?`<div class="fe-sub">Late</div><ul class="fd-list">${t.overdue.slice(0,6).map(i=>row(i,true)).join("")}</ul>`:""}
+      ${t.today.length?`<div class="fe-sub">Due today</div><ul class="fd-list">${t.today.map(i=>row(i)).join("")}</ul>`:""}
+      ${t.soon.length?`<div class="fe-sub">Inside a week</div><ul class="fd-list">${t.soon.slice(0,6).map(i=>row(i)).join("")}</ul>`:""}
+      ${t.fromMeetings.length?`<div class="fe-sub">Came out of a meeting</div><ul class="fd-list">${t.fromMeetings.slice(0,6).map(i=>row(i)).join("")}</ul>
+        <p class="fe-note">Picked up from ordinary tracked work rather than a second store, so anything Meeting Mode filed about this campaign turns up here without being told to.</p>`:""}
+
+      <div class="fe-sub">${esc(t.cadence.label)}, so the rhythm asks for this</div>
+      <ul class="fd-cad">${t.cadence.items.map(c=>`<li><b>${esc(c.what)}</b><span>${esc(c.why)}</span></li>`).join("")}</ul>
+      <p class="fe-note">The ninety day plan is a document. What somebody needs on a Tuesday is smaller: what did I leave half
+      done, what is due, and what does today ask for. Weekends read as matchday and Monday as the start of the week, derived
+      from the date rather than configured, because a runbook you have to set up is one nobody opens.</p>
+    </div>
+  </div>`;
+}
+function wireFanDay(){
+  const f=document.getElementById("fdFile");
+  if(f) f.addEventListener("click",()=>{ const n=fileFanPlan(); f.textContent="Scheduled "+n+" items"; f.disabled=true; renderFanPlan(); });
+  const r=document.getElementById("fdResume");
+  if(r) r.addEventListener("click",()=>{ const t=fanToday(); if(t.nextStep) goTool(t.nextStep); });
+}
+
 function renderFanPlan(){
   const P=operatingPlan();
   const f=P.feasibility, pen=P.penetration;
@@ -7597,6 +7730,7 @@ function renderFanPlan(){
     feHead(7,"The operating plan","operating",
       "What has to be true before anything sends, what happens in the first ninety days, and what the job is once it is running.")
     +feHowTo("fanplan")
+    +renderFanDay()
     +`<div class="card wk-card">
       <div class="wk-head"><h2>Where this came from</h2><span class="wk-count">${esc(P.generated)}</span></div>
       <div class="fe-body">
@@ -7701,6 +7835,7 @@ function renderFanPlan(){
     </div>`;
   /* bindCopy looks its button up as btn_<id> and gives the Copied feedback the rest of the
      suite uses, so the button is named to fit it rather than a second copier being written. */
+  wireFanDay();
   bindCopy("fanplan",planText(P));
   const d=document.getElementById("fePlanDl");
   if(d) d.addEventListener("click",()=>downloadText("fan-engagement-operating-plan.txt",planText(P),"text/plain"));
@@ -7845,6 +7980,261 @@ function allHandoffs(){
   const out=[];
   Object.keys(FAN_HANDOFFS).forEach(k=>FAN_HANDOFFS[k].forEach(x=>out.push(Object.assign({step:k},x))));
   return out;
+}
+
+/* ============================== PINPOINT THE FOCUS ==============================
+   The setup reads a homepage, and a homepage says the BIGGEST thing a company does, not
+   the thing you were hired to work on. Read EXL's front page and you get data and AI
+   across insurance, banking and healthcare, all of it true, none of it the reason somebody
+   is sitting in a fan engagement interview: the sports practice is three clicks down.
+
+   Left alone, every tool in this suite then writes confidently for the wrong half of the
+   business. So the focus is DECLARED, it sits above the scan rather than inside it, and it
+   goes into brandContext, which is the single place all twelve tools read from. */
+function brandFocus(){
+  const f=(B()||{}).focus;
+  if(!f||!f.label) return null;
+  return {label:f.label,note:f.note||"",url:f.url||""};
+}
+function setBrandFocus(label,note,url){
+  if(!BRAND) return;
+  const l=(label||"").trim();
+  BRAND.focus = l ? {label:l,note:(note||"").trim(),url:(url||"").trim()} : null;
+  persistBrands(); reflectBrand();
+}
+function focusLine(){
+  const f=brandFocus();
+  return f ? f.label + (f.note?". "+f.note:"") : "";
+}
+/* A profile is BROAD when the scan came back with a company that plainly does several
+   different things. That is not a fault in the read, it is what the homepage said, and it
+   is exactly when writing for "the company" produces something for nobody. */
+function profileIsBroad(){
+  const b=B()||{};
+  const a=(b.audiences||[]).length, o=(b.offerings||[]).length;
+  return a>=5 || o>=5;
+}
+function focusNeeded(){ return !!BRAND && profileIsBroad() && !brandFocus(); }
+
+/* Offered rather than invented: the candidates come from what the scan already found, so
+   picking one is a narrowing of their own words, not a guess about their business. */
+function focusSuggestions(){
+  const b=B()||{};
+  const out=[];
+  (b.audiences||[]).slice(0,6).forEach(a=>out.push(a));
+  (b.offerings||[]).slice(0,6).forEach(o=>{ if(out.indexOf(o)<0) out.push(o); });
+  return out.slice(0,10);
+}
+function renderFocusCard(){
+  const f=brandFocus(), sug=focusSuggestions();
+  if(!BRAND) return `<div class="card wk-card"><div class="wk-head"><h2>Focus</h2></div>
+    <div class="fe-body"><div class="wk-note">Load a business first and this is where you narrow it.</div></div></div>`;
+  return `<div class="card wk-card">
+    <div class="wk-head"><h2>What part of ${esc(brandName())} is this for</h2>
+      <span class="wk-count">${f?"set":"not set"}</span></div>
+    <div class="fe-body">
+      ${f?`<div class="fo-now"><b>${esc(f.label)}</b>${f.note?`<span>${esc(f.note)}</span>`:""}
+           ${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(cleanHost(f.url)||f.url)}</a>`:""}</div>`
+        :`<div class="wk-note">The setup read a homepage, and a homepage says the biggest thing a company does.
+           If the work is for one part of the business, say which, and every tool in the suite writes for that instead.</div>`}
+      <div class="fo-grid">
+        <label>The focus
+          <input id="foLabel" type="text" value="${esc(f?f.label:"")}" placeholder="e.g. Sports, gaming and entertainment" aria-label="The focus"/></label>
+        <label>What that means in practice
+          <input id="foNote" type="text" value="${esc(f?f.note:"")}" placeholder="e.g. fan engagement CRM for a sports league" aria-label="What the focus means in practice"/></label>
+        <label>A page that describes it, if there is one
+          <input id="foUrl" type="text" value="${esc(f?f.url:"")}" placeholder="https://" aria-label="A page describing the focus"/></label>
+      </div>
+      ${sug.length?`<div class="fo-sug"><span>From what the scan already found</span>
+        ${sug.map(s=>`<button type="button" class="fo-chip" data-fosug="${esc(s)}">${esc(s)}</button>`).join("")}</div>`:""}
+      <div class="wm-row" style="margin-top:14px">
+        <button type="button" class="btn-mini solid" id="foSave">Save the focus</button>
+        ${f?`<button type="button" class="btn-mini" id="foClear">Clear it</button>`:""}
+      </div>
+      <p class="fe-note">This sits ABOVE the scan rather than inside it, and it goes into the one place all twelve tools read
+      their context from. Set it and an outreach email, a LinkedIn post or a campaign brief is written for this part of the
+      business rather than for whatever the front page happened to lead with.</p>
+    </div>
+  </div>`;
+}
+function wireFocusCard(after){
+  const save=document.getElementById("foSave");
+  if(save) save.addEventListener("click",()=>{
+    setBrandFocus(document.getElementById("foLabel").value,
+                  document.getElementById("foNote").value,
+                  document.getElementById("foUrl").value);
+    logEvent("focus","Focus set to "+(brandFocus()?brandFocus().label:"nothing"));
+    if(after) after();
+  });
+  const clr=document.getElementById("foClear");
+  if(clr) clr.addEventListener("click",()=>{ setBrandFocus(""); if(after) after(); });
+  document.querySelectorAll("[data-fosug]").forEach(b=>b.addEventListener("click",()=>{
+    const el=document.getElementById("foLabel"); if(el) el.value=b.dataset.fosug;
+  }));
+}
+/* The nudge, on the screens where writing for the wrong half of the business actually
+   costs something. Dismissible per profile, because a banner you cannot turn off is one
+   people learn to look past. */
+function focusNotice(){
+  if(!focusNeeded()) return "";
+  try{ if(localStorage.getItem("gr_focus_hush_"+(BRAND.id||""))==="1") return ""; }catch(e){}
+  const b=B();
+  return `<div class="fo-notice" id="foNotice">
+    <b>This profile was read from a homepage.</b>
+    ${esc(brandName())} came back with ${(b.audiences||[]).length} audiences and ${(b.offerings||[]).length} offerings, which is a company
+    that plainly does several different things. If this work is for one part of it, set the focus and every tool writes for that
+    instead of for the front page.
+    <span class="fo-acts">
+      <button type="button" class="btn-mini solid" id="foGo">Set the focus</button>
+      <button type="button" class="btn-mini" id="foHush">Not now</button>
+    </span>
+  </div>`;
+}
+function wireFocusNotice(){
+  const go=document.getElementById("foGo");
+  if(go) go.addEventListener("click",()=>goTool("fanreq"));
+  const hush=document.getElementById("foHush");
+  if(hush) hush.addEventListener("click",()=>{
+    try{ localStorage.setItem("gr_focus_hush_"+(BRAND.id||""),"1"); }catch(e){}
+    const n=document.getElementById("foNotice"); if(n) n.remove();
+  });
+}
+
+/* ------------------------------------------------------- the day to day ---
+   A ninety day plan is a document. What somebody actually needs on a Tuesday is smaller
+   than that: what did I leave half done, what is due, and what does this particular day
+   of the week ask for. So the plan gets a front door.
+
+   Two things feed it. WHERE YOU LEFT OFF, because this is a seven step process and nobody
+   walks it in one sitting. And WHAT CAME OUT OF A MEETING, because in this job most of the
+   day's work arrives that way rather than from a plan written a month ago. */
+const FAN_CADENCE={
+  daily:[
+    {what:"Read last night's sends before anything else",
+     why:"Bounces, complaints and unsubscribes are the only numbers that get worse while you sleep. Everything else can wait until after coffee."},
+    {what:"Check whether the frequency cap fired more than you expected",
+     why:"A cap that suddenly removes twice as many people means another campaign launched into your audience. That is a conversation, not a setting."},
+    {what:"Clear the QA queue on anything creative changed",
+     why:"A swapped image with no alt text is a two minute fix today and a compliance finding next quarter."}
+  ],
+  weekly:[
+    {what:"Suppression composition, not just the total",
+     why:"If the cap has overtaken consent as the largest reason, the problem changed from permission to volume and the answer is fewer campaigns rather than better ones."},
+    {what:"Consent capture: how many did you gain back",
+     why:"It is the only suppression reason marketing can actually fix, and it compounds. Every fan recovered is addressable for every campaign after this one."},
+    {what:"One segment definition, re-read",
+     why:"Segments are code. A rule written last season quietly becomes a different audience this one, and nobody notices until the count moves."}
+  ],
+  matchday:[
+    {what:"Confirm nothing is scheduled to land during the match",
+     why:"Nobody reads a renewal ask at kickoff, and the send burns a frequency slot you will want on Monday."},
+    {what:"Hold the post-match window for the result",
+     why:"The direction is Cialdini: people display the association when it flatters them. A win is a scheduling opportunity and a heavy defeat is a reason to wait."}
+  ],
+  monthly:[
+    {what:"Re-run the accessibility and compliance harness across every live template",
+     why:"Standards do not drift; templates do. This is the check almost no CRM team has anybody to run."},
+    {what:"Reconcile renewals against the holdout, not against last season",
+     why:"Season over season carries the fixture list, the table and the weather. The holdout carries none of them."}
+  ],
+  seasonal:[
+    {what:"Rebuild segment definitions from behaviour",
+     why:"The escalator moves. Last season's lapsed holders are this season's win-back, and some of them are back on the plan."}
+  ]
+};
+/* Monday is the week's read, Saturday is the fixture. Derived from the date rather than
+   asked for, because a runbook you have to configure is a runbook nobody opens. */
+function fanDayKind(d){
+  const day=(d||new Date()).getDay();
+  return day===6||day===0 ? "matchday" : day===1 ? "weekly" : "daily";
+}
+function fanCadenceFor(d){
+  const kind=fanDayKind(d);
+  const list=FAN_CADENCE.daily.concat(kind==="weekly"?FAN_CADENCE.weekly:[]).concat(kind==="matchday"?FAN_CADENCE.matchday:[]);
+  return {kind:kind,items:list,
+    label: kind==="matchday" ? "Matchday" : kind==="weekly" ? "Start of the week" : "An ordinary day"};
+}
+
+/* Where you left off, what is due, and what a meeting put on you. */
+function fanToday(){
+  const steps=Object.keys(FAN_GUIDE);
+  const visited=(FE.visited||{});
+  let last=null, lastAt=0;
+  steps.forEach(s=>{ if((visited[s]||0)>lastAt){ lastAt=visited[s]; last=s; } });
+  const doneCount=steps.filter(s=>visited[s]).length;
+  const next=steps.filter(s=>!visited[s])[0] || null;
+
+  const fan=PLAN.items.filter(i=>i.source==="fan"&&i.status!=="done");
+  const dated=fan.filter(i=>i.due);
+  const overdue=dated.filter(i=>daysUntil(i.due)!==null&&daysUntil(i.due)<0)
+                     .sort((a,b)=>String(a.due).localeCompare(String(b.due)));
+  const today=dated.filter(i=>daysUntil(i.due)===0);
+  const soon=dated.filter(i=>{const n=daysUntil(i.due); return n!==null&&n>0&&n<=7;})
+                  .sort((a,b)=>String(a.due).localeCompare(String(b.due)));
+  const undated=fan.filter(i=>!i.due);
+  /* Anything a meeting put on you that is about this campaign. Meeting items are ordinary
+     work with source "meeting", so this is a filter rather than a second store. */
+  const fromMeetings=PLAN.items.filter(i=>i.source==="meeting"&&i.status!=="done"
+    &&/fan|segment|campaign|renew|season|email|sms|push|journey|consent|suppress/i.test(i.title+" "+(i.detail||"")));
+  return {
+    steps:steps, visited:visited, lastStep:last, lastAt:lastAt, doneCount:doneCount, nextStep:next,
+    cadence:fanCadenceFor(new Date()),
+    overdue:overdue, today:today, soon:soon, undated:undated, fromMeetings:fromMeetings,
+    scheduled:dated.length
+  };
+}
+
+/* The plan, filed as work with real dates on it. Day one is today, week one is a week out,
+   and the rest land on the horizon they are named for. Continuous is deliberately NOT
+   filed: a recurring rhythm filed as thirty dated tickets is how a to-do list stops being
+   read at all. It lives in the cadence panel instead. */
+function fanScheduleOffsets(){ return {"Day one":0,"Week one":7,"First 30 days":30,"60 days":60,"90 days":90}; }
+function fileFanPlan(){
+  const P=operatingPlan(), off=fanScheduleOffsets();
+  const today=new Date(); let filed=0; const ids=[];
+  P.phases.forEach(ph=>{
+    if(!(ph.when in off)) return;                       // Continuous stays out, on purpose
+    const due=ymd(addDays(today,off[ph.when]));
+    ph.items.forEach(it=>{
+      const row=addItem({source:"fan",title:ph.when+", "+it.what,
+        detail:it.why+(it.evidence?" Evidence: "+it.evidence:""),
+        priority:ph.when==="Day one"?"Critical":"Important",
+        due:due, foundAt:Date.now()});
+      if(row&&ids.indexOf(row.id)<0){ ids.push(row.id); filed++; }
+    });
+  });
+  logEvent("plan","Scheduled "+filed+" fan engagement items across the first 90 days");
+  persistPlan();
+  return filed;
+}
+
+/* --------------------------------------------- what Meeting Mode is told ---
+   Folded into meetingContext, which is the single place all live context is assembled, so
+   the campaign reaches BOTH the answer-that path and the make-it path without either
+   needing to know it exists. */
+function fanContextBlock(){
+  if(!FE||!FE.rules) return "";
+  const T=fanTemplates();
+  const seg=evalSegment(FE.rules,"email",{hour:FE.hour});
+  const fails=[["Email",T.email],["SMS",T.sms],["Push",T.push]]
+    .reduce((a,g)=>a+qaCounts(qaRun(g[1][FE.ver]||g[1][0],seg.people)).fail,0);
+  const sim=FE.sim||journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{birg:FE.birg||"none"});
+  const plan=abSampleSize((FE.ab&&FE.ab.baseline)||0.04,(FE.ab&&FE.ab.mde)||0.20);
+  const feas=abFeasibility(plan,seg.reachable,1);
+  const t=fanToday();
+  const bits=[
+    "FAN ENGAGEMENT CAMPAIGN ("+FAN_FOCUS.label+" focus, synthetic dataset of "+FAN_N.toLocaleString()+" fans, "+FAN_CLUB+" is fictional):",
+    "  Campaign: "+FAN_BRIEF.name+" ("+FAN_BRIEF.id+"), in market "+FAN_BRIEF.window+", judged on "+FAN_BRIEF.primaryKpi+".",
+    "  Segment: "+segSentence(seg),
+    "  Lifetime value in the segment: "+money(seg.ltv.total)+", median "+money(seg.ltv.p50)+".",
+    "  QA gate: "+(fails?fails+" findings at fail severity, so nothing can deploy":"all templates cleared to send")+".",
+    "  Journey: "+sim.entered.toLocaleString()+" entered, "+sim.converted.toLocaleString()+" renewals modelled, "+money(sim.revenue)+" season ticket revenue.",
+    feas?"  Experiment: needs "+feas.perArm.toLocaleString()+" per arm, about "+feas.weeks+" weeks at this volume, "+(feas.feasible?"which fits the window":"which does NOT fit a normal two to six week window"):"",
+    "  Progress: "+t.doneCount+" of "+t.steps.length+" steps opened"+(t.lastStep?", last on "+fanStepLabel(t.lastStep):"")+".",
+    t.overdue.length?"  Overdue on this campaign: "+t.overdue.length+" item"+(t.overdue.length===1?"":"s"):"",
+    "  HONESTY: this is an analogue built to reason about the primitives. It is NOT Adobe Experience Platform, Journey Optimizer or Customer Journey Analytics, and no figure above describes a real organisation."
+  ];
+  return bits.filter(Boolean).join("\n");
 }
 
 const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure,fanplan:renderFanPlan};
