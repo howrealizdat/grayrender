@@ -590,8 +590,27 @@ record (the webhook channel keeps history; Netlify logs don't).
 
 ## 12. Deployment
 
-Push to `main` → Netlify auto-deploys in about 25 seconds (repo connected, no build command
-needed). **Confirm a deploy by curling the live page and diffing it against the local
+Push to `main` → Netlify auto-deploys in about 25 seconds.
+
+**It does not serve the repo.** `netlify.toml` sets `publish = "_site"` and a build command that
+stages the page and nothing else:
+
+```toml
+command = "rm -rf _site && mkdir -p _site && cp index.html _site/"
+publish = "_site"
+```
+
+So the deployed site is a single `index.html` copied out of the repo root at build time.
+`_site/` is gitignored and rebuilt on every deploy, so a stale local copy of it means nothing.
+Edit the root `index.html`; never edit `_site/`.
+
+This is why the test suite, `DOCUMENTATION.md`, `README.md` and `package.json` are not fetchable
+from the live site. With the old `publish = "."` they all were, on a site whose whole premise is
+that it is by invitation, and it put test fixtures in the deployable output. Anything added to
+the repo that is not `index.html` is therefore invisible to the web by construction, and anything
+the page genuinely needs must be inside `index.html` or reached through `/.netlify/functions`.
+
+**Confirm a deploy by curling the live page and diffing it against the local
 `index.html`** — never by assuming:
 
 ```bash
