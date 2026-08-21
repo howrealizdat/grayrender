@@ -390,6 +390,19 @@ console.log('\nNO TABLE IS TRAPPED INSIDE A CLIPPING CARD');
     loose.length === 0, loose.length + ' unwrapped');
 });
 
+/* On a laptop the sidebar is roughly twice the height of the viewport, so a group at the
+   bottom of it is invisible until you scroll. This is the feature the suite gets shown for;
+   it does not get to be the one you have to hunt for on a shared screen. */
+console.log('\nTHE GROUP IS ABOVE THE FOLD, NOT AT THE BOTTOM OF THE SIDEBAR');
+const navOrder = Array.prototype.slice.call(win.document.querySelectorAll('.sidebar .nav-item'))
+  .map(el => el.dataset.tool);
+check('the fan group sits before the marketing program in the sidebar',
+  navOrder.indexOf('fanreq') < navOrder.indexOf('audit'), navOrder.join(','));
+check('and before the any-time tools', navOrder.indexOf('fanreq') < navOrder.indexOf('outreach'));
+check('only Today and Meeting Mode come above it', navOrder.indexOf('fanreq') === 2, String(navOrder.indexOf('fanreq')));
+check('all six are still together, in order',
+  navOrder.slice(2, 8).join(',') === 'fanreq,fanseg,fanbuild,fanqa,fandeploy,fanmeasure', navOrder.slice(2, 8).join(','));
+
 win.goTool('fanreq');
 const reqTxt = win.document.getElementById('main').textContent || '';
 check('the request screen states plainly that this is not Adobe experience',
