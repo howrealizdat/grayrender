@@ -1160,6 +1160,10 @@
   .fe-verdict.stop b{color:var(--amber)}
   .fe-verdict.go b{color:var(--accent-dark)}
   .fe-verdict p{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+  .fe-feas{margin-top:14px;padding:13px 16px;border-radius:11px;font-size:13.5px;line-height:1.6;border:1px solid var(--border)}
+  .fe-feas.stop{background:rgba(168,83,27,.07);border-color:rgba(168,83,27,.28);color:var(--ink)}
+  .fe-feas.go{background:rgba(138,109,59,.07);border-color:rgba(138,109,59,.28)}
+  .fe-feas b{display:block;font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);margin-bottom:5px}
   .fe-vstats{margin-top:11px;padding-top:11px;border-top:1px solid var(--border);font-family:var(--mono);
     font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
   @media (max-width:860px){
@@ -1170,6 +1174,63 @@
     .fe-rx{margin-left:0}
     .fe-jday{margin-left:0;width:100%}
     .fe-jnums{gap:14px}
+  }
+  /* how-to-read panel */
+  .fe-guide{border:1px solid var(--border);border-radius:16px;background:var(--surface-2);margin-bottom:18px;overflow:hidden}
+  .fe-guide summary{list-style:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:10px;min-height:44px}
+  .fe-guide summary::-webkit-details-marker{display:none}
+  .fe-gi{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+  .fe-guide summary:after{content:"";margin-left:auto;width:7px;height:7px;border-right:1.5px solid var(--ink-2);
+    border-bottom:1.5px solid var(--ink-2);transform:rotate(45deg);transition:transform .18s var(--ease)}
+  .fe-guide[open] summary:after{transform:rotate(225deg)}
+  .fe-gbody{padding:0 20px 20px;display:grid;gap:16px}
+  .fe-grow>span{display:block;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+  .fe-grow>p{font-size:13.5px;line-height:1.62;color:var(--ink)}
+  .fe-glist{list-style:none;display:grid;gap:9px}
+  .fe-glist li{font-size:13px;line-height:1.6;color:var(--ink-2);padding-left:15px;position:relative}
+  .fe-glist li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .fe-glist b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .fe-gcite{list-style:none;display:grid;gap:12px}
+  .fe-gcite li{padding:13px 15px;border:1px solid var(--border);border-radius:11px;background:var(--surface-solid)}
+  .fe-gcite b{display:block;font-size:13.5px;font-weight:600}
+  .fe-gcite span{display:block;font-size:11.5px;color:var(--ink-2);margin:3px 0 7px;font-style:italic}
+  .fe-gcite em{display:block;font-style:normal;font-size:13px;line-height:1.6;color:var(--ink-2)}
+  .fe-cite-here{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12.5px;line-height:1.6;color:var(--accent-dark)}
+  /* focus */
+  .fe-focus{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .fe-focus-mark{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:23px}
+  .fe-focus-main{flex:1;min-width:230px}
+  .fe-focus-main h3{font-family:var(--display);font-size:23px;font-weight:400;line-height:1.2}
+  .fe-focus-main p{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:5px}
+  .fe-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  .fe-split>div{padding:14px 16px;border:1px solid var(--border);border-radius:12px}
+  .fe-split h4{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);margin-bottom:9px}
+  .fe-split ul{list-style:none;display:grid;gap:6px}
+  .fe-split li{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding-left:14px;position:relative}
+  .fe-split li:before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  /* plan */
+  .fe-when{font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+  .fe-plan-items{list-style:none;counter-reset:pi;display:grid;gap:16px}
+  .fe-plan-items li{counter-increment:pi;position:relative;padding-left:38px}
+  .fe-plan-items li:before{content:counter(pi);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .fe-plan-items b{display:block;font-size:14.5px;font-weight:600;line-height:1.45}
+  .fe-plan-items p{font-size:13.5px;line-height:1.62;color:var(--ink-2);margin-top:5px}
+  .fe-ev{margin-top:8px;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--accent-dark)}
+  .fe-ev span{display:inline-block;font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--ink-2);margin-right:8px}
+  .fe-unknowns{list-style:none;display:grid;gap:12px}
+  .fe-unknowns li{padding:13px 15px;border:1px solid var(--border);border-left:2px solid var(--amber);border-radius:0 11px 11px 0}
+  .fe-unknowns b{display:block;font-size:13.5px;font-weight:600;margin-bottom:4px}
+  .fe-unknowns span{font-size:13px;line-height:1.6;color:var(--ink-2)}
+  .fe-birg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .fe-birg-note{width:100%;font-size:12.5px;line-height:1.55;color:var(--amber);margin-top:2px}
+  @media (max-width:860px){
+    .fe-split{grid-template-columns:1fr}
+    .fe-when{margin-left:0}
+    .fe-plan-items li{padding-left:32px}
   }
 </style>
 </head>
@@ -1242,6 +1303,10 @@
     <div class="nav-item" data-tool="fanmeasure">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M7 20v-6M12 20V8M17 20v-9"/></svg>
       6. Measure
+    </div>
+    <div class="nav-item" data-tool="fanplan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 16h7M9 8h3"/></svg>
+      7. Operating plan
     </div>
 
     <!-- THE PROGRAM. The tools used to be grouped by what they ARE. Grouped by WHEN YOU
@@ -1444,6 +1509,7 @@ const TOOLS = {
   fanqa:{fan:true,title:"QA",hl:"QA",blurb:"Every template checked against a written standard, with the send blocked while anything is still failing.",fields:[]},
   fandeploy:{fan:true,title:"Deploy",hl:"Deploy",blurb:"The journey, the wait between each step, and who the frequency cap removed at every send.",fields:[]},
   fanmeasure:{fan:true,title:"Measure",hl:"Measure",blurb:"What the journey returned, what a fan is worth, and an experiment that refuses to be stopped early.",fields:[]},
+  fanplan:{fan:true,title:"Operating plan",hl:"plan",blurb:"Everything the previous six screens established, assembled into what to do from day one and what the job is once it is running.",fields:[]},
   /* Not a generator. The workspace is where the work already done lives, so it carries no
      fields and no prompt of its own, and renderTool hands straight over to renderHome. */
   home:{
@@ -5498,6 +5564,69 @@ const FAN_TODAY="2026-08-21";        // frozen: a demo whose numbers move with t
 const FAN_SEASON=2026;
 const FAN_CLUB="Harborline FC";      // fictional on purpose. No real club, no real person, no real number.
 
+/* ------------------------------------------------------------------- the focus ---
+   A fan base is not a generic customer list, and the whole point of this section is that
+   the DOMAIN changes what the primitives mean. Season tickets, a fixture list, a result on
+   Saturday that moves how people feel on Sunday: none of that exists in ecommerce, and a
+   build that stayed vertical-neutral would model none of it.
+
+   So the focus is DECLARED rather than assumed. Sports is the one that is built. The
+   primitives underneath (consent, suppression, journeys, dynamic content, template QA,
+   experiment guards) are vertical-neutral; what the focus supplies is the schema, the
+   progression model, the campaign and the vocabulary on screen. */
+const FAN_FOCUS={
+  id:"sports",
+  label:"Sports",
+  sub:"a club with a season ticket base",
+  unit:"season ticket",
+  event:"match",
+  eventPlural:"matches",
+  cycle:"season",
+  built:true,
+  why:"Sports is the vertical where fan engagement is a job title rather than a metaphor. It has the two "
+     +"things that make the problem interesting: a fixed inventory that expires the moment the whistle goes, "
+     +"and an identity attachment that ordinary customers do not have to a brand.",
+  /* Named so the section cannot quietly pretend to be general. */
+  neutral:["Consent held per channel","Suppression and frequency capping","Journey orchestration",
+           "Dynamic content with fallbacks","Template QA against WCAG, CAN-SPAM and TCPA","Experiment design and stopping rules"],
+  specific:["The fan schema and its seasonal shape","The frequency escalator and the psychological continuum",
+            "Result-contingent send timing","Season ticket reactivation as the campaign","Renewals as the primary KPI"]
+};
+
+/* ------------------------------------------------ the thinking this is held to ---
+   The writing tools in this suite each name the practitioner standard they are written to,
+   because "this looks good" is an opinion and "this is written to Josh Braun's 4-T" is a
+   claim somebody can check. The same rule applies here, and it matters more, because every
+   number on these screens is a modelling decision that somebody has already studied
+   properly. Where this build departs from the standard, it says so rather than quietly
+   diverging. */
+const FAN_STANDARDS=[
+  {who:"Mullin, Hardy and Sutton",
+   work:"Sport Marketing (Human Kinetics). The frequency escalator, originally Mullin, 1978.",
+   says:"Fans occupy rungs of involvement and the job is to move them up one rung at a time, investing first in the people already on the escalator: retain, then grow, then acquire.",
+   here:"Every fan carries an escalator rung derived from real attendance and tenure, and lapsing is modelled as what it is, a slide DOWN a rung rather than a churn event. The reactivation campaign is a retain play and is labelled as one."},
+  {who:"Funk and James",
+   work:"The Psychological Continuum Model, Sport Management Review, 2001.",
+   says:"Attachment runs on a continuum from awareness to attraction to attachment to allegiance, and the same behaviour can mean different things at different stages.",
+   here:"A second axis beside the behavioural one. Two fans with identical attendance can sit at different stages, which is why the segment screen lets you filter on both and the plan treats them differently."},
+  {who:"Cialdini, Borden, Thorne, Walker, Freeman and Sloan",
+   work:"Basking in Reflected Glory: Three (Football) Field Studies, 1976.",
+   says:"People display their association with a winning team far more readily than a losing one: 26 percent wore team apparel after a win against 13.5 percent after a loss, and used the word we more often.",
+   here:"Send timing is modelled against the result. The DIRECTION is the finding; the magnitude used here is an explicit assumption you would replace with your own holdout, and the screen says so rather than passing a guess off as a measurement."},
+  {who:"Fader and Hardie",
+   work:"Pareto/NBD, BG/NBD (2005) and BG/BB (2010). The buy-till-you-die family.",
+   says:"Lifetime value in a non-contractual setting is a probability problem: how likely is this customer still active, given recency and frequency, and how much will they do if they are.",
+   here:"This is the standard the LTV figure is held to, and this build does NOT meet it. It uses transparent arithmetic printed beside the number, because a fitted model needs real transaction histories and a synthetic dataset cannot honestly produce one. Stated as a gap rather than dressed up as a score."},
+  {who:"Byron Sharp and the Ehrenberg-Bass Institute",
+   work:"How Brands Grow.",
+   says:"Growth comes overwhelmingly from penetration, not loyalty. The heaviest 20 percent of buyers rarely account for more than half of sales, light buyers are 70 to 80 percent of any base, and loyalty programmes produce slight effects that often do not survive their own cost.",
+   here:"The counterweight, and it is built in as a challenge rather than a footnote. The plan measures how much of itself is retention and warns when it is all of it, because a fan engagement function that only ever re-messages the committed is optimising the half of the base that was least likely to leave."},
+  {who:"Kohavi, Tang and Xu",
+   work:"Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing.",
+   says:"Compute the sample size before the test opens, do not stop early, and if the required traffic cannot be reached in a normal two to six week window, question whether the test is worth running at all.",
+   here:"The stopping rule refuses to name a winner before the planned size, the cost of peeking is simulated rather than asserted, and the feasibility check states in weeks how long this audience would actually take to reach that size."}
+];
+
 const FAN_FIRST=["Marcus","Danielle","Terrence","Priya","Jordan","Alicia","Devon","Rosa","Malik","Grace","Curtis","Yusuf","Nia","Owen","Tamara","Andre","Bianca","Hector","Simone","Reggie","Lena","Darnell","Ivy","Sasha","Colin","Fatima","Trevor","Maya","Elias","Bridget"];
 const FAN_LAST=["Whitfield","Okonkwo","Marchetti","Vasquez","Boone","Nakamura","Ellery","Duplessis","Farrow","Adeyemi","Kowalczyk","Sinclair","Brantley","Okafor","Rutherford","Delgado","Ashford","Petrov","Calloway","Njoroge","Hargrove","Silva","Winterbourne","Mbeki","Foster","Quintero","Ashworth","Larue"];
 const FAN_CITY=[["Riverton","ET"],["Northgate","ET"],["Lakeshore","ET"],["Bell Harbor","ET"],["Westbrook","CT"],["Ashland","CT"],["Fairmount","ET"],["Cedar Point","CT"]];
@@ -5608,6 +5737,23 @@ function buildFans(){
            : f.spend>=p90 ? "Premium"
            : f.sthEver    ? "Season"
            : f.gamesAttended>=4 ? "Regular" : "Casual";
+    /* THE FREQUENCY ESCALATOR (Mullin, Hardy and Sutton). Derived from behaviour that is
+       already in the record rather than drawn separately, so a fan's rung and their
+       attendance can never contradict each other. Lapsing is a rung DOWN, not an exit:
+       that is the entire reason a reactivation campaign is worth running. */
+    f.rung = f.sthEver && !f.lapsed ? "Season ticket holder"
+           : f.lapsed               ? "Lapsed season ticket"
+           : f.gamesAttended>=10    ? "Partial plan"
+           : f.gamesAttended>=4     ? "Regular attender"
+           : f.gamesAttended>=1     ? "Light attender"
+           : "Aware, not attending";
+    /* THE PSYCHOLOGICAL CONTINUUM (Funk and James). A second axis, because two fans with
+       identical attendance can be at different stages, and the same message lands
+       differently on each. Scored from tenure, frequency and commitment. */
+    const yrs=Math.max(1,(f.lastSeasonHeld||Number(f.lastAttended.slice(0,4)))-f.joinYear+1);
+    const pcm=(f.sthEver?2:0)+(f.seasonsHeld>=3?1:0)+(yrs>=5?1:0)
+             +(f.gamesAttended>=10?1:0)+(f.merchSpend>=150?1:0)-(f.dormantSeasons>=3?2:0);
+    f.stage = pcm>=5 ? "Allegiance" : pcm>=3 ? "Attachment" : pcm>=1 ? "Attraction" : "Awareness";
   });
   return out;
 }
@@ -5684,6 +5830,8 @@ const FAN_FIELDS={
   seasonsHeld:{label:"Seasons held",type:"num"},
   dormantDays:{label:"Days since they last attended",type:"num"},
   tier:{label:"Tier",type:"text"},
+  rung:{label:"Escalator rung",type:"text"},
+  stage:{label:"Attachment stage",type:"text"},
   msgs7d:{label:"Messages sent in the last 7 days",type:"num"},
   lastSeasonHeld:{label:"Last season held",type:"num"},
   dormantSeasons:{label:"Seasons dormant",type:"num"},
@@ -6197,6 +6345,30 @@ function peekingCost(opts){
     atPlannedEnd:falseAtEnd/trials, ifPeeking:falseIfPeeking/trials};
 }
 
+/* --------------------------------------------------- result-contingent timing ---
+   Cialdini's 1976 field studies are the most replicated finding in sport consumer
+   behaviour: after a win, 26 percent of students wore team apparel against 13.5 percent
+   after a loss, and they said "we" more often. People display the association when the
+   association flatters them. A club that sends its renewal ask on the Tuesday after a
+   heavy defeat is fighting that, and one that sends it while the ground is still warm is
+   not.
+
+   THE HONESTY THAT MATTERS HERE: the DIRECTION is the finding. The MAGNITUDE below is an
+   assumption. Cialdini measured apparel display, not email opens, and anyone who tells you
+   a 1976 apparel study gives them an email open-rate multiplier is overselling it. These
+   numbers are deliberately far more conservative than the effect in the paper, they are
+   labelled as an assumption everywhere they appear on screen, and the first thing a real
+   deployment would do is replace them with a holdout of its own. */
+const BIRG={
+  win:  {label:"Within 48 hours of a home win", open:1.18, click:1.10,
+         note:"Assumed, not measured. The direction is Cialdini 1976; the size is a deliberately conservative stand-in for a holdout you have not run yet."},
+  none: {label:"No result nearby", open:1.00, click:1.00,
+         note:"The baseline. Every other row is expressed relative to this."},
+  loss: {label:"Within 48 hours of a heavy defeat", open:0.88, click:0.84,
+         note:"Assumed, not measured. Same caveat, in the other direction."}
+};
+function birgOf(k){ return BIRG[k]||BIRG.none; }
+
 /* --------------------------------------------------------------- journeys ---
    A journey is data. Simulating it uses the same suppression function the segment
    screen uses, so the two can never disagree about who is contactable, and the
@@ -6205,6 +6377,7 @@ function peekingCost(opts){
    that ignores its own sends is not a cap. */
 function journeySim(journey,opts){
   opts=opts||{};
+  const bg=birgOf(opts.birg||"none");
   /* `== null` here would treat an explicit null as "not supplied" and quietly restore the
      default, which makes cap:null mean the opposite of what it reads as. undefined is the
      only value that means "use the house default". */
@@ -6232,9 +6405,11 @@ function journeySim(journey,opts){
         sent++; st.sent++;
         /* Open and click drawn from the fan's own rate, seeded per fan, so the same
            person behaves the same way every time the journey is run. */
-        const oR=node.channel==="email"?f.openRate:(node.channel==="sms"?0.92:0.38);
+        /* Result-contingent timing applies to the pull of the message, not to whether it
+           was allowed to send: a guard is a guard regardless of Saturday's score. */
+        const oR=Math.min(0.97,(node.channel==="email"?f.openRate:(node.channel==="sms"?0.92:0.38))*bg.open);
         if(st.r()<oR){ opened=opened+1; st.opened=true;
-          if(st.r()<(node.channel==="sms"?0.14:0.19)){ clicked++; st.clicked=true;
+          if(st.r()<(node.channel==="sms"?0.14:0.19)*bg.click){ clicked++; st.clicked=true;
             /* Conversion leans on value: a fan with a high LTV and a recent lapse is a
                likelier renewal than one who left five years ago. */
             const pc=Math.max(0.03,Math.min(0.42,0.20-f.dormantSeasons*0.035+Math.min(0.12,f.seasonsHeld*0.012)));
@@ -6254,6 +6429,7 @@ function journeySim(journey,opts){
   const converted=Array.from(state.values()).filter(s=>s.converted);
   const revenue=converted.reduce((s,x)=>s+(x.fan.seatPrice||x.fan.avgTicket*17),0);
   return {
+    birg:opts.birg||"none", birgNote:bg.note,
     entered:pop.length, steps:steps, days:dayCursor,
     reached:Array.from(state.values()).filter(s=>s.sent>s.fan.msgs7d).length,
     converted:converted.length,
@@ -6340,7 +6516,64 @@ const EMAIL_V2={
     </p>
   </td></tr>
 </table>
-<style>@media (prefers-color-scheme: dark){ body,table{background-color:#141210 !important;} p,h1,h2{color:#F2EFEA !important;} }</style>`
+<style>@media (prefers-color-scheme: dark){ body,table{background-color:#141210 !important;} p,h1,h2{color:#F2EFEA !important;} }  /* how-to-read panel */
+  .fe-guide{border:1px solid var(--border);border-radius:16px;background:var(--surface-2);margin-bottom:18px;overflow:hidden}
+  .fe-guide summary{list-style:none;cursor:pointer;padding:15px 20px;display:flex;align-items:center;gap:10px;min-height:44px}
+  .fe-guide summary::-webkit-details-marker{display:none}
+  .fe-gi{font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+  .fe-guide summary:after{content:"";margin-left:auto;width:7px;height:7px;border-right:1.5px solid var(--ink-2);
+    border-bottom:1.5px solid var(--ink-2);transform:rotate(45deg);transition:transform .18s var(--ease)}
+  .fe-guide[open] summary:after{transform:rotate(225deg)}
+  .fe-gbody{padding:0 20px 20px;display:grid;gap:16px}
+  .fe-grow>span{display:block;font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px}
+  .fe-grow>p{font-size:13.5px;line-height:1.62;color:var(--ink)}
+  .fe-glist{list-style:none;display:grid;gap:9px}
+  .fe-glist li{font-size:13px;line-height:1.6;color:var(--ink-2);padding-left:15px;position:relative}
+  .fe-glist li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .fe-glist b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+  .fe-gcite{list-style:none;display:grid;gap:12px}
+  .fe-gcite li{padding:13px 15px;border:1px solid var(--border);border-radius:11px;background:var(--surface-solid)}
+  .fe-gcite b{display:block;font-size:13.5px;font-weight:600}
+  .fe-gcite span{display:block;font-size:11.5px;color:var(--ink-2);margin:3px 0 7px;font-style:italic}
+  .fe-gcite em{display:block;font-style:normal;font-size:13px;line-height:1.6;color:var(--ink-2)}
+  .fe-cite-here{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12.5px;line-height:1.6;color:var(--accent-dark)}
+  /* focus */
+  .fe-focus{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .fe-focus-mark{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:23px}
+  .fe-focus-main{flex:1;min-width:230px}
+  .fe-focus-main h3{font-family:var(--display);font-size:23px;font-weight:400;line-height:1.2}
+  .fe-focus-main p{font-size:13.5px;line-height:1.6;color:var(--ink-2);margin-top:5px}
+  .fe-split{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  .fe-split>div{padding:14px 16px;border:1px solid var(--border);border-radius:12px}
+  .fe-split h4{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);margin-bottom:9px}
+  .fe-split ul{list-style:none;display:grid;gap:6px}
+  .fe-split li{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding-left:14px;position:relative}
+  .fe-split li:before{content:"";position:absolute;left:0;top:7px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+  /* plan */
+  .fe-when{font-size:10.5px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+  .fe-plan-items{list-style:none;counter-reset:pi;display:grid;gap:16px}
+  .fe-plan-items li{counter-increment:pi;position:relative;padding-left:38px}
+  .fe-plan-items li:before{content:counter(pi);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+    font-size:11.5px;font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .fe-plan-items b{display:block;font-size:14.5px;font-weight:600;line-height:1.45}
+  .fe-plan-items p{font-size:13.5px;line-height:1.62;color:var(--ink-2);margin-top:5px}
+  .fe-ev{margin-top:8px;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--accent-dark)}
+  .fe-ev span{display:inline-block;font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:1.2px;
+    text-transform:uppercase;color:var(--ink-2);margin-right:8px}
+  .fe-unknowns{list-style:none;display:grid;gap:12px}
+  .fe-unknowns li{padding:13px 15px;border:1px solid var(--border);border-left:2px solid var(--amber);border-radius:0 11px 11px 0}
+  .fe-unknowns b{display:block;font-size:13.5px;font-weight:600;margin-bottom:4px}
+  .fe-unknowns span{font-size:13px;line-height:1.6;color:var(--ink-2)}
+  .fe-birg{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .fe-birg-note{width:100%;font-size:12.5px;line-height:1.55;color:var(--amber);margin-top:2px}
+  @media (max-width:860px){
+    .fe-split{grid-template-columns:1fr}
+    .fe-when{margin-left:0}
+    .fe-plan-items li{padding-left:32px}
+  }
+</style>`
 };
 const SMS_V1={channel:"sms",version:"Draft 1",
   text:"Hi {{first_name}}, your seat in section {{seat_section}} at Harborline FC is still open for 2026 and we would love to have you back for what is shaping up to be a real season. Renew now at harborlinefc.example.com/renew"};
@@ -6388,7 +6621,7 @@ function feLoad(){
   try{ const raw=localStorage.getItem("gr_fan"); if(raw) FE=Object.assign(FE,JSON.parse(raw)); }catch(e){}
   if(!FE.rules||!FE.rules.length) FE.rules=FAN_SEGMENT_RULES.map(r=>Object.assign({},r));
 }
-function feSave(){ try{ localStorage.setItem("gr_fan",JSON.stringify({rules:FE.rules,channel:FE.channel,hour:FE.hour,ver:FE.ver,tab:FE.tab})); }catch(e){} }
+function feSave(){ try{ localStorage.setItem("gr_fan",JSON.stringify({rules:FE.rules,channel:FE.channel,hour:FE.hour,ver:FE.ver,tab:FE.tab,birg:FE.birg})); }catch(e){} }
 function feSeg(){ return evalSegment(FE.rules,FE.channel,{hour:FE.hour}); }
 function n(x){ return Number(x||0).toLocaleString(); }
 function money(x){ return "$"+Number(Math.round(x||0)).toLocaleString(); }
@@ -6399,9 +6632,18 @@ function pct(a,b){ return b?Math.round(1000*a/b)/10+"%":"0%"; }
 function feSynth(extra){
   return `<div class="fe-synth"><b>Synthetic data.</b> ${n(FAN_N)} fan records generated from a fixed seed, so every count here reproduces exactly. ${FAN_CLUB} is a fictional club and no figure on this screen describes a real organisation.${extra?" "+extra:""}</div>`;
 }
+/* Counted, never typed. The label said "of 6" for a while after the seventh screen
+   existed, which is a small lie on every screen at once.
+
+   A FUNCTION, not a const. As a const beside feHead it was evaluated during script
+   execution, before `const FAN_GUIDE` further down had initialised, so it threw a
+   temporal-dead-zone error at load. That does not fail politely: everything declared after
+   the throw never exists, including FAN_SCREENS, and the whole app dies on every screen.
+   Reading it at render time removes the ordering question entirely. */
+function fanSteps(){ return Object.keys(FAN_GUIDE).length; }
 function feHead(step,title,hlWord,blurb){
   return `<div class="tool-head">
-    <div class="fe-step">Fan engagement, step ${step} of 6</div>
+    <div class="fe-step">Fan engagement, step ${step} of ${fanSteps()}</div>
     <h1>${title.replace(hlWord,`<span class="hl">${hlWord}</span>`)}</h1>
     <p>${blurb}</p>
   </div>`;
@@ -6419,7 +6661,29 @@ function renderFanReq(){
   main.innerHTML=
     feHead(1,"The request","request",
       "What was asked for, what it will be measured on, and the rules the build is not allowed to break.")
+    +feHowTo("fanreq")
     +`<div class="card wk-card">
+      <div class="wk-head"><h2>Focus</h2><span class="wk-count">${esc(FAN_FOCUS.label)}</span></div>
+      <div class="fe-body">
+        <div class="fe-focus">
+          <div class="fe-focus-mark" aria-hidden="true">${esc(FAN_FOCUS.label.slice(0,2))}</div>
+          <div class="fe-focus-main">
+            <h3>${esc(FAN_FOCUS.label)}, ${esc(FAN_FOCUS.sub)}</h3>
+            <p>${esc(FAN_FOCUS.why)}</p>
+          </div>
+        </div>
+        <div class="fe-split">
+          <div><h4>Vertical-neutral, the primitives</h4><ul>${FAN_FOCUS.neutral.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+          <div><h4>Specific to this focus</h4><ul>${FAN_FOCUS.specific.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+        </div>
+        <p class="fe-note">The focus is declared rather than assumed, because the domain is what makes the problem interesting.
+        The left column would survive a move to any subscription business. The right column would not, and pretending otherwise
+        is how a fan engagement build ends up being an ecommerce build with the word fan pasted over it. Sports is the vertical
+        that is built here; the schema, the progression models and the campaign are all shaped by it.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
       <div class="wk-head"><h2>${esc(FAN_BRIEF.id)} &nbsp;${esc(FAN_BRIEF.name)}</h2><span class="wk-count">${esc(FAN_BRIEF.window)}</span></div>
       <div class="fe-body">
         <p class="fe-obj">${esc(FAN_BRIEF.objective)}</p>
@@ -6447,6 +6711,31 @@ function renderFanReq(){
         <p class="fe-note">The top 1% of this book holds <b>${pct(top1,tot)}</b> of lifetime spend and the top 10% holds <b>${pct(top10,tot)}</b>.
         That shape is deliberate: a uniformly random fan base is spotted immediately by anyone who has looked at a real one, and it would quietly
         distort the segment counts, the lifetime value bands and the A/B module at the same time.</p>
+
+        <div class="fe-sub">The frequency escalator, Mullin, Hardy and Sutton</div>
+        <div class="fe-bars">
+          ${["Season ticket holder","Partial plan","Regular attender","Light attender","Aware, not attending","Lapsed season ticket"].map(r=>{
+            const c=all.filter(f=>f.rung===r).length;
+            return `<div class="fe-bar"><span class="fe-bl">${esc(r)}</span>
+              <span class="fe-bt"><i class="${r==="Lapsed season ticket"?"warnbar":""}" style="width:${Math.max(0.6,100*c/all.length)}%"></i></span>
+              <b>${n(c)}</b><em>${pct(c,all.length)}</em></div>`;}).join("")}
+        </div>
+        <p class="fe-note">A fan base is a pyramid and this one is shaped like one. The escalator's argument is that people move
+        up a rung at a time and that the first investment belongs with the people already on it: retain, then grow, then acquire.
+        <b>Lapsing is a rung down, not an exit</b>, which is the entire reason a reactivation campaign is worth running at all.</p>
+
+        <div class="fe-sub">The psychological continuum, Funk and James</div>
+        <div class="fe-bars">
+          ${["Allegiance","Attachment","Attraction","Awareness"].map(s=>{
+            const c=all.filter(f=>f.stage===s).length;
+            return `<div class="fe-bar"><span class="fe-bl">${esc(s)}</span>
+              <span class="fe-bt"><i style="width:${Math.max(0.6,100*c/all.length)}%"></i></span>
+              <b>${n(c)}</b><em>${pct(c,all.length)}</em></div>`;}).join("")}
+        </div>
+        <p class="fe-note">A second axis, because behaviour and attachment are not the same question. Two fans with identical
+        attendance can sit at different stages, and the mismatch is usually where the opportunity is: someone at Allegiance who
+        has stopped turning up has a problem worth a phone call, while someone at Awareness who came twice needs a reason,
+        not a renewal form. Both axes are segmentable on the next screen.</p>
 
         <div class="fe-sub">Consent is held per channel, not once for "marketing"</div>
         <div class="fe-bars">
@@ -6481,6 +6770,7 @@ function renderFanSeg(){
   main.innerHTML=
     feHead(2,"Build the segment","segment",
       "Who matches, who can lawfully be contacted, and exactly who was removed on the way.")
+    +feHowTo("fanseg")
     +`<div class="card wk-card">
       <div class="wk-head"><h2>Rules</h2><div class="wk-acts">
         <select id="feAddField" aria-label="Add a rule">${Object.keys(FAN_FIELDS).map(k=>`<option value="${k}">${esc(FAN_FIELDS[k].label)}</option>`).join("")}</select>
@@ -6601,6 +6891,7 @@ function renderFanBuild(){
   main.innerHTML=
     feHead(3,"Build the message","message",
       "One offer, three channels, and every personalization token shown with what happens when it is empty.")
+    +feHowTo("fanbuild")
     +`<div class="card wk-card">
       <div class="wk-head"><h2>Channel</h2><div class="wk-acts">
         ${["email","sms","push"].map(c=>`<button type="button" class="btn-mini${FE.tab===c?" solid":""}" data-fetab="${c}">${c.toUpperCase()}</button>`).join("")}
@@ -6700,6 +6991,7 @@ function renderFanQa(){
   main.innerHTML=
     feHead(4,"QA the touchpoints","QA",
       "Every template checked against a written standard, with the send blocked while anything is still failing.")
+    +feHowTo("fanqa")
     +`<div class="card wk-card">
       <div class="wk-head"><h2>Gate</h2><div class="wk-acts">
         ${fanTemplates().email.map((t,i)=>`<button type="button" class="btn-mini${FE.ver===i?" solid":""}" data-feqav="${i}">${esc(t.version)}</button>`).join("")}
@@ -6749,17 +7041,23 @@ function renderFanDeploy(){
   const seg=evalSegment(FE.rules,"email",{hour:FE.hour});
   const T=fanTemplates();
   const blocked=[T.email,T.sms,T.push].filter(v=>qaBlocks(qaRun(v[FE.ver]||v[0],seg.people))).length;
-  const sim=journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{});
+  const sim=journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{birg:FE.birg||"none"});
   FE.sim=sim;
   main.innerHTML=
     feHead(5,"Deploy the journey","journey",
       "The sequence, the wait between each step, and who the frequency cap removed at every send.")
+    +feHowTo("fandeploy")
     +`<div class="card wk-card">
       <div class="wk-head"><h2>${esc(FAN_JOURNEY.name)}</h2><span class="wk-count">${n(sim.entered)} entered, ${sim.days} days</span></div>
       <div class="fe-body">
         <div class="fe-gatebig ${blocked?"stop":"go"}">${blocked
           ? "Deployment held. "+blocked+" of 3 templates still have a finding at fail severity, and the gate is checked here, not only on the QA screen."
           : "QA cleared all three templates. This journey is clear to deploy."}</div>
+        <div class="fe-sub">Send timing against the result</div>
+        <div class="fe-birg">
+          ${Object.keys(BIRG).map(k=>`<button type="button" class="fe-ver${(FE.birg||"none")===k?" on":""}" data-febirg="${k}">${esc(BIRG[k].label)}</button>`).join("")}
+          <div class="fe-birg-note">${esc(sim.birgNote)}</div>
+        </div>
         <div class="fe-jny">
           ${sim.steps.map(s=>{
             if(s.type==="wait") return `<div class="fe-jwait">wait ${s.days} day${s.days===1?"":"s"}</div>`;
@@ -6776,6 +7074,10 @@ function renderFanDeploy(){
             </div>`;
           }).join("")}
         </div>
+        <p class="fe-note"><b>Cialdini's finding, made operational.</b> After a win, 26 percent of students wore team apparel
+        against 13.5 percent after a loss. Switch the timing above and the opens move while <b>the suppression numbers do not</b>,
+        because a guard does not care what the score was. The direction is the research; the size is an assumption this build
+        states rather than hides, and the first real campaign would replace it with a holdout.</p>
         <p class="fe-note"><b>Watch the frequency cap climb.</b> At the first send it removes the people who were already near their limit from other
         campaigns. By the final email it is the largest single reason anyone is held back, because the journey is now counting <em>its own</em> earlier
         sends against the same ${FREQ_CAP} in 7 days. A cap that ignores the messages it has just sent is not a cap, and a journey without one is the
@@ -6785,6 +7087,9 @@ function renderFanDeploy(){
         ${feSynth("")}
       </div>
     </div>`;
+  document.querySelectorAll("[data-febirg]").forEach(b=>b.addEventListener("click",()=>{
+    FE.birg=b.dataset.febirg; feSave(); renderFanDeploy();
+  }));
 }
 
 /* ------------------------------------------------------------------ MEASURE --- */
@@ -6814,6 +7119,7 @@ function renderFanMeasure(){
   main.innerHTML=
     feHead(6,"Measure it","Measure",
       "What the journey returned, what a fan is worth, and an experiment that will not let you stop it early.")
+    +feHowTo("fanmeasure")
     +`<div class="card wk-card">
       <div class="wk-head"><h2>Channel performance</h2><span class="wk-count">${n(sim.entered)} entered</span></div>
       <div class="fe-body">
@@ -6862,6 +7168,8 @@ function renderFanMeasure(){
           <p>${esc(v.reason)}</p>
           <div class="fe-vstats">observed lift ${(v.lift*100).toFixed(1)}% &nbsp;|&nbsp; z = ${v.z.toFixed(2)} &nbsp;|&nbsp; p = ${v.p.toFixed(4)} &nbsp;|&nbsp; ${n(v.have)} of ${n(v.need)} per arm</div>
         </div>
+        ${(function(){const fz=abFeasibility(plan,evalSegment(FE.rules,"email",{hour:FE.hour}).reachable,1);
+          return fz?`<div class="fe-feas ${fz.feasible?"go":"stop"}"><b>Feasibility</b> ${esc(fz.verdict)}</div>`:"";})()}
         <p class="fe-note"><b>Notice what the guard does when p dips under 0.05 early.</b> It still refuses. That is the point: the p value wanders
         on its own at low sample sizes, so a rule of "stop when it goes significant" finds a winner far more often than 5% of the time even when the
         two variants are identical.</p>
@@ -6891,7 +7199,440 @@ function renderFanMeasure(){
     const el=document.getElementById("feAbExp"); if(el){el.focus();}});
 }
 
-const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure};
+/* ------------------------------------------------- how to read each screen ---
+   The suite's own audit report is built on the principle that a number nobody can
+   interpret is not evidence, it is decoration. These screens carry numbers that are easy
+   to nod along to and hard to actually read: a suppression breakdown looks like a failure
+   report until somebody explains that it is the opposite, and a p value under 0.05 beside
+   a refusal to declare a winner looks like a bug until somebody explains the stopping rule.
+
+   So every screen states four things in the same order: what it is doing, what it is
+   breaking down, how to read what comes back, and whose thinking it is held to. */
+const FAN_GUIDE={
+  fanreq:{
+    does:"Fixes the brief before anything is built: the objective, the window, the one KPI it will be judged on, and the guardrails that are enforced in code rather than agreed in a meeting.",
+    breaks:"The audience of record. It breaks "+FAN_N.toLocaleString()+" fans down three ways: by value tier, by where they sit on the frequency escalator, and by how far along the attachment continuum they are.",
+    read:[
+      ["The escalator is a pyramid, and it should be","Most of any fan base is light. If the biggest band were the committed one, the data would be wrong. A lapsed season ticket holder has slid DOWN a rung, not left, which is the whole reason a reactivation campaign exists."],
+      ["Tier, rung and stage are three different questions","Tier is what they have paid. Rung is how often they turn up. Stage is how attached they are. A fan can be high on one and low on another, and that mismatch is usually where the opportunity is."],
+      ["Consent is six separate numbers, not one","Email, SMS, push, app install, unsubscribe and quiet hours are held independently. The gap between the email bar and the SMS bar is the single most important thing on this screen."]
+    ],
+    held:["Mullin, Hardy and Sutton","Funk and James"]
+  },
+  fanseg:{
+    does:"Turns a description of an audience into a countable one, then tells you how much of it you are actually allowed to contact on each channel at each hour.",
+    breaks:"Matched against reachable. Every fan removed between those two numbers is attributed to exactly one reason, and the reasons sum to the difference.",
+    read:[
+      ["Matched is the vanity number","It is how many people fit the description. It is not the number you can send to, and quoting it in a forecast is how a campaign misses its target by forty percent on day one."],
+      ["Reachable is the number to plan with","Consent, bounces, unsubscribes, the frequency cap and quiet hours have all been applied. This is what would genuinely leave the building."],
+      ["The reasons are a work list, not an apology","187 people with no email consent is not a loss, it is a consent-capture campaign worth more than another send to the people who already said yes."],
+      ["Change the hour and watch SMS move","At 22:00 the quiet-hours guard removes everybody. At 11:00 it removes nobody. Quiet hours are held per fan, so this is a real timezone-aware rule and not a global switch."]
+    ],
+    held:["Mullin, Hardy and Sutton","Byron Sharp and the Ehrenberg-Bass Institute"]
+  },
+  fanbuild:{
+    does:"Renders one offer as an email, an SMS and a push notification for a named individual out of the real segment, so you see what a specific person receives rather than a template.",
+    breaks:"Every personalization token, against how often it is empty across the whole audience, and whether anything covers it when it is.",
+    read:[
+      ["Empty for is the column that matters","A token that is never empty in your test data proves nothing. This counts the nulls across the real segment, so 263 of 959 means one in four people would get a hole in that sentence."],
+      ["Send time freezes, open time does not","A countdown resolved when the message was queued is wrong by the time it is read. The two panels show the same sentence resolved both ways, four days apart."],
+      ["Pick the fan with no favourite player","The picker deliberately offers people with missing fields. That is the render you have to look at, not the one where everything is populated."]
+    ],
+    held:["Fader and Hardie"]
+  },
+  fanqa:{
+    does:"Checks every template against a written standard and blocks the send while anything is still failing. The gate is a function, not a judgement call.",
+    breaks:"Findings by severity and by the standard each one comes from: WCAG for accessibility, CAN-SPAM for commercial email, TCPA for SMS, plus token, link and cost checks.",
+    read:[
+      ["Draft 1 is broken on purpose","Every defect planted in it is one somebody has actually shipped. A QA harness demonstrated against a clean template has been proven of nothing. Switch to Draft 2 to see the same message with all of it closed."],
+      ["Fail blocks, warn does not","Only fail severity stops a deploy. Warnings are real but survivable, and the difference is enforced rather than negotiated."],
+      ["Contrast is computed, not eyeballed","The ratio beside each contrast finding comes from sRGB relative luminance per WCAG 2.1, against 4.5:1 for body text and 3:1 for large. It is the same arithmetic a screen reader audit would use."],
+      ["Every finding names its standard","So it is a defect somebody can fix and re-test, rather than an opinion somebody can argue with."]
+    ],
+    held:["Kohavi, Tang and Xu"]
+  },
+  fandeploy:{
+    does:"Runs the journey against the real segment, step by step, applying the same guards at every send rather than only at the entry.",
+    breaks:"Each node into eligible, sent, suppressed with reasons, opened, clicked and renewed, plus the wait between steps.",
+    read:[
+      ["Watch the frequency cap climb","It removes 44 people at the first email and far more by the last, because by then the journey is counting ITS OWN earlier sends against the same rolling limit. A cap that ignores the messages it just sent is not a cap."],
+      ["Consent is re-checked at every send","Not inherited from the moment the segment was built. Somebody who unsubscribes on day two is gone by day three."],
+      ["The result switch is an assumption, and says so","Sending inside the 48 hours after a home win lifts opens here. The direction comes from Cialdini's 1976 field studies; the magnitude is a conservative stand-in for a holdout you have not run. The suppression numbers do not move, because a guard does not care what the score was."]
+    ],
+    held:["Cialdini, Borden, Thorne, Walker, Freeman and Sloan","Mullin, Hardy and Sutton"]
+  },
+  fanmeasure:{
+    does:"Reports what the journey returned, what a fan is worth, and whether the experiment attached to it is allowed to be called yet.",
+    breaks:"Performance per channel and per step, lifetime value across the segment, and the A/B test against its pre-computed sample size.",
+    read:[
+      ["Suppressed belongs beside sent","A channel that looks like it underperformed often just had most of its audience withheld. Reading sent without suppressed is how SMS gets blamed for a consent problem."],
+      ["The LTV formula is printed beside the number","Because it is arithmetic, not a model. The proper standard is the buy-till-you-die family, and this build does not meet it. Saying so is the point."],
+      ["A p value under 0.05 is not permission to stop","The guard refuses until the planned sample size is reached. The table below it measures what ignoring that actually costs, by running three thousand A/A tests where no winner exists."],
+      ["Check the feasibility line before the verdict","If this audience needs more weeks than the campaign has, the honest answer is not to run the test."]
+    ],
+    held:["Kohavi, Tang and Xu","Fader and Hardie"]
+  },
+  fanplan:{
+    does:"Assembles everything the previous six screens established into an operating plan: what has to be true before anything sends, what happens in the first ninety days, and what the job looks like once it is running.",
+    breaks:"The work into day one, the first week, thirty, sixty and ninety days, and the continuing cadence, with every figure traced back to the screen it came from.",
+    read:[
+      ["Nothing here is generated prose","Every number is read out of the engine on this page. If the segment changes, the plan changes, which is why it can be re-read rather than re-written."],
+      ["The counterweight is deliberate","A fan engagement plan that is entirely retention is optimising the part of the base least likely to leave. The penetration section says how much of this plan has that problem."],
+      ["Read the last section first if you are short of time","What this cannot tell you is the honest boundary of the whole exercise, and it is the part an interviewer will respect most."]
+    ],
+    held:["Byron Sharp and the Ehrenberg-Bass Institute","Mullin, Hardy and Sutton","Kohavi, Tang and Xu"]
+  }
+};
+function feHowTo(key){
+  const g=FAN_GUIDE[key]; if(!g) return "";
+  const cites=(g.held||[]).map(w=>{
+    const s=FAN_STANDARDS.filter(x=>x.who===w)[0];
+    return s?`<li><b>${esc(s.who)}</b><span>${esc(s.work)}</span><em>${esc(s.here)}</em></li>`:"";
+  }).join("");
+  return `<details class="fe-guide" open>
+    <summary><span class="fe-gi">How to read this screen</span></summary>
+    <div class="fe-gbody">
+      <div class="fe-grow"><span>What it does</span><p>${esc(g.does)}</p></div>
+      <div class="fe-grow"><span>What it breaks down</span><p>${esc(g.breaks)}</p></div>
+      <div class="fe-grow"><span>How to read it</span>
+        <ul class="fe-glist">${g.read.map(r=>`<li><b>${esc(r[0])}</b>${esc(r[1])}</li>`).join("")}</ul></div>
+      ${cites?`<div class="fe-grow"><span>Held to</span><ul class="fe-gcite">${cites}</ul></div>`:""}
+    </div>
+  </details>`;
+}
+
+/* =============================== THE OPERATING PLAN ===============================
+   The seventh screen, and the reason the other six are worth walking through. Everything
+   here is READ OUT OF THE ENGINE on this page: change a segment rule and the plan changes.
+   Nothing is generated prose, so there is nothing for a model to invent and nothing that
+   can drift away from the numbers it claims to be based on.
+
+   It is structured the way an operating plan actually has to be: what must be true before
+   anything sends at all, then the first ninety days, then what the job looks like once it
+   is running, then the two things that stop it being a fantasy: the penetration
+   counterweight, and an honest boundary. */
+
+/* --- Ehrenberg-Bass counterweight -------------------------------------------------
+   Sharp's finding is uncomfortable for a function called fan engagement: growth comes
+   overwhelmingly from penetration, the heaviest 20 percent rarely account for more than
+   half of sales, and loyalty programmes produce slight effects that often do not survive
+   their own cost. A reactivation campaign is a RETENTION play by construction. It is worth
+   running, and it is not a growth strategy, and a plan that does not say so is selling
+   something. */
+function penetrationRead(seg){
+  const all=fans();
+  const light=all.filter(f=>f.rung==="Light attender"||f.rung==="Aware, not attending").length;
+  const spend=all.map(f=>f.spend).sort((a,b)=>a-b);
+  const total=spend.reduce((s,x)=>s+x,0);
+  const heaviestFifth=spend.slice(Math.floor(0.8*spend.length)).reduce((s,x)=>s+x,0);
+  return {
+    base:all.length,
+    addressed:seg.matched,
+    addressedPct:all.length?seg.matched/all.length:0,
+    lightShare:all.length?light/all.length:0,
+    heavyFifthShareOfSpend:total?heaviestFifth/total:0,
+    isAllRetention:true,   // this campaign, by construction: every entry rule selects prior holders
+    verdict:"This campaign is entirely retention. It selects people who have already held a season "
+      +"ticket, so by construction it cannot add a single new fan. That is a fine thing for it to be, "
+      +"and it is not a growth plan. On this book the lightest rungs are "
+      +Math.round(100*(light/all.length))+" percent of the base and the heaviest fifth holds "
+      +Math.round(100*(heaviestFifth/total))+" percent of lifetime spend, so most of the room to grow "
+      +"is in people this campaign does not contact at all."
+  };
+}
+
+/* --- Kohavi feasibility -----------------------------------------------------------
+   The check almost nobody runs: not "is the test designed correctly" but "can this
+   audience physically deliver the sample size inside the window the campaign has". If the
+   answer is fourteen weeks for a three week campaign, the correct decision is to not run
+   the test, and to say so before it starts rather than after it is inconclusive. */
+function abFeasibility(plan,reachablePerSend,sendsPerWeek){
+  if(!plan||!plan.perArm) return null;
+  const perWeek=Math.max(1,Math.round(reachablePerSend*(sendsPerWeek||1)));
+  const weeks=(plan.total)/perWeek;
+  return {
+    perArm:plan.perArm, total:plan.total, perWeek:perWeek,
+    weeks:Math.round(weeks*10)/10,
+    feasible:weeks<=6,
+    verdict: weeks<=6
+      ? "Reachable in about "+(Math.round(weeks*10)/10)+" weeks at this volume, which fits inside a normal two to six week testing window."
+      : "This audience would need about "+(Math.round(weeks*10)/10)+" weeks to deliver "+plan.total.toLocaleString()
+        +" exposures at "+perWeek.toLocaleString()+" a week. That is outside a normal two to six week window, so the honest "
+        +"decision is to not run this test as designed: either accept a larger minimum detectable effect, pool it across "
+        +"campaigns, or ship the variant you believe in and measure it as a before and after."
+  };
+}
+
+function operatingPlan(){
+  const seg=evalSegment(FE.rules,"email",{hour:FE.hour});
+  const smsSeg=evalSegment(FE.rules,"sms",{hour:11});
+  const all=fans();
+  const T=fanTemplates();
+  const qaAll=[["Email",T.email],["SMS",T.sms],["Push",T.push]].map(g=>{
+    const tpl=g[1][FE.ver]||g[1][0];
+    return {channel:g[0],findings:qaRun(tpl,seg.people)};
+  });
+  const fails=qaAll.reduce((a,g)=>a+qaCounts(g.findings).fail,0);
+  const warns=qaAll.reduce((a,g)=>a+qaCounts(g.findings).warn,0);
+  const blocking=qaAll.filter(g=>qaBlocks(g.findings)).map(g=>g.channel);
+  const sim=journeySim(Object.assign({},FAN_JOURNEY,{entry:FE.rules}),{birg:FE.birg||"none"});
+  const ab=FE.ab||{baseline:0.04,mde:0.20};
+  const abPlan=abSampleSize(ab.baseline,ab.mde);
+  const feas=abFeasibility(abPlan,seg.reachable,1);
+  const pen=penetrationRead(seg);
+  const noEmail=(seg.reasons.filter(r=>/No email consent/.test(r.reason))[0]||{count:0}).count;
+  const noSms=(smsSeg.reasons.filter(r=>/No SMS consent/.test(r.reason))[0]||{count:0}).count;
+  const capped=(seg.reasons.filter(r=>/Frequency cap/.test(r.reason))[0]||{count:0}).count;
+  const bounced=(seg.reasons.filter(r=>/hard-bounced/.test(r.reason))[0]||{count:0}).count;
+  const unsub=(seg.reasons.filter(r=>/Unsubscribed/.test(r.reason))[0]||{count:0}).count;
+
+  const P=(when,title,items)=>({when:when,title:title,items:items});
+  const I=(what,why,evidence)=>({what:what,why:why,evidence:evidence});
+
+  const phases=[
+    P("Day one","Nothing sends until these are true",[
+      fails>0
+        ? I("Close the "+fails+" finding"+(fails===1?"":"s")+" blocking "+blocking.join(", "),
+            "The gate is a function, not a judgement call, and it is checked again on the deploy screen. A template that fails accessibility or carries a broken merge field is not a style disagreement, it is a defect with a standard attached.",
+            fails+" at fail severity, "+warns+" at warn, across three templates")
+        : I("Keep the QA gate closed by default",
+            "All three templates currently clear. The rule that matters is that the gate stays a function: the moment it becomes a conversation, it stops working.",
+            "0 findings at fail severity across three templates"),
+      I("Confirm the frequency cap counts every campaign, not just this one",
+        "A cap scoped to a single journey is not a cap. The number that must be shared is messages per fan per rolling seven days across everything in flight.",
+        FREQ_CAP+" per 7 days, currently removing "+capped.toLocaleString()+" from this segment before the first send"),
+      I("Confirm quiet hours resolve in the fan's timezone, not the sender's",
+        "This is the guard that turns into a regulatory problem rather than a performance one. It is held per fan here, which is why the number moves across the clock instead of switching on and off.",
+        "At 22:00 local, 0 of "+smsSeg.matched.toLocaleString()+" are reachable by SMS; at 11:00, "+smsSeg.reachable.toLocaleString()+" are"),
+      I("Put campaign parameters on every link before launch, not after",
+        "Anything the campaign drives without them lands in analytics as direct traffic, and the campaign gets no credit for revenue it actually caused. Retro-fitting this after launch loses the first cohort permanently.",
+        warns+" warnings currently open, including untagged links"),
+      I("Hold back a genuine control group",
+        "Without one, every renewal that would have happened anyway is attributed to the campaign. On a reactivation audience with this much latent intent, that overstatement can be most of the reported result.",
+        "Suggested 5 to 10 percent of "+seg.reachable.toLocaleString()+" reachable, withheld from all four sends")
+    ]),
+    P("Week one","Launch, and open the experiment properly",[
+      I("Enter "+sim.entered.toLocaleString()+" fans into the journey, expecting "+sim.steps.filter(s=>s.type==="send").reduce((a,s)=>a+s.sent,0).toLocaleString()+" sends over "+sim.days+" days",
+        "The gap between entered and sent is consent and capping doing their job. Forecasting off the entry number is how a campaign misses by forty percent in its first week.",
+        sim.entered.toLocaleString()+" entered, "+seg.reachable.toLocaleString()+" reachable on email at launch"),
+      I("Open the subject line test at "+(abPlan?abPlan.perArm.toLocaleString():"n/a")+" per arm and do not look at it",
+        "The sample size is computed before the test opens and the stopping rule is enforced. Peeking at five interim looks turns a five percent false positive rate into about fifteen.",
+        feas?feas.verdict:"no plan computed"),
+      I("Start a consent-capture ask for the "+noEmail.toLocaleString()+" with no email consent and the "+noSms.toLocaleString()+" with no SMS consent",
+        "These are the largest single suppression reasons and they are the only ones that are fixable by marketing rather than by time. Every one recovered is permanently addressable inventory, which is worth more than another send to somebody who already opted in.",
+        noEmail.toLocaleString()+" no email consent, "+noSms.toLocaleString()+" no SMS consent, "+bounced.toLocaleString()+" hard-bounced, "+unsub.toLocaleString()+" globally unsubscribed"),
+      I("Time the first send inside the 48 hours after a home win where the fixture list allows",
+        "The direction is the most replicated finding in sport consumer behaviour. The magnitude in this build is an assumption, so treat the first run as the holdout that replaces it.",
+        "Modelled at +18 percent relative on opens, labelled an assumption on every screen it appears")
+    ]),
+    P("First 30 days","Read it without touching it",[
+      I("Report sent, suppressed, opened, clicked and renewals started, per step and per channel",
+        "Suppressed belongs beside sent in every report. A channel that looks like it underperformed usually just had most of its audience withheld, and SMS gets blamed for a consent problem it did not cause.",
+        "Modelled: "+sim.converted.toLocaleString()+" renewals from "+sim.entered.toLocaleString()+" entered, "+pct(sim.converted,sim.entered)+" reactivation rate"),
+      I("Do not call the A/B",
+        "It will not have reached its planned size. The whole value of the stopping rule is that it holds when the number looks good.",
+        feas?(feas.feasible?"Expected to reach size in about "+feas.weeks+" weeks":"Will not reach size inside the window"):"n/a"),
+      I("Re-run template QA on every new creative, including the ones marketing considers minor",
+        "Accessibility regressions arrive through small edits far more often than through redesigns. A swapped hero image with no alt text is the commonest way a compliant template stops being one.",
+        "Same harness, same standards: WCAG 1.1.1, 1.3.1, 1.4.3, 2.4.4, 3.1.1, CAN-SPAM, TCPA")
+    ]),
+    P("60 days","Go down a rung",[
+      I("When reactivation is exhausted, move to the rung below rather than re-messaging the same people",
+        "The escalator is the point: the next campaign is not another attempt at the same audience, it is the people one step down, being asked for one step up. Re-messaging a spent audience is how a frequency cap starts firing constantly and unsubscribes climb.",
+        "Regular attenders and light attenders are the two rungs below the lapsed holders this campaign addresses"),
+      I("Review what suppression is made of, not just how big it is",
+        "If the cap is now the largest reason rather than consent, the problem has changed from permission to volume, and the answer is fewer campaigns rather than better ones.",
+        "At launch: "+seg.reasons.map(r=>r.count.toLocaleString()+" "+r.reason.toLowerCase()).slice(0,3).join("; ")),
+      I("Call the A/B if and only if it has reached its planned size",
+        "And treat no difference as a real result. Two variants that cannot be told apart means ship the cheaper one, not run it again until it wins.",
+        abPlan?abPlan.perArm.toLocaleString()+" per arm required":"n/a")
+    ]),
+    P("90 days","Re-baseline, and decide what to build properly",[
+      I("Re-read lifetime value across the segment and compare it to what was recovered",
+        "The figure this build prints is arithmetic and says so. At ninety days there is enough real behaviour to justify fitting an actual model instead.",
+        "Modelled: "+money(sim.ltvRecovered)+" recovered against "+money(sim.ltvAtRisk)+" in the segment"),
+      I("Decide whether to invest in a buy-till-you-die model for P(alive)",
+        "Pareto/NBD or BG/NBD on real transaction histories replaces a heuristic with a probability, and it is the single biggest upgrade available to the targeting. It needs data this build does not have, which is exactly why it is a ninety day decision and not a day one claim.",
+        "Fader and Hardie, BG/NBD 2005 and BG/BB 2010"),
+      I("Present renewals against the control group, not against last season",
+        "Season over season comparisons carry the fixture list, the table position and the weather. The holdout carries none of them, and it is the only number that survives a hostile question.",
+        "Requires the control group held back on day one")
+    ]),
+    P("Continuous","What the job actually is once it is running",[
+      I("Weekly: suppression composition, cap breaches, bounce and unsubscribe movement",
+        "These are the leading indicators. Renewals are the lagging one, and by the time renewals move, the cause is six weeks old.",
+        "Four numbers, same shape every week"),
+      I("Per match: honour the result-contingent window where the calendar allows",
+        "It is close to free. It is a scheduling decision, not a creative one.",
+        "Fixture-driven"),
+      I("Monthly: re-run the accessibility and compliance harness across every live template",
+        "Standards do not drift; templates do. This is the check that almost no CRM team has anybody to run, which is precisely why it is worth owning.",
+        "WCAG, CAN-SPAM, TCPA"),
+      I("Per season: rebuild the segment definitions from behaviour, not from last season's rules",
+        "A rule written for one season quietly becomes a different audience the next. Segments are code and they need the same review as code.",
+        "Current definition: "+FE.rules.map(ruleWords).join(" and "))
+    ])
+  ];
+
+  return {
+    focus:FAN_FOCUS, generated:FAN_TODAY, phases:phases,
+    seg:seg, sim:sim, penetration:pen, feasibility:feas, abPlan:abPlan,
+    qa:{fails:fails,warns:warns,blocking:blocking},
+    unknowns:[
+      ["The data is synthetic","Every count here comes from "+FAN_N.toLocaleString()+" seeded records. The shapes are chosen to be realistic and the arithmetic is real, but no figure describes an actual organisation."],
+      ["Lifetime value is arithmetic, not a fitted model","The standard is the buy-till-you-die family. This does not meet it, and the formula is printed beside the number so it can be argued with."],
+      ["The result-contingent lift is assumed","Cialdini 1976 establishes the direction. The magnitude here is a conservative stand-in and would be replaced by a holdout in the first month."],
+      ["Nothing here touches deliverability","No ESP, no sending reputation, no IP warmup, no inbox placement. A campaign that is perfect on this screen can still land in spam, and that is a different discipline."],
+      ["No identity resolution","One fan is one record. Real fan bases have the same person as three records across ticketing, retail and the app, and merging them is most of the work."],
+      ["Conversion is modelled, not observed","Open, click and renewal are drawn from the fan's own seeded rates. They demonstrate the mechanics of the journey; they are not a forecast."]
+    ]
+  };
+}
+
+function renderFanPlan(){
+  const P=operatingPlan();
+  const f=P.feasibility, pen=P.penetration;
+  main.innerHTML=
+    feHead(7,"The operating plan","operating",
+      "What has to be true before anything sends, what happens in the first ninety days, and what the job is once it is running.")
+    +feHowTo("fanplan")
+    +`<div class="card wk-card">
+      <div class="wk-head"><h2>Where this came from</h2><span class="wk-count">${esc(P.generated)}</span></div>
+      <div class="fe-body">
+        <div class="fe-counts">
+          <div class="fe-count"><b>${n(P.seg.matched)}</b><span>match the segment</span></div>
+          <div class="fe-count ok"><b>${n(P.seg.reachable)}</b><span>reachable on email</span></div>
+          <div class="fe-count ${P.qa.fails?"bad":"ok"}"><b>${n(P.qa.fails)}</b><span>QA findings blocking</span></div>
+          <div class="fe-count"><b>${money(P.seg.ltv.total)}</b><span>lifetime value in scope</span></div>
+        </div>
+        <p class="fe-note">Every figure below is read out of this page when it renders. Change a rule on the Segment screen
+        and the plan changes with it, which is the difference between a plan you re-read and a document you rewrite.</p>
+      </div>
+    </div>
+
+    ${P.phases.map(ph=>`<div class="card wk-card">
+      <div class="wk-head"><h2>${esc(ph.title)}</h2><span class="fe-when">${esc(ph.when)}</span></div>
+      <div class="fe-body">
+        <ol class="fe-plan-items">
+          ${ph.items.map(it=>`<li>
+            <b>${esc(it.what)}</b>
+            <p>${esc(it.why)}</p>
+            ${it.evidence?`<div class="fe-ev"><span>Evidence</span>${esc(it.evidence)}</div>`:""}
+          </li>`).join("")}
+        </ol>
+      </div>
+    </div>`).join("")}
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>The counterweight</h2><span class="wk-count">Ehrenberg-Bass</span></div>
+      <div class="fe-body">
+        <div class="fe-gatebig ${pen.isAllRetention?"stop":"go"}">${esc(pen.verdict)}</div>
+        <ul class="fe-kv" style="margin-top:16px">
+          <li><span>Base addressed by this campaign</span><b>${pct(pen.addressed,pen.base)}</b></li>
+          <li><span>On the two lightest rungs</span><b>${Math.round(pen.lightShare*100)}%</b></li>
+          <li><span>Held by the heaviest fifth</span><b>${Math.round(pen.heavyFifthShareOfSpend*100)}% of spend</b></li>
+          <li><span>New fans this can add</span><b>None, by construction</b></li>
+        </ul>
+        <p class="fe-note">This is here because it is the argument against the thing being built, and a plan that omits its own
+        strongest objection is a pitch. Sharp's finding is that growth comes from penetration rather than loyalty, and that the
+        heaviest buyers rarely account for more than half of sales. Reactivation is still worth running: these people have already
+        proved they will pay, and the seat is already built. It is simply not the same thing as growth, and the next campaign after
+        this one should be aimed a rung down.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>Can the experiment even run</h2><span class="wk-count">Kohavi feasibility</span></div>
+      <div class="fe-body">
+        ${f?`<div class="fe-gatebig ${f.feasible?"go":"stop"}">${esc(f.verdict)}</div>
+        <ul class="fe-kv" style="margin-top:16px">
+          <li><span>Required per arm</span><b>${n(f.perArm)}</b></li>
+          <li><span>Required in total</span><b>${n(f.total)}</b></li>
+          <li><span>Reachable per week</span><b>${n(f.perWeek)}</b></li>
+          <li><span>Weeks to reach it</span><b>${f.weeks}</b></li>
+        </ul>`:`<div class="wk-note">No test is planned.</div>`}
+        <p class="fe-note">The check almost nobody runs. Not whether the test is designed correctly, but whether this audience can
+        physically deliver the sample size inside the window the campaign has. If the honest answer is that it cannot, the decision
+        is to not run it, and to say so before it starts rather than after it comes back inconclusive.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>What this cannot tell you</h2></div>
+      <div class="fe-body">
+        <ul class="fe-unknowns">
+          ${P.unknowns.map(u=>`<li><b>${esc(u[0])}</b><span>${esc(u[1])}</span></li>`).join("")}
+        </ul>
+        <p class="fe-note">Every audit this suite produces ends with the same section, for the same reason: the boundary of what
+        was actually established is part of the finding. A plan that claims more than its evidence supports fails on the first
+        hostile question, and this is the section that survives one.</p>
+      </div>
+    </div>
+
+    <div class="card wk-card">
+      <div class="wk-head"><h2>The thinking this is held to</h2><div class="wk-acts">
+        <button type="button" class="btn-mini solid" id="btn_fanplan">Copy the plan</button>
+        <button type="button" class="btn-mini" id="fePlanDl">Download it</button>
+        <button type="button" class="btn-mini" id="fePlanFile"${BRAND?"":" disabled"}>File day one as work</button>
+      </div></div>
+      <div class="fe-body">
+        <ul class="fe-gcite">
+          ${FAN_STANDARDS.map(s=>`<li><b>${esc(s.who)}</b><span>${esc(s.work)}</span><em>${esc(s.says)}</em>
+            <div class="fe-cite-here">${esc(s.here)}</div></li>`).join("")}
+        </ul>
+        ${BRAND?"":`<div class="wk-note">Filing work needs a business loaded, because tracked work is kept per business.</div>`}
+      </div>
+    </div>`;
+  /* bindCopy looks its button up as btn_<id> and gives the Copied feedback the rest of the
+     suite uses, so the button is named to fit it rather than a second copier being written. */
+  bindCopy("fanplan",planText(P));
+  const d=document.getElementById("fePlanDl");
+  if(d) d.addEventListener("click",()=>downloadText("fan-engagement-operating-plan.txt",planText(P),"text/plain"));
+  const fb=document.getElementById("fePlanFile");
+  if(fb) fb.addEventListener("click",()=>{
+    const day1=P.phases[0].items; let filed=0; const ids=[];
+    day1.forEach(it=>{
+      const item=addItem({source:"fan",title:"Day one, "+it.what,detail:it.why+(it.evidence?" Evidence: "+it.evidence:""),
+        priority:"Critical",foundAt:Date.now()});
+      if(item&&ids.indexOf(item.id)<0){ ids.push(item.id); filed++; }
+    });
+    logEvent("plan","Filed "+filed+" day-one fan engagement items");
+    fb.textContent="Filed "+filed+" to Today"; fb.disabled=true;
+  });
+}
+/* Plain text, because the thing somebody actually does with a plan is paste it into a
+   ticket or an email, and HTML does not survive that trip. */
+function planText(P){
+  const L=[];
+  L.push("FAN ENGAGEMENT OPERATING PLAN");
+  L.push(P.focus.label+" focus. "+FAN_CLUB+", synthetic dataset of "+FAN_N.toLocaleString()+" fans. Generated "+P.generated+".");
+  L.push("");
+  L.push("THE READ");
+  L.push("  "+segSentence(P.seg));
+  L.push("  Lifetime value in scope: "+money(P.seg.ltv.total)+". QA findings blocking a send: "+P.qa.fails+".");
+  L.push("");
+  P.phases.forEach(ph=>{
+    L.push(ph.when.toUpperCase()+" - "+ph.title);
+    ph.items.forEach((it,i)=>{
+      L.push("  "+(i+1)+". "+it.what);
+      L.push("     Why: "+it.why);
+      if(it.evidence) L.push("     Evidence: "+it.evidence);
+    });
+    L.push("");
+  });
+  L.push("THE COUNTERWEIGHT (Ehrenberg-Bass)");
+  L.push("  "+P.penetration.verdict);
+  L.push("");
+  if(P.feasibility){ L.push("EXPERIMENT FEASIBILITY (Kohavi)"); L.push("  "+P.feasibility.verdict); L.push(""); }
+  L.push("WHAT THIS CANNOT TELL YOU");
+  P.unknowns.forEach(u=>L.push("  - "+u[0]+". "+u[1]));
+  L.push("");
+  L.push("HELD TO");
+  FAN_STANDARDS.forEach(s=>L.push("  - "+s.who+". "+s.work));
+  return L.join("\n");
+}
+
+const FAN_SCREENS={fanreq:renderFanReq,fanseg:renderFanSeg,fanbuild:renderFanBuild,fanqa:renderFanQa,fandeploy:renderFanDeploy,fanmeasure:renderFanMeasure,fanplan:renderFanPlan};
 
 /* Refine dock wiring. Bound once against the static markup, since the dock lives outside
    main and therefore survives every tool re-render. */

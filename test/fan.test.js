@@ -42,8 +42,19 @@ const win = dom.window;
 /* const declarations never become window properties, so the fixtures are lifted out
    through the page's own scope rather than guessed at from the outside. */
 win.eval('window.__fx={FAN_N,FREQ_CAP,FAN_TODAY,FAN_CLUB,FAN_SEED,FAN_SEGMENT_RULES,FAN_JOURNEY,'
-       + 'FAN_TOKENS,SEG_OPS,FAN_FIELDS,EMAIL_V1,EMAIL_V2,SMS_V1,SMS_V2,PUSH_V1,PUSH_V2,FAN_BRIEF};');
+       + 'FAN_TOKENS,SEG_OPS,FAN_FIELDS,EMAIL_V1,EMAIL_V2,SMS_V1,SMS_V2,PUSH_V1,PUSH_V2,FAN_BRIEF,'
+       + 'FAN_FOCUS,FAN_STANDARDS,FAN_GUIDE,BIRG};');
 const FX = win.__fx;
+
+/* The cheapest assertion in the file, and it catches the worst failure. A throw anywhere
+   during script execution means every declaration AFTER it never happens, and the app dies
+   on every screen at once with a confusing "cannot access X before initialization" from
+   whatever happens to be referenced first. A const that read another const declared further
+   down did exactly that. If this line fails, nothing below it is worth reading. */
+console.log('\nTHE SCRIPT RAN TO THE END');
+check('the last declarations in the file exist, so nothing threw on the way',
+  win.eval('typeof FAN_SCREENS') === 'object' && Object.keys(win.eval('FAN_SCREENS')).length === 7);
+check('and the boot sequence completed', typeof win.goTool === 'function' && typeof win.fans === 'function');
 
 /* ------------------------------------------------------------- determinism */
 console.log('\nTHE SAME SEED IS THE SAME BOOK, EVERY TIME');
@@ -362,7 +373,7 @@ check('the simulation reproduces from its seed',
 
 /* ------------------------------------------------------------- the screens */
 console.log('\nEVERY SCREEN RENDERS, AND SAYS THE DATA IS INVENTED');
-['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure'].forEach(id => {
+['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure', 'fanplan'].forEach(id => {
   win.goTool(id);
   const txt = win.document.getElementById('main').textContent || '';
   check(id + ' renders', txt.length > 600);
@@ -372,7 +383,7 @@ console.log('\nEVERY SCREEN RENDERS, AND SAYS THE DATA IS INVENTED');
   check(id + ' is highlighted in the sidebar',
     (win.document.querySelector('.nav-item.active') || { dataset: {} }).dataset.tool === id);
 });
-['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure'].forEach(id => {
+['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure', 'fanplan'].forEach(id => {
   win.goTool(id);
   const txt = win.document.getElementById('main').textContent || '';
   check(id + ' labels the dataset as synthetic on screen',
@@ -382,7 +393,7 @@ console.log('\nEVERY SCREEN RENDERS, AND SAYS THE DATA IS INVENTED');
    CLIPPED: the rows past the fold cannot be reached at all. Caught in a 375px pass on the
    suppression-reasons table, which was the one table not wrapped in a scroller. */
 console.log('\nNO TABLE IS TRAPPED INSIDE A CLIPPING CARD');
-['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure'].forEach(id => {
+['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure', 'fanplan'].forEach(id => {
   win.goTool(id);
   const tables = Array.prototype.slice.call(win.document.querySelectorAll('#main .fe-tbl'));
   const loose = tables.filter(tb => !tb.closest('.fe-scroll'));
@@ -400,8 +411,8 @@ check('the fan group sits before the marketing program in the sidebar',
   navOrder.indexOf('fanreq') < navOrder.indexOf('audit'), navOrder.join(','));
 check('and before the any-time tools', navOrder.indexOf('fanreq') < navOrder.indexOf('outreach'));
 check('only Today and Meeting Mode come above it', navOrder.indexOf('fanreq') === 2, String(navOrder.indexOf('fanreq')));
-check('all six are still together, in order',
-  navOrder.slice(2, 8).join(',') === 'fanreq,fanseg,fanbuild,fanqa,fandeploy,fanmeasure', navOrder.slice(2, 8).join(','));
+check('all seven are together, in order',
+  navOrder.slice(2, 9).join(',') === 'fanreq,fanseg,fanbuild,fanqa,fandeploy,fanmeasure,fanplan', navOrder.slice(2, 9).join(','));
 
 win.goTool('fanreq');
 const reqTxt = win.document.getElementById('main').textContent || '';
@@ -448,6 +459,155 @@ check('and the button reports what actually landed, not what was attempted',
 check('each job carries the standard it came from', filedItems.every(i => /WCAG|CAN-SPAM|TCPA|Personalization|Link|Journey/.test(i.detail)));
 check('and what to do about it', filedItems.every(i => /Fix: \S/.test(i.detail)));
 check('they are filed as coming from the fan engagement work', filedItems.every(i => i.source === 'fan'));
+
+/* -------------------------------------------------------------- the focus */
+console.log('\nTHE SECTION DECLARES ITS FOCUS RATHER THAN ASSUMING ONE');
+check('the focus is sports, and it is the one that is built',
+  FX.FAN_FOCUS.id === 'sports' && FX.FAN_FOCUS.built === true);
+check('it separates what is vertical-neutral from what is not',
+  FX.FAN_FOCUS.neutral.length >= 5 && FX.FAN_FOCUS.specific.length >= 4);
+check('and does not claim a primitive as domain-specific, or the reverse',
+  FX.FAN_FOCUS.neutral.every(x => FX.FAN_FOCUS.specific.indexOf(x) < 0));
+win.goTool('fanreq');
+const reqT = win.document.getElementById('main').textContent;
+check('the focus is stated on the first screen', /Sports, a club with a season ticket base/.test(reqT));
+
+/* ------------------------------------------------------- the two axes */
+console.log('\nTHE ESCALATOR AND THE CONTINUUM ARE DERIVED, NOT DRAWN');
+const rungs = {}; A.forEach(f => rungs[f.rung] = (rungs[f.rung] || 0) + 1);
+check('every fan sits on exactly one rung', Object.values(rungs).reduce((a, b) => a + b, 0) === A.length);
+check('every lapsed holder is on the lapsed rung, so the two can never contradict',
+  A.filter(f => f.lapsed).every(f => f.rung === 'Lapsed season ticket'));
+check('nobody on a light rung is also a current season ticket holder',
+  A.filter(f => f.rung === 'Light attender').every(f => !f.sthEver || f.lapsed));
+check('the base is a pyramid: the lightest rungs outnumber the committed ones',
+  (rungs['Light attender'] || 0) + (rungs['Aware, not attending'] || 0) > (rungs['Season ticket holder'] || 0));
+const stages = {}; A.forEach(f => stages[f.stage] = (stages[f.stage] || 0) + 1);
+check('the continuum has all four stages', Object.keys(stages).length === 4);
+check('and thins out towards allegiance, which is what a continuum does',
+  stages['Awareness'] > stages['Attraction'] && stages['Attraction'] > stages['Attachment'] && stages['Attachment'] > stages['Allegiance']);
+const medSpend = s => { const v = A.filter(f => f.stage === s).map(f => f.spend).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
+check('the stages actually discriminate on value (' + medSpend('Allegiance') + ' vs ' + medSpend('Awareness') + ')',
+  medSpend('Allegiance') > medSpend('Awareness') * 5);
+check('both axes are segmentable', !!FX.FAN_FIELDS.rung && !!FX.FAN_FIELDS.stage);
+check('derived fields survive regeneration unchanged',
+  (function () { win.eval('FANS=null;'); const C = win.fans(); return C[500].rung === A[500].rung && C[500].stage === A[500].stage; })());
+
+/* --------------------------------------------------- result-contingent timing */
+console.log('\nTHE SCORE MOVES THE PULL, NEVER THE GUARD');
+const jWin = win.journeySim(FX.FAN_JOURNEY, { birg: 'win' });
+const jNone = win.journeySim(FX.FAN_JOURNEY, { birg: 'none' });
+const jLoss = win.journeySim(FX.FAN_JOURNEY, { birg: 'loss' });
+const n1 = s => s.steps.filter(x => x.type === 'send')[0];
+check('opens are higher after a win and lower after a loss ('
+  + n1(jWin).opened + ' / ' + n1(jNone).opened + ' / ' + n1(jLoss).opened + ')',
+  n1(jWin).opened > n1(jNone).opened && n1(jNone).opened > n1(jLoss).opened);
+check('renewals follow (' + jWin.converted + ' / ' + jNone.converted + ' / ' + jLoss.converted + ')',
+  jWin.converted > jLoss.converted);
+/* The important one. Whether somebody may lawfully be contacted has nothing to do with
+   Saturday's result, so at the first send, before anything downstream has happened, the
+   guard must produce byte-identical numbers whichever way the match went. */
+check('at the first send the guard is completely score-blind',
+  n1(jWin).eligible === n1(jLoss).eligible && n1(jWin).sent === n1(jLoss).sent
+  && n1(jWin).suppressed === n1(jLoss).suppressed
+  && JSON.stringify(n1(jWin).reasons) === JSON.stringify(n1(jLoss).reasons));
+check('the assumed magnitude is far more conservative than the effect in the paper',
+  FX.BIRG.win.open < 1.3, String(FX.BIRG.win.open));
+check('and every setting carries a note saying whether it was measured',
+  Object.keys(FX.BIRG).every(k => /assum|baseline/i.test(FX.BIRG[k].note)));
+win.goTool('fandeploy');
+check('the deploy screen states it is an assumption rather than a measurement',
+  /assumption/i.test(win.document.getElementById('main').textContent));
+
+/* ------------------------------------------------------ the standards */
+console.log('\nTHE THINKING IT IS HELD TO IS NAMED, AND THE GAPS ARE ADMITTED');
+check('six standards are carried', FX.FAN_STANDARDS.length === 6);
+check('each names a person, a work, what it says, and what this build does about it',
+  FX.FAN_STANDARDS.every(s => s.who && s.work && s.says.length > 60 && s.here.length > 60));
+const fader = FX.FAN_STANDARDS.filter(s => /Fader/.test(s.who))[0];
+check('the lifetime value standard is cited AND the gap to it is admitted, not papered over',
+  /does NOT meet it/.test(fader.here));
+const sharp = FX.FAN_STANDARDS.filter(s => /Sharp/.test(s.who))[0];
+check('the counterweight is carried as a challenge to the build, not a footnote',
+  /counterweight/i.test(sharp.here) && /warns/.test(sharp.here));
+
+/* ------------------------------------------------------- how to read it */
+console.log('\nEVERY SCREEN EXPLAINS ITSELF');
+const SCREENS = ['fanreq', 'fanseg', 'fanbuild', 'fanqa', 'fandeploy', 'fanmeasure', 'fanplan'];
+SCREENS.forEach(id => {
+  const g = FX.FAN_GUIDE[id];
+  check(id + ' says what it does, what it breaks down, and how to read it',
+    !!g && g.does.length > 60 && g.breaks.length > 40 && g.read.length >= 3);
+  check(id + ' gives every reading note a heading and an explanation',
+    g.read.every(r => r.length === 2 && r[0].length > 8 && r[1].length > 40));
+  win.goTool(id);
+  const panel = win.document.querySelector('#main .fe-guide');
+  check(id + ' renders the panel', !!panel && (panel.textContent || '').length > 300);
+});
+/* Typed as "of 6" while a seventh screen existed, which put a small lie on every screen
+   at once. Counted from the screens that actually exist now. */
+check('the step count is derived from the screens, not typed',
+  win.fanSteps() === SCREENS.length, String(win.fanSteps()));
+SCREENS.forEach((id, i) => {
+  win.goTool(id);
+  const lab = (win.document.querySelector('#main .fe-step') || {}).textContent || '';
+  check(id + ' labels itself step ' + (i + 1) + ' of ' + SCREENS.length,
+    lab === 'Fan engagement, step ' + (i + 1) + ' of ' + SCREENS.length, lab);
+});
+check('every standard a screen cites actually exists in the registry',
+  SCREENS.every(id => (FX.FAN_GUIDE[id].held || []).every(w => FX.FAN_STANDARDS.some(s => s.who === w))));
+
+/* --------------------------------------------------------- the plan */
+console.log('\nTHE PLAN IS READ OUT OF THE ENGINE, NOT WRITTEN');
+win.eval('window.__P = operatingPlan();');
+const PL = win.__P;
+check('it covers day one through continuous', PL.phases.length === 6);
+check('the phases are in time order',
+  PL.phases.map(p => p.when).join('|') === 'Day one|Week one|First 30 days|60 days|90 days|Continuous');
+check('every item says what to do and why', PL.phases.every(p => p.items.length >= 3
+  && p.items.every(i => i.what.length > 15 && i.why.length > 60)));
+check('almost every item carries its evidence',
+  PL.phases.reduce((a, p) => a + p.items.filter(i => i.evidence).length, 0)
+  >= PL.phases.reduce((a, p) => a + p.items.length, 0) - 1);
+/* The claim the whole screen rests on: these numbers are not restated, they are read. */
+const liveSeg = win.evalSegment(FX.FAN_SEGMENT_RULES, 'email', {});
+check('the plan reports the SAME segment the segment screen does',
+  PL.seg.matched === liveSeg.matched && PL.seg.reachable === liveSeg.reachable);
+check('and the same QA failure count the QA screen shows',
+  PL.qa.fails === ['Email', 'SMS', 'Push'].reduce((a, k) => a + win.qaRun(
+    { Email: FX.EMAIL_V1, SMS: FX.SMS_V1, Push: FX.PUSH_V1 }[k], liveSeg.people)
+    .filter(x => x.severity === 'fail').length, 0));
+check('day one refuses to let anything send while QA is failing',
+  /Close the \d+ finding/.test(PL.phases[0].items[0].what));
+check('and asks for a holdout, without which the campaign takes credit for renewals it did not cause',
+  PL.phases[0].items.some(i => /control group/i.test(i.what)));
+
+console.log('\nAND IT ARGUES WITH ITSELF');
+check('the penetration counterweight is present and says this campaign adds no new fans',
+  /entirely retention/.test(PL.penetration.verdict) && /cannot add a single new fan/.test(PL.penetration.verdict));
+check('it quantifies how much of the base the campaign never touches',
+  PL.penetration.addressedPct > 0 && PL.penetration.addressedPct < 0.2);
+check('the feasibility check states a number of weeks',
+  PL.feasibility && typeof PL.feasibility.weeks === 'number' && PL.feasibility.weeks > 0);
+check('and refuses the test when the audience cannot deliver it in the window ('
+  + PL.feasibility.weeks + ' weeks)',
+  PL.feasibility.weeks > 6 ? (PL.feasibility.feasible === false && /honest decision is to not run/.test(PL.feasibility.verdict)) : PL.feasibility.feasible === true);
+check('a bigger audience makes the same test feasible',
+  win.abFeasibility(PL.abPlan, 40000, 1).feasible === true);
+check('it ends with what it cannot tell you', PL.unknowns.length >= 5);
+check('including that the data is synthetic and the LTV is not a fitted model',
+  PL.unknowns.some(u => /synthetic/i.test(u[0])) && PL.unknowns.some(u => /not a fitted model/i.test(u[0])));
+check('and that the result-contingent lift is assumed rather than measured',
+  PL.unknowns.some(u => /assumed/i.test(u[0])));
+
+console.log('\nTHE EXPORT IS SOMETHING YOU CAN PASTE INTO A TICKET');
+const txt = win.planText(PL);
+check('it is plain text with no markup', !/<[a-z/][^>]*>/i.test(txt));
+check('it carries every phase', PL.phases.every(p => txt.indexOf(p.when.toUpperCase()) >= 0));
+check('it carries the counterweight and the boundary',
+  /THE COUNTERWEIGHT/.test(txt) && /WHAT THIS CANNOT TELL YOU/.test(txt));
+check('it names the thinking it was held to', /HELD TO/.test(txt) && /Mullin/.test(txt) && /Kohavi/.test(txt));
+check('it is long enough to be a real document (' + txt.length + ' chars)', txt.length > 4000);
 
 /* ---------------------------------------------------------------- hygiene */
 console.log('\nNOTHING IN HERE SHOULD EMBARRASS A PUBLIC REPO');
