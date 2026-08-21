@@ -50,9 +50,9 @@ lives in the `:root` token block. No emojis in the UI.
 
 ## 2. The screens
 
-Twenty entries in `TOOLS`, grouped in the sidebar by **when you use them** rather than by what
-they are. Eight are bespoke screens rather than generators (`workspace: true`, `meeting: true`,
-and the six carrying `fan: true`); the rest take fields and produce an asset plus a strategist's
+Twenty-one entries in `TOOLS`, grouped in the sidebar by **when you use them** rather than by what
+they are. Nine are bespoke screens rather than generators (`workspace: true`, `meeting: true`,
+and the seven carrying `fan: true`); the rest take fields and produce an asset plus a strategist's
 briefing.
 
 ### Workspace
@@ -86,7 +86,7 @@ briefing.
 
 ### Fan Engagement
 
-Six bespoke screens (`fan: true`), named with the vocabulary of the process they model. They run
+Seven bespoke screens (`fan: true`), named with the vocabulary of the process they model. They run
 without a business loaded, because they carry their own audience of record. Full detail in
 section 15.
 
@@ -98,6 +98,7 @@ section 15.
 | 4. QA | Every template against WCAG, CAN-SPAM and TCPA, with the send blocked while anything fails |
 | 5. Deploy | The journey, and who the frequency cap removed at every send |
 | 6. Measure | Channel KPIs, fan LTV, and an A/B test that refuses to be stopped early |
+| 7. Operating plan | Day one through continuous, 22 evidence-backed items, read out of the engine rather than written |
 
 Every writing tool also returns a **briefing** — why it works (naming the practitioner standard
 applied), two or three complete paste-ready alternatives, what to test, and what to watch out for.
@@ -501,7 +502,7 @@ asserted in the test suite. `handoffWorth()` prevents offering to send an empty 
 ## 8. Architecture & files
 
 ```
-/index.html                       entire frontend: 20 screens, the workspace, the program,
+/index.html                       entire frontend: 21 screens, the workspace, the program,
                                   Meeting Mode, the audit orchestration, PDF export
 /netlify/functions/generate.js    Claude proxy for every writing tool + usage logging
 /netlify/functions/image.js       OpenAI image proxy for the LinkedIn tool
@@ -652,7 +653,7 @@ anything needing a model call must be tested against the deployment.
 npm test
 ```
 
-749 assertions across five suites. The rule they enforce is not "the output looks right" but
+839 assertions across five suites. The rule they enforce is not "the output looks right" but
 **"the product cannot make a claim it did not earn."**
 
 | Suite | What it proves |
@@ -661,7 +662,7 @@ npm test
 | `audit-guards.test.js` | Every false claim the audit ever shipped is blocked, and every real finding still survives. Both directions matter: a guard that over-fires deletes true findings. |
 | `report-render.test.js` | The report a human actually receives renders, prints, and leaks no scaffolding. |
 | `workspace.test.js` | Items, local dates, the `.ics` a stranger's calendar has to parse, the program, Meeting Mode, and the handoff payload. |
-| `fan.test.js` | The seeded dataset reproduces exactly, every suppression count adds up and names a reason, consent is per channel, the frequency cap counts the journey's own sends, the QA harness catches a template that is genuinely broken, the contrast maths is the real WCAG maths, and the A/B guard refuses to be peeked at. |
+| `fan.test.js` | The script reaches its own end (a throw at load kills every declaration after it), the seeded dataset reproduces exactly, every suppression count adds up and names a reason, consent is per channel, the frequency cap counts the journey's own sends, the escalator and continuum are derived rather than drawn, the score moves the pull but never the guard, the QA harness catches a template that is genuinely broken, the contrast maths is the real WCAG maths, the A/B guard refuses to be peeked at, and the operating plan reports the same numbers the screens do. |
 
 **The house rule:** when a change turns a test red, fix the test only if the test was wrong.
 Never weaken the app to keep an old test happy.
@@ -671,8 +672,21 @@ Never weaken the app to keep an old test happy.
 ## 15. Fan Engagement
 
 Its own nav group and its own test file, sharing the design system, the guard philosophy and the
-passcode. Six screens carrying the **JD's own vocabulary** — Request, Segment, Build, QA, Deploy,
-Measure — so somebody who runs this process for a living recognises their own week in the sidebar.
+passcode. Seven screens: six carrying the **JD's own vocabulary** — Request, Segment, Build, QA,
+Deploy, Measure — plus an **Operating plan** that assembles what the other six established.
+Somebody who runs this process for a living should recognise their own week in the sidebar.
+
+**The focus is declared, not assumed.** `FAN_FOCUS` states that the built vertical is sports and
+separates what is vertical-neutral (consent, suppression, journeys, dynamic content, template QA,
+experiment design) from what is not (the fan schema, the two progression models, result-contingent
+timing, season tickets as the unit, renewals as the KPI). A build that stayed neutral would be an
+ecommerce build with the word fan pasted over it.
+
+**Every screen explains itself.** `feHowTo(key)` renders the same four parts from `FAN_GUIDE`:
+what the screen does, what it is breaking down, how to read what comes back, and whose thinking it
+is held to. A suppression breakdown reads as a failure report until somebody says it is the
+opposite; a p value under 0.05 beside a refusal to call a winner reads as a bug until somebody
+explains the stopping rule.
 
 **What it is, stated on screen:** the analogue built to reason about the primitives an
 enterprise journey platform is made of. It is **not** Adobe Experience Platform, Journey
@@ -682,7 +696,22 @@ and IP warmup, suppression infrastructure, throttling, trained propensity models
 identity. That is where the genuine production complexity lives and it cannot be simulated
 honestly.
 
-### 15.1 The audience of record
+### 15.1 The thinking it is held to
+
+`FAN_STANDARDS` carries six, each with what it says and **what this build does about it** — the
+same rule the writing tools follow, where naming the standard turns an opinion into a checkable
+claim. They are implemented, not quoted:
+
+| Source | Implemented as |
+|--------|----------------|
+| Mullin, Hardy and Sutton, the frequency escalator (*Sport Marketing*; Mullin, 1978) | Every fan carries a `rung` derived from real attendance and tenure. Lapsing is a rung **down**, not a churn event, which is the whole reason reactivation is worth running |
+| Funk and James, the Psychological Continuum Model (*Sport Management Review*, 2001) | A `stage` beside it — Awareness, Attraction, Attachment, Allegiance — because behaviour and attachment are different questions. Both axes are segmentable |
+| Cialdini et al., *Basking in Reflected Glory* (1976) | Result-contingent send timing. 26% wore team apparel after a win against 13.5% after a loss. The **direction** is the finding; the magnitude here is a stated assumption, and the guards stay score-blind |
+| Fader and Hardie, BTYD / Pareto-NBD / BG-NBD / BG-BB | Named as the standard the LTV figure is held to, **and the gap to it admitted**. A fitted model needs real transaction histories; this prints arithmetic beside the number instead |
+| Byron Sharp and the Ehrenberg-Bass Institute | The counterweight, built as a challenge. The plan measures how much of itself is retention and states that this campaign cannot add a single new fan |
+| Kohavi, Tang and Xu, *Trustworthy Online Controlled Experiments* | Feasibility, not just a stopping rule: `abFeasibility()` states in weeks how long this audience would take to deliver the planned sample |
+
+### 15.2 The audience of record
 
 `buildFans()` generates 24,000 records from a **fixed seed** (`FAN_SEED`), in two passes: everything
 a fan *is* is drawn independently, then tier is assigned by percentile, because a tier is a
@@ -698,7 +727,7 @@ that is never null in your test data proves nothing.
 Determinism is the whole foundation: `Math.random` would make every segment size, LTV band and
 A/B result a different story on each reload. The UI labels the dataset synthetic on all six screens.
 
-### 15.2 Segmentation and reachability
+### 15.3 Segmentation and reachability
 
 Rules are data, so a rule can be shown on screen exactly as it was evaluated, and `.fe-ruleline`
 restates them in English from the same objects the engine read. Every operator is total: an
@@ -714,7 +743,7 @@ number that matters is not how many people match but how many you are allowed to
 alike so the two can never disagree. A global unsubscribe is reported as an unsubscribe even when
 a channel flag is still set, because that is the reason that governs.
 
-### 15.3 Dynamic content, send time against open time
+### 15.4 Dynamic content, send time against open time
 
 Tokens are **declared** in `FAN_TOKENS`, not discovered, so QA can tell a typo from a field that
 is allowed to be empty. Syntax is `{{token}}` or `{{token | fallback}}`; the pipe is part of the
@@ -723,7 +752,7 @@ send-time token is frozen when the message is built, an open-time token resolves
 is opened, which is why a countdown in an email is either impressive or a lie. The Build screen
 shows both, side by side, for the same fan.
 
-### 15.4 The QA harness
+### 15.5 The QA harness
 
 Findings carry the **standard** they come from, so they are defects rather than opinions:
 WCAG 1.1.1, 1.3.1, 1.4.3, 2.4.4, 3.1.1, CAN-SPAM, TCPA. Contrast is **computed** — sRGB relative
@@ -741,14 +770,14 @@ Failures become **ordinary tracked work** through the same `addItem` door audit 
 location is part of the item's identity: two elements failing contrast are two jobs, and titling
 on the message alone collapsed them into one.
 
-### 15.5 The journey
+### 15.6 The journey
 
 `journeySim()` carries the segment through send, wait and audience-filtered nodes. The frequency
 cap counts the journey's **own** earlier sends, which is visible in the numbers: it removes 44
 people at the first email and 223 by the last. A cap that ignores the messages it has just sent
 is not a cap.
 
-### 15.6 A/B, and the peeking guard
+### 15.7 A/B, and the peeking guard
 
 `abSampleSize()` is a two-proportion two-sided calculation with alpha and power as real inputs
 (`probit()` is Acklam's inverse normal, accurate to ~1e-9). `abVerdict()` **refuses to name a
@@ -760,6 +789,23 @@ A/A tests, where the two variants are identical by construction, so every winner
 At a fixed horizon it sits on its nominal 5%; stopping at the first significant look reaches
 about 15% at five looks and 21% at ten — the textbook sequential-testing result, reproduced in
 the browser from a fixed seed.
+
+### 15.8 The operating plan
+
+The seventh screen, and the reason the other six are worth walking through. `operatingPlan()`
+returns six phases — day one, week one, 30, 60, 90 and continuous — of 22 items, each with what to
+do, why, and the **evidence** it was derived from. Every figure is read out of the engine when the
+screen renders, so changing a segment rule changes the plan; nothing is generated prose, so there
+is nothing to invent and nothing that can drift from the numbers it claims to rest on. It exports
+as plain text, because what people actually do with a plan is paste it into a ticket, and files
+day one as tracked work.
+
+It closes with the two sections that stop it being a pitch: **the counterweight**, which states
+that a reactivation campaign is retention by construction and cannot add a new fan, with the share
+of the base it never touches; and **what this cannot tell you** — synthetic data, LTV that is not
+a fitted model, an assumed result-contingent lift, no deliverability, no identity resolution,
+modelled rather than observed conversion. Same convention as the audit's NOT VERIFIED appendix,
+for the same reason: the boundary of what was established is part of the finding.
 
 ---
 
